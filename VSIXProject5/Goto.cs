@@ -22,6 +22,8 @@ using Microsoft.CodeAnalysis.CSharp;
 using VSIXProject5.Helpers;
 using Microsoft.VisualStudio.LanguageServices;
 using System.IO;
+using EnvDTE80;
+using EnvDTE;
 
 namespace VSIXProject5
 {
@@ -115,7 +117,7 @@ namespace VSIXProject5
             IComponentModel componentModel = (IComponentModel)this.ServiceProvider.GetService(typeof(SComponentModel));
             var componentService = componentModel.GetService<IVsEditorAdaptersFactoryService>().GetWpfTextView(textView);
             SnapshotPoint caretPosition = componentService.Caret.Position.BufferPosition;
-            Document doc = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
+            Microsoft.CodeAnalysis.Document doc = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
             SemanticModel semModel = await doc.GetSemanticModelAsync();
             //doc.TryGetSemanticModel(out semModel);
             NodeHelpers helper = new NodeHelpers(semModel);
@@ -151,18 +153,34 @@ namespace VSIXProject5
             }
             string path = Path.GetDirectoryName(projectsPaths.First());
             var dirs = Directory.EnumerateFiles(path);
+            DTE2 dte = this.ServiceProvider.GetService(typeof(DTE)) as DTE2;
+            //var testdoc = dte.Solution.FindProjectItem("sqlMap.xml");
+            //testdoc.DTE.ItemOperations.OpenFile(testdoc.FileNames[0], EnvDTE.Constants.vsDocumentKindHTML);
+            //TextSelection sel = (TextSelection)dte.ActiveDocument.Selection;
+            //sel.GotoLine(1);
+            var findObject = dte.Find;
+            findObject.FindWhat = queryName;
+            findObject.FilesOfType = "*.xml";
+            findObject.Target = vsFindTarget.vsFindTargetSolution;
+            //findObject.Action = vsFindAction.vsFindActionFindAll;
+            var findResults = findObject.Execute();
+           
+            //    title = "iBatis method call found in return statment. Of name: " + queryName;
+            //    string message = string.Format(CultureInfo.CurrentCulture, "Inside {0}.MenuItemCallback()", this.GetType().FullName);
+            //    // Show a message box to prove we were here
+            //    VsShellUtilities.ShowMessageBox(
+            //        this.ServiceProvider,
+            //        message,
+            //        title,
+            //        OLEMSGICON.OLEMSGICON_INFO,
+            //        OLEMSGBUTTON.OLEMSGBUTTON_OK,
+            //        OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+        }
 
-
-            title = "iBatis method call found in return statment. Of name: " + queryName;
-            string message = string.Format(CultureInfo.CurrentCulture, "Inside {0}.MenuItemCallback()", this.GetType().FullName);
-            // Show a message box to prove we were here
-            VsShellUtilities.ShowMessageBox(
-                this.ServiceProvider,
-                message,
-                title,
-                OLEMSGICON.OLEMSGICON_INFO,
-                OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+        private void OnFindDone(vsFindResult Result, bool Cancelled)
+        {
+            var resultCopy = Result;
+            //throw new NotImplementedException();
         }
     }
 }
