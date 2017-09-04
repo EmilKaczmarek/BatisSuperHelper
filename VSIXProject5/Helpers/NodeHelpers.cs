@@ -23,7 +23,7 @@ namespace VSIXProject5.Helpers
         /// Used to determine if Document/Document fragment contains 'return' keyword.
         /// </summary>
         /// <param name="SyntaxNodes"></param>
-        /// <returns>Singe SyntaxNode that is ReturnStatmentSyntax type or null</returns>
+        /// <returns>Single SyntaxNode that is ReturnStatmentSyntax type or null</returns>
         public SyntaxNode GetFirstNodeOfReturnStatmentSyntaxType(IEnumerable<SyntaxNode> SyntaxNodes)
         {
             return SyntaxNodes.FirstOrDefault(x => x.GetType() == typeof(ReturnStatementSyntax));
