@@ -66,10 +66,48 @@ namespace VSIXProject5
             {
                 var menuCommandID = new CommandID(CommandSet, CommandId);
                 var menuItem = new MenuCommand(this.MenuItemCallback, menuCommandID);
-                commandService.AddCommand(menuItem);
+                var menuItem2 = new OleMenuCommand(new EventHandler(this.MenuItemCallback), new EventHandler(this.Change), new EventHandler(this.BeforeQuery), menuCommandID, "Go to Query");
+
+                commandService.AddCommand(menuItem2);
+
             }
         }
+        private async void BeforeQuery(object sender, EventArgs e)
+        {
+            var myCommand = sender as OleMenuCommand;
+            myCommand.Text = "Everything fine";
+            var events = e;
+            IVsTextManager textManager = (IVsTextManager)this.ServiceProvider.GetService(typeof(SVsTextManager));
+            IVsTextView textView = null;
+            textManager.GetActiveView(1, null, out textView);
+            int selectionLineNum;
+            int selectionCol;
+            textView.GetCaretPos(out selectionLineNum, out selectionCol);
+            IComponentModel componentModel = (IComponentModel)this.ServiceProvider.GetService(typeof(SComponentModel));
+            var componentService = componentModel.GetService<IVsEditorAdaptersFactoryService>().GetWpfTextView(textView);
+            SnapshotPoint caretPosition = componentService.Caret.Position.BufferPosition;
+            Microsoft.CodeAnalysis.Document doc = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
+            if (doc == null)
+            {
+                myCommand.Visible = false;
+                myCommand.Text = "Something went wrong";
+                return;
+            }
+            SemanticModel semModel = await doc.GetSemanticModelAsync();
+            NodeHelpers helper = new NodeHelpers(semModel);
+            SyntaxTree synTree = null;
+            doc.TryGetSyntaxTree(out synTree);
+            var span = synTree.GetText().Lines[selectionLineNum].Span;
+            var root = (CompilationUnitSyntax)synTree.GetRoot();
+            var nodesAtLine = from method in root.DescendantNodesAndSelf(span)
+                              select method;
 
+            myCommand.Visible = helper.IsAnySyntaxNodeContainIBatisNamespace(nodesAtLine);
+        }
+        private void Change(object sender, EventArgs e)
+        {
+
+        }
         /// <summary>
         /// Gets the instance of the command.
         /// </summary>
