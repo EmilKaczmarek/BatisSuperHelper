@@ -37,7 +37,10 @@
          must be a menu. -->
     <Groups>
       <Group guid="guidGotoPackageCmdSet" id="MyMenuGroup" priority="0x0600">
-        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS"/>
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN"/>
+      </Group>
+      <Group guid="guidGotoPackageCmdSet" id="MyMainToolbarGroup" priority="0x100">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_TOOL_STANDARD"/>
       </Group>
     </Groups>
 
@@ -52,13 +55,29 @@
               <CommandFlag>DefaultInvisible</CommandFlag>
               <CommandFlag>DynamicVisibility</CommandFlag>
           If you do not want an image next to your command, remove the Icon node /> -->
+      <!--
       <Button guid="guidGotoPackageCmdSet" id="GotoId" priority="0x0100" type="Button">
+       
         <Parent guid="guidGotoPackageCmdSet" id="MyMenuGroup" />
         <Icon guid="guidImages" id="bmpPic1" />
         <Strings>
           <ButtonText>Invoke Goto</ButtonText>
         </Strings>
       </Button>
+      -->
+      <Button guid="guidGotoPackageCmdSet" id="GotoId" priority="0x100" type="Button">
+        <Parent guid="guidGotoPackageCmdSet" id="MyMenuGroup"/>
+        <Icon guid="guidImages" id="bmpPic1"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
+        <CommandFlag>TextChanges</CommandFlag>
+        <Strings>
+          <ButtonText>Go To Query</ButtonText>
+        </Strings>
+      </Button>
+
+
     </Buttons>
 
     <!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
@@ -71,7 +90,6 @@
       <Bitmap guid="guidImages" href="Resources\Goto.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough"/>
     </Bitmaps>
   </Commands>
-
   <Symbols>
     <!-- This is the package guid. -->
     <GuidSymbol name="guidGotoPackage" value="{6a38185d-6f88-44d9-a7ba-59888f48c3d6}" />
@@ -80,6 +98,8 @@
     <GuidSymbol name="guidGotoPackageCmdSet" value="{ae46308e-e071-4943-91dc-3c7733f41554}">
       <IDSymbol name="MyMenuGroup" value="0x1020" />
       <IDSymbol name="GotoId" value="0x0100" />
+
+      <IDSymbol name="MyMainToolbarGroup" value="0x1012" />
     </GuidSymbol>
 
     <GuidSymbol name="guidImages" value="{9a6dc11f-1a70-4b38-8b94-0272ef0075aa}" >
