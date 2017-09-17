@@ -47,7 +47,7 @@ namespace VSIXProject5
         /// <summary>
         /// GotoPackage GUID string.
         /// </summary>
-        public const string PackageGuidString = "6a38185d-6f88-44d9-a7ba-59888f48c3d6";
+        public const string PackageGuidString = "0d0c7a5a-951b-4d78-ab1d-870fa377376f";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Goto"/> class.

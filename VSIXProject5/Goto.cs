@@ -24,6 +24,10 @@ using Microsoft.VisualStudio.LanguageServices;
 using System.IO;
 using EnvDTE80;
 using EnvDTE;
+using System.Xml.Serialization;
+using System.Xml;
+using System.Xml.Linq;
+using VSIXProject5.Search;
 
 namespace VSIXProject5
 {
@@ -40,7 +44,7 @@ namespace VSIXProject5
         /// <summary>
         /// Command menu group (command set GUID).
         /// </summary>
-        public static readonly Guid CommandSet = new Guid("ae46308e-e071-4943-91dc-3c7733f41554");
+        public static readonly Guid CommandSet = new Guid("74b835d6-70a4-4629-9d2c-520ce16236b5");
 
         /// <summary>
         /// VS Package that provides this command, not null.
@@ -89,7 +93,7 @@ namespace VSIXProject5
             Microsoft.CodeAnalysis.Document doc = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
             if (doc == null)
             {
-                myCommand.Visible = false;
+                myCommand.Visible = true;
                 myCommand.Text = "Something went wrong";
                 return;
             }
@@ -103,6 +107,7 @@ namespace VSIXProject5
                               select method;
 
             myCommand.Visible = helper.IsAnySyntaxNodeContainIBatisNamespace(nodesAtLine);
+            myCommand.Visible = true;
         }
         private void Change(object sender, EventArgs e)
         {
@@ -146,12 +151,44 @@ namespace VSIXProject5
         /// <param name="e">Event args.</param>
         private async void MenuItemCallback(object sender, EventArgs e)
         {
+            DTE2 dte = this.ServiceProvider.GetService(typeof(DTE)) as DTE2;
+            bool isXmlFile = dte.ActiveDocument.Language == "XML";
             IVsTextManager textManager = (IVsTextManager)this.ServiceProvider.GetService(typeof(SVsTextManager));
             IVsTextView textView = null;
             textManager.GetActiveView(1, null, out textView);
             int selectionLineNum;
             int selectionCol;
             textView.GetCaretPos(out selectionLineNum, out selectionCol);
+            if (isXmlFile)
+            {
+                EnvDTE.TextDocument doc3 = (EnvDTE.TextDocument)(dte.ActiveDocument.Object("TextDocument"));
+                var p = doc3.StartPoint.CreateEditPoint();
+                string s = p.GetText(doc3.EndPoint);
+                sqlMap sqlMapObject = null;
+                //using (TextReader readerx = new StreamReader(@"G:\programowanie\iBatis Helper\sqlMap2.xml"))
+                //{
+                //    XmlSerializer serializer = new XmlSerializer(typeof(sqlMap));
+                //    sqlMapObject=(sqlMap)serializer.Deserialize(readerx);
+                //}
+                //TextReader reader = new StreamReader(@"G:\programowanie\iBatis Helper\sqlMap2.xml");
+                var xmlTextContent = s;
+                var doc2 = XDocument.Parse(xmlTextContent, LoadOptions.SetLineInfo);
+                var node = doc2.Descendants();
+                var emm = node.Select(x => ((IXmlLineInfo)x).LineNumber).ToList();
+                int lineNumber = selectionLineNum;
+                emm.Add(lineNumber);
+                emm.Sort();
+                int elementLocation = emm[emm.IndexOf(lineNumber) - 1];
+                var nodee = node.FirstOrDefault(x => ((IXmlLineInfo)x).LineNumber == elementLocation);
+                var nn = nodee.FirstAttribute.Value;
+                var findObject2 = dte.Find;
+                findObject2.FindWhat = nn;
+                findObject2.FilesOfType = "*.cs";
+                findObject2.Target = vsFindTarget.vsFindTargetSolution;
+                //findObject.Action = vsFindAction.vsFindActionFindAll;
+                var findResults2 = findObject2.Execute();
+                return;
+            }
             IComponentModel componentModel = (IComponentModel)this.ServiceProvider.GetService(typeof(SComponentModel));
             var componentService = componentModel.GetService<IVsEditorAdaptersFactoryService>().GetWpfTextView(textView);
             SnapshotPoint caretPosition = componentService.Caret.Position.BufferPosition;
@@ -191,18 +228,54 @@ namespace VSIXProject5
             }
             string path = Path.GetDirectoryName(projectsPaths.First());
             var dirs = Directory.EnumerateFiles(path);
-            DTE2 dte = this.ServiceProvider.GetService(typeof(DTE)) as DTE2;
+
             //var testdoc = dte.Solution.FindProjectItem("sqlMap.xml");
             //testdoc.DTE.ItemOperations.OpenFile(testdoc.FileNames[0], EnvDTE.Constants.vsDocumentKindHTML);
             //TextSelection sel = (TextSelection)dte.ActiveDocument.Selection;
             //sel.GotoLine(1);
-            var findObject = dte.Find;
-            findObject.FindWhat = queryName;
-            findObject.FilesOfType = "*.xml";
-            findObject.Target = vsFindTarget.vsFindTargetSolution;
-            //findObject.Action = vsFindAction.vsFindActionFindAll;
-            var findResults = findObject.Execute();
-           
+            var xmlSolutionFiles = dte.Solution.Projects;
+            List<DocumentProperties> files = new List<DocumentProperties>();
+            foreach (EnvDTE.Project project in xmlSolutionFiles)
+            {
+                var solutionName = dte.Solution.Properties.Item("Name").Value;
+                var projectName = project.Name;
+                foreach (ProjectItem item in project.ProjectItems)
+                {
+                    var properies = item.Properties;
+                    files.Add(new DocumentProperties
+                    {
+                        FileName = (string)properies.Item("FileName").Value,
+                        FilePath = (string)properies.Item("FullPath").Value,
+                        RelativePath = $"{solutionName}\\{projectName}\\{(string)properies.Item("FileName").Value}",
+                });
+                }
+            }
+            XmlSearcher searcher = new XmlSearcher();
+            var results = searcher.SearchInFiles(queryName, files.Where(x=>x.FileName.Contains("xml")).ToList());
+            var firstResult = results.FirstOrDefault();
+              
+            dte.Windows.Item(EnvDTE.Constants.vsWindowKindSolutionExplorer).Activate();
+            var obj = dte.ActiveWindow.Object as UIHierarchy;
+            obj.GetItem(firstResult.RelativeVsPath).Select(vsUISelectionType.vsUISelectionTypeSelect);
+            obj.DoDefaultAction();
+            TextSelection sel = (TextSelection)dte.ActiveDocument.Selection;
+            TextPoint pnt = (TextPoint)sel.ActivePoint;
+            sel.GotoLine(firstResult.SearchLocations.FirstOrDefault().LineNumber, true);
+            //var obj = dte.ActiveWindow.Object as UIHierarchy;
+            //obj.GetItem(@"IBatisSample\IBatisSample\sqlMap.xml").Select(vsUISelectionType.vsUISelectionTypeSelect);
+            //obj.DoDefaultAction();
+            //TextSelection sel = (TextSelection)dte.ActiveDocument.Selection;
+            //TextPoint pnt = (TextPoint)sel.ActivePoint;
+            //sel.GotoLine(2, true);
+            //dte.ActiveWindow.Object.GetItem("ConsoleApplication1\WindowsFormsApplication1\Program.cs").Select(vsUISelectionType.vsUISelectionTypeSelect);
+            //dte.ActiveWindow.Object.DoDefaultAction();
+            //var findObject = dte.Find;
+            //findObject.FindWhat = queryName;
+            //findObject.FilesOfType = "*.xml";
+            //findObject.Target = vsFindTarget.vsFindTargetSolution;
+            ////findObject.Action = vsFindAction.vsFindActionFindAll;
+            //var findResults = findObject.Execute();
+
             //    title = "iBatis method call found in return statment. Of name: " + queryName;
             //    string message = string.Format(CultureInfo.CurrentCulture, "Inside {0}.MenuItemCallback()", this.GetType().FullName);
             //    // Show a message box to prove we were here
