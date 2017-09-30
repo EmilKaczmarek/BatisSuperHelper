@@ -76,6 +76,7 @@ namespace VSIXProject5
 
             }
         }
+        //Action before 
         private async void BeforeQuery(object sender, EventArgs e)
         {
             var myCommand = sender as OleMenuCommand;
@@ -181,12 +182,96 @@ namespace VSIXProject5
                 int elementLocation = emm[emm.IndexOf(lineNumber) - 1];
                 var nodee = node.FirstOrDefault(x => ((IXmlLineInfo)x).LineNumber == elementLocation);
                 var nn = nodee.FirstAttribute.Value;
-                var findObject2 = dte.Find;
-                findObject2.FindWhat = nn;
-                findObject2.FilesOfType = "*.cs";
-                findObject2.Target = vsFindTarget.vsFindTargetSolution;
-                //findObject.Action = vsFindAction.vsFindActionFindAll;
-                var findResults2 = findObject2.Execute();
+                var nodeLineInfo = nodee as IXmlLineInfo;
+                var linePos = nodeLineInfo.LinePosition;
+                //TODO: BUG: what if user clicked in empty line between 2 nodes?
+                //Possible to find starting and ending line number for each node
+
+                //var findObject2 = dte.Find;
+                //findObject2.FindWhat = nn;
+                //findObject2.FilesOfType = "*.cs";
+                //findObject2.Target = vsFindTarget.vsFindTargetSolution;
+                ////findObject.Action = vsFindAction.vsFindActionFindAll;
+                //var findResults2 = findObject2.Execute();
+                //Roslyn Method
+                List<string> projectFiles = new List<string>();
+                var componentModel2 = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
+                var workspace = (Workspace)componentModel2.GetService<VisualStudioWorkspace>();
+                foreach (EnvDTE.Project project in dte.Solution.Projects)
+                {
+                    foreach (ProjectItem item in project.ProjectItems)
+                    {
+                        var properies = item.Properties;
+                        projectFiles.Add((string)properies.Item("FullPath").Value);
+                        if (item.Document != null) { 
+                            var documentid = workspace.CurrentSolution.GetDocumentIdsWithFilePath(item.Document.FullName).FirstOrDefault();
+                            var docc = workspace.CurrentSolution.GetDocument(documentid);
+                            SemanticModel semModel2 = await docc.GetSemanticModelAsync();
+                            //doc.TryGetSemanticModel(out semModel);
+                            SyntaxTree synTree2 = null;
+                            docc.TryGetSyntaxTree(out synTree2);
+                            var root2 = (CompilationUnitSyntax)synTree2.GetRoot();
+                            var nodes = root2.DescendantNodesAndSelf();
+                            var iBatisNodes = nodes.
+                                Select(x => semModel2.GetTypeInfo(x).Type)
+                                .Where(x => x != null && x.ContainingNamespace != null)
+                                //.Any(x => x.ContainingNamespace.ToDisplayString().Contains("Batis"));
+                                .Where(x => x.ContainingSymbol.ToDisplayString().Contains("Batis"))
+                                .Select(x => x).ToList();
+                            //var iBatisNodes2 = nodes.
+                            //    Where(x =>
+                            //    {
+                            //        var typeInfo = semModel2.GetTypeInfo(x.Parent);
+                            //        if (typeInfo.Type != null
+                            //            && typeInfo.Type.ContainingNamespace != null
+                            //            && typeInfo.Type.ContainingSymbol.ToDisplayString().Contains("Batis")
+                            //            )
+                            //        {
+                            //            return true;
+                            //        }
+                            //        return false;
+                            //    })
+                            //    .ToList();
+                            //foreach(var n in nodes)
+                            //{
+                            //    var type = n.GetType();                               
+                            //    if(type == typeof(ArgumentListSyntax))
+                            //    {
+                            //        var semType = semModel2.GetTypeInfo(n);
+                            //        if (semType.Type == null)
+                            //        {
+                            //            var parentSyntaxNode = n.Parent;
+                            //            var semTypeParent= semModel2.GetTypeInfo(parentSyntaxNode);
+                            //        }
+                            //    }
+                            //}
+                            var intt = 1;
+                            var argumentNodes = nodes
+                                .Where(x => x.GetType() == typeof(ArgumentListSyntax))
+                                .Select(x => x as ArgumentListSyntax)
+                                .Where(x => x.Arguments.Any())
+                                .Select(x => x)
+                                .ToList();
+                            foreach(var n in nodes)
+                            {
+                                var type = n.GetType();
+                                if(type == typeof(ArgumentListSyntax))
+                                {
+                                    var t = n.Ancestors().ToList();
+                                    if(t.Any(x=> semModel2.GetTypeInfo(x).Type!=null&&semModel2.GetTypeInfo(x).Type.ContainingNamespace.ToDisplayString().Contains("Batis")))
+                                    {
+                                        var done = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                //foreach(var file in projectFiles.Where(x => x.Contains(".cs")))
+                //{
+                   
+                //}
+
                 return;
             }
             IComponentModel componentModel = (IComponentModel)this.ServiceProvider.GetService(typeof(SComponentModel));
@@ -202,7 +287,6 @@ namespace VSIXProject5
             var root = (CompilationUnitSyntax)synTree.GetRoot();
             var nodesAtLine = from method in root.DescendantNodesAndSelf(span)
                               select method;
-            string title = "No iBatis method at cursor location";
             string queryName = "";
             var returnNode = helper.GetFirstNodeOfReturnStatmentSyntaxType(nodesAtLine);
             //Check if current document line is having 'return' keyword.
@@ -220,9 +304,9 @@ namespace VSIXProject5
             }
             //We have Query Name, time to find this specific query in Solution files.
             //Theoretic logic is to look only at *.xml files.
-            var workspace = componentModel.GetService<VisualStudioWorkspace>();
+            var workspace2 = componentModel.GetService<VisualStudioWorkspace>();
             List<String> projectsPaths = new List<string>();
-            foreach(var project in workspace.CurrentSolution.Projects)
+            foreach(var project in workspace2.CurrentSolution.Projects)
             {
                 projectsPaths.Add(project.FilePath);
             }
