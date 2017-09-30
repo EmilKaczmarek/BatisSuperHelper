@@ -5,35 +5,36 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.ComponentModel.Design;
-using System.Globalization;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.TextManager.Interop;
-using Microsoft.VisualStudio.ComponentModelHost;
-using Microsoft.VisualStudio.Editor;
-using Microsoft.VisualStudio.Text;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Linq;
 using System.Collections.Generic;
-using Microsoft.CodeAnalysis.CSharp;
-using VSIXProject5.Helpers;
-using Microsoft.VisualStudio.LanguageServices;
+using System.ComponentModel.Design;
 using System.IO;
-using EnvDTE80;
-using EnvDTE;
-using System.Xml.Serialization;
+using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
-using VSIXProject5.Search;
+using EnvDTE;
+using EnvDTE80;
+using iBatisSuperHelper.Services;
+using iBatisSuperHelper.Services.Helpers;
+using iBatisSuperHelper.Services.Search;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
+using Microsoft.VisualStudio.ComponentModelHost;
+using Microsoft.VisualStudio.Editor;
+using Microsoft.VisualStudio.LanguageServices;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.TextManager.Interop;
+using Document = Microsoft.CodeAnalysis.Document;
+using Project = EnvDTE.Project;
+using TextDocument = EnvDTE.TextDocument;
 
-namespace VSIXProject5
+namespace iBatisSuperHelper
 {
     /// <summary>
     /// Command handler
     /// </summary>
+    /// 
     internal sealed class Goto
     {
         /// <summary>
@@ -49,7 +50,7 @@ namespace VSIXProject5
         /// <summary>
         /// VS Package that provides this command, not null.
         /// </summary>
-        private readonly Package package;
+        private readonly Package _package;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Goto"/> class.
@@ -58,19 +59,12 @@ namespace VSIXProject5
         /// <param name="package">Owner package, not null.</param>
         private Goto(Package package)
         {
-            if (package == null)
-            {
-                throw new ArgumentNullException("package");
-            }
+            this._package = package ?? throw new ArgumentNullException(nameof(package));
 
-            this.package = package;
-
-            OleMenuCommandService commandService = this.ServiceProvider.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-            if (commandService != null)
+            if (ServiceProvider.GetService(typeof(IMenuCommandService)) is OleMenuCommandService commandService)
             {
-                var menuCommandID = new CommandID(CommandSet, CommandId);
-                var menuItem = new MenuCommand(this.MenuItemCallback, menuCommandID);
-                var menuItem2 = new OleMenuCommand(new EventHandler(this.MenuItemCallback), new EventHandler(this.Change), new EventHandler(this.BeforeQuery), menuCommandID, "Go to Query");
+                var menuCommandId = new CommandID(CommandSet, CommandId);
+                var menuItem2 = new OleMenuCommand(MenuItemCallback, Change, BeforeQuery, menuCommandId, "Go to Query");
 
                 commandService.AddCommand(menuItem2);
 
@@ -80,18 +74,16 @@ namespace VSIXProject5
         private async void BeforeQuery(object sender, EventArgs e)
         {
             var myCommand = sender as OleMenuCommand;
-            myCommand.Text = "Everything fine";
-            var events = e;
-            IVsTextManager textManager = (IVsTextManager)this.ServiceProvider.GetService(typeof(SVsTextManager));
-            IVsTextView textView = null;
-            textManager.GetActiveView(1, null, out textView);
+            var textView = _serviceProviderHelper.GetActiveTextView();
+
             int selectionLineNum;
             int selectionCol;
+
             textView.GetCaretPos(out selectionLineNum, out selectionCol);
-            IComponentModel componentModel = (IComponentModel)this.ServiceProvider.GetService(typeof(SComponentModel));
-            var componentService = componentModel.GetService<IVsEditorAdaptersFactoryService>().GetWpfTextView(textView);
-            SnapshotPoint caretPosition = componentService.Caret.Position.BufferPosition;
-            Microsoft.CodeAnalysis.Document doc = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
+            
+            SnapshotPoint caretPosition = _serviceProviderHelper.GetActiveWpfTextView().Caret.Position.BufferPosition;
+            Document doc = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
+
             if (doc == null)
             {
                 myCommand.Visible = true;
@@ -130,7 +122,7 @@ namespace VSIXProject5
         {
             get
             {
-                return this.package;
+                return _package;
             }
         }
 
@@ -138,11 +130,14 @@ namespace VSIXProject5
         /// Initializes the singleton instance of the command.
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
-        public static void Initialize(Package package)
+        /// <param name="serviceProviderHelper">Dupa</param>
+        public static void Initialize(Package package, IServiceProviderHelper serviceProviderHelper)
         {
+            _serviceProviderHelper = serviceProviderHelper;
             Instance = new Goto(package);
         }
 
+        private static IServiceProviderHelper _serviceProviderHelper;
         /// <summary>
         /// This function is the callback used to execute the command when the menu item is clicked.
         /// See the constructor to see how the menu item is associated with this function using
@@ -152,26 +147,17 @@ namespace VSIXProject5
         /// <param name="e">Event args.</param>
         private async void MenuItemCallback(object sender, EventArgs e)
         {
-            DTE2 dte = this.ServiceProvider.GetService(typeof(DTE)) as DTE2;
+            DTE2 dte = ServiceProvider.GetService(typeof(DTE)) as DTE2;
             bool isXmlFile = dte.ActiveDocument.Language == "XML";
-            IVsTextManager textManager = (IVsTextManager)this.ServiceProvider.GetService(typeof(SVsTextManager));
-            IVsTextView textView = null;
-            textManager.GetActiveView(1, null, out textView);
+            var textView = _serviceProviderHelper.GetActiveTextView();
             int selectionLineNum;
             int selectionCol;
             textView.GetCaretPos(out selectionLineNum, out selectionCol);
             if (isXmlFile)
             {
-                EnvDTE.TextDocument doc3 = (EnvDTE.TextDocument)(dte.ActiveDocument.Object("TextDocument"));
+                TextDocument doc3 = (TextDocument)(dte.ActiveDocument.Object("TextDocument"));
                 var p = doc3.StartPoint.CreateEditPoint();
                 string s = p.GetText(doc3.EndPoint);
-                sqlMap sqlMapObject = null;
-                //using (TextReader readerx = new StreamReader(@"G:\programowanie\iBatis Helper\sqlMap2.xml"))
-                //{
-                //    XmlSerializer serializer = new XmlSerializer(typeof(sqlMap));
-                //    sqlMapObject=(sqlMap)serializer.Deserialize(readerx);
-                //}
-                //TextReader reader = new StreamReader(@"G:\programowanie\iBatis Helper\sqlMap2.xml");
                 var xmlTextContent = s;
                 var doc2 = XDocument.Parse(xmlTextContent, LoadOptions.SetLineInfo);
                 var node = doc2.Descendants();
@@ -197,13 +183,14 @@ namespace VSIXProject5
                 List<string> projectFiles = new List<string>();
                 var componentModel2 = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
                 var workspace = (Workspace)componentModel2.GetService<VisualStudioWorkspace>();
-                foreach (EnvDTE.Project project in dte.Solution.Projects)
+                foreach (Project project in dte.Solution.Projects)
                 {
                     foreach (ProjectItem item in project.ProjectItems)
                     {
                         var properies = item.Properties;
                         projectFiles.Add((string)properies.Item("FullPath").Value);
-                        if (item.Document != null) { 
+                        if (item.Document != null)
+                        {
                             var documentid = workspace.CurrentSolution.GetDocumentIdsWithFilePath(item.Document.FullName).FirstOrDefault();
                             var docc = workspace.CurrentSolution.GetDocument(documentid);
                             SemanticModel semModel2 = await docc.GetSemanticModelAsync();
@@ -252,13 +239,13 @@ namespace VSIXProject5
                                 .Where(x => x.Arguments.Any())
                                 .Select(x => x)
                                 .ToList();
-                            foreach(var n in nodes)
+                            foreach (var n in nodes)
                             {
                                 var type = n.GetType();
-                                if(type == typeof(ArgumentListSyntax))
+                                if (type == typeof(ArgumentListSyntax))
                                 {
                                     var t = n.Ancestors().ToList();
-                                    if(t.Any(x=> semModel2.GetTypeInfo(x).Type!=null&&semModel2.GetTypeInfo(x).Type.ContainingNamespace.ToDisplayString().Contains("Batis")))
+                                    if (t.Any(x => semModel2.GetTypeInfo(x).Type != null && semModel2.GetTypeInfo(x).Type.ContainingNamespace.ToDisplayString().Contains("Batis")))
                                     {
                                         var done = true;
                                     }
@@ -269,21 +256,21 @@ namespace VSIXProject5
                 }
                 //foreach(var file in projectFiles.Where(x => x.Contains(".cs")))
                 //{
-                   
+
                 //}
 
                 return;
             }
-            IComponentModel componentModel = (IComponentModel)this.ServiceProvider.GetService(typeof(SComponentModel));
+            IComponentModel componentModel = (IComponentModel)ServiceProvider.GetService(typeof(SComponentModel));
             var componentService = componentModel.GetService<IVsEditorAdaptersFactoryService>().GetWpfTextView(textView);
             SnapshotPoint caretPosition = componentService.Caret.Position.BufferPosition;
-            Microsoft.CodeAnalysis.Document doc = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
+            Document doc = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
             SemanticModel semModel = await doc.GetSemanticModelAsync();
             //doc.TryGetSemanticModel(out semModel);
             NodeHelpers helper = new NodeHelpers(semModel);
             SyntaxTree synTree = null;
             doc.TryGetSyntaxTree(out synTree);
-            var span=synTree.GetText().Lines[selectionLineNum].Span;
+            var span = synTree.GetText().Lines[selectionLineNum].Span;
             var root = (CompilationUnitSyntax)synTree.GetRoot();
             var nodesAtLine = from method in root.DescendantNodesAndSelf(span)
                               select method;
@@ -306,7 +293,7 @@ namespace VSIXProject5
             //Theoretic logic is to look only at *.xml files.
             var workspace2 = componentModel.GetService<VisualStudioWorkspace>();
             List<String> projectsPaths = new List<string>();
-            foreach(var project in workspace2.CurrentSolution.Projects)
+            foreach (var project in workspace2.CurrentSolution.Projects)
             {
                 projectsPaths.Add(project.FilePath);
             }
@@ -319,7 +306,7 @@ namespace VSIXProject5
             //sel.GotoLine(1);
             var xmlSolutionFiles = dte.Solution.Projects;
             List<DocumentProperties> files = new List<DocumentProperties>();
-            foreach (EnvDTE.Project project in xmlSolutionFiles)
+            foreach (Project project in xmlSolutionFiles)
             {
                 var solutionName = dte.Solution.Properties.Item("Name").Value;
                 var projectName = project.Name;
@@ -330,20 +317,20 @@ namespace VSIXProject5
                     {
                         FileName = (string)properies.Item("FileName").Value,
                         FilePath = (string)properies.Item("FullPath").Value,
-                        RelativePath = $"{solutionName}\\{projectName}\\{(string)properies.Item("FileName").Value}",
-                });
+                        RelativePath = $"{solutionName}\\{projectName}\\{(string)properies.Item("FileName").Value}"
+                    });
                 }
             }
             XmlSearcher searcher = new XmlSearcher();
-            var results = searcher.SearchInFiles(queryName, files.Where(x=>x.FileName.Contains("xml")).ToList());
+            var results = searcher.SearchInFiles(queryName, files.Where(x => x.FileName.Contains("xml")).ToList());
             var firstResult = results.FirstOrDefault();
-              
-            dte.Windows.Item(EnvDTE.Constants.vsWindowKindSolutionExplorer).Activate();
+
+            dte.Windows.Item(Constants.vsWindowKindSolutionExplorer).Activate();
             var obj = dte.ActiveWindow.Object as UIHierarchy;
             obj.GetItem(firstResult.RelativeVsPath).Select(vsUISelectionType.vsUISelectionTypeSelect);
             obj.DoDefaultAction();
             TextSelection sel = (TextSelection)dte.ActiveDocument.Selection;
-            TextPoint pnt = (TextPoint)sel.ActivePoint;
+            TextPoint pnt = sel.ActivePoint;
             sel.GotoLine(firstResult.SearchLocations.FirstOrDefault().LineNumber, true);
             //var obj = dte.ActiveWindow.Object as UIHierarchy;
             //obj.GetItem(@"IBatisSample\IBatisSample\sqlMap.xml").Select(vsUISelectionType.vsUISelectionTypeSelect);

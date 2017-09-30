@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using VSIXProject5.Search;
+﻿using System.Collections.Generic;
 
-namespace VSIXProject5.Searchers
+namespace iBatisSuperHelper.Services.Search
 {
     public class SearchResult
     {
@@ -16,9 +11,6 @@ namespace VSIXProject5.Searchers
         public List<SearchLocation> SearchLocations { get; set; }
         public int LineNumber { get; set; }
         public int StartIndex { get; set; }
-        public int SearchDataLength
-        {
-            get { return SearchData.Length == 0 ? -1 : SearchData.Length; }
-        }
+        public int SearchDataLength => SearchData.Length == 0 ? -1 : SearchData.Length;
     }
 }
