@@ -4,19 +4,19 @@
 // </copyright>
 //------------------------------------------------------------------------------
 
-using System;
 using System.ComponentModel.Design;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Runtime.InteropServices;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.OLE.Interop;
+using EnvDTE;
+using EnvDTE80;
+using iBatisSuperHelper.Services;
+using Microsoft.VisualStudio.ComponentModelHost;
+using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.Win32;
+using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.TextManager.Interop;
 
-namespace VSIXProject5
+namespace iBatisSuperHelper
 {
     /// <summary>
     /// This is the class that implements the package exposed by this assembly.
@@ -35,6 +35,8 @@ namespace VSIXProject5
     /// To get loaded into VS, the package must be referred by &lt;Asset Type="Microsoft.VisualStudio.VsPackage" ...&gt; in .vsixmanifest file.
     /// </para>
     /// </remarks>
+    /// [ProvideService((typeof(STextWriterService)), IsAsyncQueryable = true)]  
+
     /// 
     [ProvideAutoLoad("{f1536ef8-92ec-443c-9ed7-fdadf150da82}")]
     [PackageRegistration(UseManagedResourcesOnly = true)]
@@ -42,6 +44,7 @@ namespace VSIXProject5
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [Guid(GotoPackage.PackageGuidString)]
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
+    [ProvideService(typeof(SVsTextManager), ServiceName = "Source Control Sample Basic Provider Service")]
     public sealed class GotoPackage : Package
     {
         /// <summary>
@@ -60,6 +63,8 @@ namespace VSIXProject5
             // initialization is the Initialize method.
         }
 
+       
+
         #region Package Members
 
         /// <summary>
@@ -68,7 +73,11 @@ namespace VSIXProject5
         /// </summary>
         protected override void Initialize()
         {
-            Goto.Initialize(this);
+
+            var sVsTextManager = (IVsTextManager)GetService(typeof(SVsTextManager));
+            var componentModel = (IComponentModel)GetService(typeof(SComponentModel));
+            var dte = (DTE2)GetService(typeof(DTE));
+            Goto.Initialize(this, new ServiceProviderHelper(sVsTextManager, componentModel, dte));
             base.Initialize();
         }
 

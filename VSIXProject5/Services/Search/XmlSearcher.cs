@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
-using VSIXProject5.Searchers;
 
-namespace VSIXProject5.Search
+namespace iBatisSuperHelper.Services.Search
 {
     public class XmlSearcher : IFileSearcher
     {
