@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2002
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iBatisGoToQueryVS2015", "VSIXProject5\iBatisGoToQueryVS2015.csproj", "{B06A0AE7-66B0-423C-9523-2E312019FEC7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iBatisSuperHelper", "VSIXProject5\iBatisSuperHelper.csproj", "{B06A0AE7-66B0-423C-9523-2E312019FEC7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoToQueryUnitTests", "GoToQueryUnitTests\GoToQueryUnitTests.csproj", "{9BCF29ED-24F1-4995-8863-BE5B60E2E042}"
 EndProject
