@@ -80,7 +80,6 @@
       <DependentUpon>BatisSHelperTestConsoleControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Constants\IBatisConstants.cs" />
-    <Compile Include="DocumentProperties.cs" />
     <Compile Include="Goto.cs" />
     <Compile Include="GotoPackage.cs" />
     <Compile Include="Helpers\DocumentHelper.cs" />
@@ -105,12 +104,7 @@
     <Compile Include="Windows\ResultWindow\ResultWindowControl.xaml.cs">
       <DependentUpon>ResultWindowControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Search\IFileSearcher.cs" />
-    <Compile Include="Search\SearchLocation.cs" />
-    <Compile Include="Search\SearchResult.cs" />
-    <Compile Include="Search\XmlSearcher.cs" />
     <Compile Include="VSIntegration\UI\StatusBar.cs" />
-    <Compile Include="Xml\SqlMap.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

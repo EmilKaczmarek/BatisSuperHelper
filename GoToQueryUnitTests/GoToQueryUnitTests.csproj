@@ -57,7 +57,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\VSIXProject5\iBatisGoToQueryVS2015.csproj">
+    <ProjectReference Include="..\VSIXProject5\iBatisSuperHelper.csproj">
       <Project>{b06a0ae7-66b0-423c-9523-2e312019fec7}</Project>
       <Name>iBatisGoToQueryVS2015</Name>
     </ProjectReference>
