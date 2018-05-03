@@ -72,6 +72,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="HelpersAndExtensions\IBatisHelper.cs" />
+    <Compile Include="HelpersAndExtensions\VisualStudio\ProjectItemHelper.cs" />
+    <Compile Include="HelpersAndExtensions\VisualStudio\TextDocumentExtension.cs" />
+    <Compile Include="Models\SimpleProjectItem.cs" />
     <Compile Include="VSIntegration\Navigation\DocumentNavigation.cs" />
     <Compile Include="VSIntegration\Navigation\DocumentNavigationInstance.cs" />
     <Compile Include="Windows\DebugConsole\BatisSHelperTestConsole.cs" />
@@ -82,9 +86,9 @@
     <Compile Include="Constants\IBatisConstants.cs" />
     <Compile Include="Goto.cs" />
     <Compile Include="GotoPackage.cs" />
-    <Compile Include="Helpers\DocumentHelper.cs" />
-    <Compile Include="Helpers\NodeHelpers.cs" />
-    <Compile Include="Helpers\XDocHelper.cs" />
+    <Compile Include="HelpersAndExtensions\VisualStudio\DocumentExtension.cs" />
+    <Compile Include="HelpersAndExtensions\NodeHelpers.cs" />
+    <Compile Include="HelpersAndExtensions\XDocHelper.cs" />
     <Compile Include="Indexers\CodeStatmentInfo.cs" />
     <Compile Include="Indexers\CSharpIndexer.cs" />
     <Compile Include="Indexers\IndexerKey.cs" />
@@ -293,6 +297,9 @@
       <HintPath>..\packages\Microsoft.VisualStudio.Validation.14.1.111\lib\net45\Microsoft.VisualStudio.Validation.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.VisualStudio.Workspace, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.VisualStudio.Workspace.Extensions, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.VisualStudio.Workspace.Extensions.VS, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="stdole, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

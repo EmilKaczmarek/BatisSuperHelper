@@ -26,6 +26,7 @@ using System.Xml.Linq;
 using VSIXProject5.Constants;
 using VSIXProject5.Helpers;
 using VSIXProject5.Indexers;
+using VSIXProject5.Models;
 using VSIXProject5.VSIntegration;
 using VSIXProject5.VSIntegration.Navigation;
 
@@ -34,7 +35,7 @@ namespace VSIXProject5
     /// <summary>
     /// Command handler
     /// </summary>
-    internal sealed class Goto : IVsSolutionLoadEvents
+    internal sealed class Goto
     {
         /// <summary>
         /// Command ID.
@@ -57,9 +58,8 @@ namespace VSIXProject5
         private Events2 _dteEvents2;
         private ProjectItemsEvents _projectItemEvents2;
         private TextDocumentKeyPressEvents _textDocumentKeyPressEvents;
-        private FindEvents _findEvents;
-        private TextEditorEvents _textEditorEvents;
         private StatusBarIntegration _statusBar;
+
         private void SetupEvents()
         {
             this.dte = this.ServiceProvider.GetService(typeof(DTE)) as DTE2;
@@ -75,61 +75,16 @@ namespace VSIXProject5
 
                 _textDocumentKeyPressEvents = _dteEvents2.TextDocumentKeyPressEvents;
                 _textDocumentKeyPressEvents.AfterKeyPress += TextDocumentKeyPressEvents_AfterKeyPress;
-                _textDocumentKeyPressEvents.BeforeKeyPress += _textDocumentKeyPressEvents_BeforeKeyPress;
-
-                _textEditorEvents = _dteEvents2.TextEditorEvents;
-                _textEditorEvents.LineChanged += _textEditorEvents_LineChanged1;
             }
-            
+
             _timer = new System.Windows.Forms.Timer
             {
                 Interval = 100,//ms
             };
             _timer.Tick += _timer_Tick;
-            _shouldProcessLineChange = false;
 
             _statusBar = new StatusBarIntegration(this.ServiceProvider.GetService(typeof(SVsStatusbar)) as IVsStatusbar);
         }
-
-        private bool _suspressLineChangeEvent;
-        private void _textDocumentKeyPressEvents_BeforeKeyPress(string Keypress, TextSelection Selection, bool InStatementCompletion, ref bool CancelKeypress)
-        {
-            _suspressLineChangeEvent = true;
-        }
-
-        private void _textEditorEvents_LineChanged1(TextPoint StartPoint, TextPoint EndPoint, int Hint)
-        {
-            if (_suspressLineChangeEvent)
-            {
-                _suspressLineChangeEvent = false;
-                return;
-            }
-            var textDocument = StartPoint?.Parent;
-            if (textDocument == null) return;
-
-            var document = StartPoint.Parent.Parent;
-            if (document == null) return;
-            string docLanguage = document.Language;
-            if (docLanguage == "XML")
-            {
-                var dteDocument = document.Object("TextDocument") as EnvDTE.TextDocument;             
-                var editPoint = dteDocument.StartPoint.CreateEditPoint();
-                string documentText = editPoint.GetText(dteDocument.EndPoint);
-                var xmlDoc = XDocument.Parse(documentText).DescendantNodes();
-                bool isIBatisQueryXmlFile = XDocHelper.GetXDocumentNamespace(xmlDoc) == IBatisConstants.SqlMapNamespace;
-                if (isIBatisQueryXmlFile)
-                {
-                    var newStatments = new XmlIndexer().BuildFromXDocString(documentText, dteDocument.Parent.FullName, Path.GetDirectoryName(dte.Solution.FullName));
-                    Indexer.UpdateXmlStatmentForFile(newStatments);
-                }
-            }
-            else if (docLanguage == "CSharp")
-            {               
-                var csIndexer = new CSharpIndexer();
-                var getStatmentTask = csIndexer.BuildFromFileAsync(Tuple.Create(document.FullName, document.ProjectItem.ContainingProject.Name), Path.GetFileNameWithoutExtension(dte.Solution.FileName));
-                Indexer.UpdateCodeStatmentForFile(getStatmentTask.Result);
-            }      
-    }
 
         private void _findEvents_FindDone(vsFindResult Result, bool Cancelled)
         {
@@ -174,102 +129,31 @@ namespace VSIXProject5
             }
         }
 
-        //Unused. Keep this only for future reference(how to NOT implement such a functionality)
-        public void UpdateIndexer()
-        {
-            //This should be implemented different, only thing that is stoping this from consuming resources is Thread.Sleep
-            while (true)
-            {
-                if (typingStarts != null)
-                {
-                    TimeSpan spanBetweenChanges = DateTime.Now - typingStarts.Value;
-                    if (spanBetweenChanges.TotalMilliseconds > 1000 && EditedDocument != null)//Edited Document should never be null.
-                    {
-                        string docLanguage = EditedDocument.Language;
-                        if (docLanguage == "XML")
-                        {
-                            var editPoint = EditedDocument.StartPoint.CreateEditPoint();
-                            string documentText = editPoint.GetText(EditedDocument.EndPoint);
-                            var xmlDoc = XDocument.Parse(documentText).DescendantNodes();
-                            bool isIBatisQueryXmlFile = XDocHelper.GetXDocumentNamespace(xmlDoc) == IBatisConstants.SqlMapNamespace;
-                            if (isIBatisQueryXmlFile)
-                            {
-                                var newStatments = new XmlIndexer().BuildFromXDocString(documentText, EditedDocument.Parent.FullName, Path.GetDirectoryName(dte.Solution.FullName));
-                                //Indexer.UpdateXmlFileStatments(newStatments, EditedDocument.Parent.Name);
-                                Indexer.UpdateXmlStatmentForFile(newStatments);
-                            }
-                        }
-                        else if (docLanguage == "CSharp")
-                        {
-                            var editPoint = EditedDocument.StartPoint.CreateEditPoint();
-                            string text = editPoint.GetText(EditedDocument.EndPoint);
-                            IVsTextManager textManager = (IVsTextManager)this.ServiceProvider.GetService(typeof(SVsTextManager));
-                            IVsTextView textView = null;
-                            textManager.GetActiveView(1, null, out textView);
-                            IComponentModel componentModel = (IComponentModel)this.ServiceProvider.GetService(typeof(SComponentModel));
-                            var componentService = componentModel.GetService<IVsEditorAdaptersFactoryService>().GetWpfTextView(textView);
-                            SnapshotPoint caretPosition = componentService.Caret.Position.BufferPosition;
-                            Microsoft.CodeAnalysis.Document roslynDocument = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
-                            var csIndexer = new CSharpIndexer();
-                            var testIndexer = csIndexer.BuildFromDocumentAsync(roslynDocument, Tuple.Create<string,string>(EditedDocument.Parent.FullName, EditedDocument.Parent.ProjectItem.ContainingProject.Name), Path.GetFileNameWithoutExtension(dte.Solution.FullName));
-                            //Indexer.UpdateCSharpFileStatment(testIndexer.Result, EditedDocument.Parent.Name);
-                            Indexer.UpdateCodeStatmentForFile(testIndexer.Result);
-                        }
-                        //Reload of indexer done, assing null to prevent looping.
-                        typingStarts = null;
-                    }
-                }
-                System.Threading.Thread.Sleep(100);
-            }
-        }
-
-        private DateTime? typingStarts;
-        private TextPoint LastStartPoint;
-        private TextPoint LastEndPoint;
         private EnvDTE.TextDocument EditedDocument;
         private System.Windows.Forms.Timer _timer;
-        private bool _shouldProcessLineChange; //this is preventing "premature raise of line changed event"
-        //FUCKING HELL WHY THIS FIRES ON FUCKING SEARCH OR AFTER SOLUTION LOAD ? OR FUCKING RANDOMLY ...
-        private void _textEditorEvents_LineChanged(TextPoint StartPoint, TextPoint EndPoint, int Hint)
-        {
-            _timer.Stop();
-            _timer.Start();
-            var StartPointParent = StartPoint.Parent.Parent;
-            EditedDocument = StartPointParent != null ? (EnvDTE.TextDocument)StartPoint.Parent.Parent.Object("TextDocument") : (EnvDTE.TextDocument)dte.ActiveDocument.Object("TextDocument");
-        }
 
         private void _timer_Tick(object sender, EventArgs e)
         {
             _timer.Stop();
             if (EditedDocument != null)//Edited Document should never be null.
-            {
-                //Premature raise prevention, basicaly line changed is rising moment after solution load(not always)
-                //if (!_shouldProcessLineChange && EditedDocument.StartPoint.AtStartOfDocument && EditedDocument.StartPoint.AtStartOfLine)
-                //{
-                //    _shouldProcessLineChange = true;
-                //    return;
-                //}
-                
-
+            {            
                 string docLanguage = EditedDocument.Language;
                 //if (EditedDocument.Selection.IsEmpty) return;
                 if (docLanguage == "XML")
                 {
-                    var editPoint = EditedDocument.StartPoint.CreateEditPoint();
-                    string documentText = editPoint.GetText(EditedDocument.EndPoint);
+                    string documentText = EditedDocument.GetText();
+
                     var xmlDoc = XDocument.Parse(documentText).DescendantNodes();
                     bool isIBatisQueryXmlFile = XDocHelper.GetXDocumentNamespace(xmlDoc) == IBatisConstants.SqlMapNamespace;
                     if (isIBatisQueryXmlFile)
                     {
                         var newStatments = new XmlIndexer().BuildFromXDocString(documentText, EditedDocument.Parent.FullName, Path.GetDirectoryName(dte.Solution.FullName));
-                        //Indexer.UpdateXmlFileStatments(newStatments, EditedDocument.Parent.Name);
+
                        Indexer.UpdateXmlStatmentForFile(newStatments);
                     }
                 }
                 else if (docLanguage == "CSharp")
                 {
-                    var editPoint = EditedDocument.StartPoint.CreateEditPoint();
-                    string text = editPoint.GetText(EditedDocument.EndPoint);
                     IVsTextManager textManager = (IVsTextManager)this.ServiceProvider.GetService(typeof(SVsTextManager));
                     IVsTextView textView = null;
                     textManager.GetActiveView(1, null, out textView);
@@ -277,17 +161,17 @@ namespace VSIXProject5
                     var componentService = componentModel.GetService<IVsEditorAdaptersFactoryService>().GetWpfTextView(textView);
                     SnapshotPoint caretPosition = componentService.Caret.Position.BufferPosition;
                     Microsoft.CodeAnalysis.Document roslynDocument = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
-                    var csIndexer = new CSharpIndexer();
-                    var testIndexer = csIndexer.BuildFromDocumentAsync(roslynDocument, Tuple.Create<string, string>(EditedDocument.Parent.FullName, EditedDocument.Parent.ProjectItem.ContainingProject.Name), Path.GetFileNameWithoutExtension(dte.Solution.FullName));
-                    //Indexer.UpdateCSharpFileStatment(testIndexer.Result, EditedDocument.Parent.Name);
-                   Indexer.UpdateCodeStatmentForFile(testIndexer.Result);  
+                   
+                    var simpleProjectItem = new SimpleProjectItem {
+                        FilePath = EditedDocument.Parent.FullName,
+                        ProjectName = EditedDocument.Parent.ProjectItem.ContainingProject.Name,
+                        IsCSharpFile = true,
+                    };
+
+                    var csIndexer = new CSharpIndexer().BuildFromDocumentAsync(roslynDocument, simpleProjectItem, Path.GetFileNameWithoutExtension(dte.Solution.FullName));
+                    Indexer.UpdateCodeStatmentForFile(csIndexer.Result);  
                 }
             }
-        }
-
-        private void _documentEvents_DocumentSaved(EnvDTE.Document Document)
-        {
-            var test = true;
         }
 
         /// <summary>
@@ -321,52 +205,9 @@ namespace VSIXProject5
             
             XmlIndexer indexerInstance = new XmlIndexer();
             ActivityLog.LogInformation("solutionDir:", dte.Solution.FullName);
-            //string solutionDir = Path.GetDirectoryName(dte.Solution.FullName);
-
-            //var testIndexerResult = indexerInstance.BuildIndexer(solutionDir);
-            //Indexer.BuildFromXml(testIndexerResult);
-            _solutionEvents = dte.Events.SolutionEvents;
-            _solutionEvents.Opened += SolutionEvents_Opened;
         }
 
-        private SolutionEvents _solutionEvents;
-
-        //Check if not needed. 
-        private void SolutionEvents_Opened()
-        {
-            //CSharpIndexer csIndexer = new CSharpIndexer();
-            //List<String> solutionDocumentsFullNames = new List<string>();
-            //foreach (EnvDTE.Project project in dte.Solution.Projects)
-            //{
-            //    foreach (ProjectItem projectItem in project.ProjectItems)
-            //    {
-            //        EnvDTE.Document document = new Func<EnvDTE.Document>(() =>
-            //        {
-            //            try
-            //            {
-            //                return projectItem.Document;
-            //            }
-            //            catch (System.Runtime.InteropServices.COMException)
-            //            {
-            //                return null;
-            //            }
-            //        })();
-            //        if (document != null && document.Language == "CSharp")
-            //        {
-            //            solutionDocumentsFullNames.Add((string)projectItem.Properties.Item("FullPath").Value);
-            //        }
-            //    }
-            //}
-            ////var codeIndexerResult = csIndexer.BuildIndexer(solutionDocumentsFullNames);
-            ////Indexer.AppendCSharpFileStatment(codeIndexerResult);
-        }
-
-        private void SelectionEvents_OnChange()
-        {
-            throw new NotImplementedException();
-        }
-
-        //Action before
+        //Action before opening menu
         private async void BeforeQuery(object sender, EventArgs e)
         {
             var myCommand = sender as OleMenuCommand;
@@ -419,9 +260,10 @@ namespace VSIXProject5
                 {
                     sel.MoveToLineAndOffset(pnt.Line, oldLineCharBeginOffset);
                     sel.MoveToLineAndOffset(pnt.Line, oldLineCharEndOffset, true);
-                    var editPoint = doc.StartPoint.CreateEditPoint();
-                    string text = editPoint.GetText(doc.EndPoint);
+
+                    string text = doc.GetText();
                     var xmlDoc = XDocument.Parse(text).DescendantNodes();
+
                     bool isIBatisQueryXmlFile = ((XElement)xmlDoc.First()).Name.NamespaceName == @"http://ibatis.apache.org/mapping";
                     if (isIBatisQueryXmlFile)
                     {
@@ -432,6 +274,7 @@ namespace VSIXProject5
             }
         }
 
+        //Unused, but cant remove it
         private void Change(object sender, EventArgs e)
         {
         }
@@ -473,12 +316,10 @@ namespace VSIXProject5
         /// <param name="sender">Event sender.</param>
         /// <param name="e">Event args.</param>
         private async void MenuItemCallback(object sender, EventArgs e)
-        {
+        { 
             DTE2 dte = this.ServiceProvider.GetService(typeof(DTE)) as DTE2;
-            dte.Events.TextEditorEvents.LineChanged += TextEditorEvents_LineChanged;
             string solutionDir = Path.GetDirectoryName(dte.Solution.FullName);
-            //Document saved test
-            //Indexer Test
+
             bool isXmlFile = dte.ActiveDocument.Language == "XML";
             IVsTextManager textManager = (IVsTextManager)this.ServiceProvider.GetService(typeof(SVsTextManager));
             IVsTextView textView = null;
@@ -488,11 +329,9 @@ namespace VSIXProject5
             textView.GetCaretPos(out selectionLineNum, out selectionCol);
             if (isXmlFile)
             {
-                EnvDTE.TextDocument doc3 = (EnvDTE.TextDocument)(dte.ActiveDocument.Object("TextDocument"));
+                EnvDTE.TextDocument doc = (EnvDTE.TextDocument)(dte.ActiveDocument.Object("TextDocument"));
+                string xmlTextContent = doc.GetText();
 
-                var p = doc3.StartPoint.CreateEditPoint();
-                string s = p.GetText(doc3.EndPoint);
-                var xmlTextContent = s;
                 var doc2 = XDocument.Parse(xmlTextContent, LoadOptions.SetLineInfo);
                 var node = doc2.Descendants();
                 var emm = node.Select(x => ((IXmlLineInfo)x).LineNumber).ToList();
@@ -631,47 +470,10 @@ namespace VSIXProject5
             }
         }
 
-        private void TextEditorEvents_LineChanged(TextPoint StartPoint, TextPoint EndPoint, int Hint)
-        {
-            //Indexer.statmenentInfo;
-        }
-
         private void OnFindDone(vsFindResult Result, bool Cancelled)
         {
             var resultCopy = Result;
-            //throw new NotImplementedException();
         }
 
-        public int OnBeforeOpenSolution(string pszSolutionFilename)
-        {
-            return 0;
-        }
-
-        public int OnBeforeBackgroundSolutionLoadBegins()
-        {
-            return 0;
-        }
-
-        public int OnQueryBackgroundLoadProjectBatch(out bool pfShouldDelayLoadToNextIdle)
-        {
-            pfShouldDelayLoadToNextIdle = false;
-            return 0;
-        }
-
-        public int OnBeforeLoadProjectBatch(bool fIsBackgroundIdleBatch)
-        {
-            return 0;
-        }
-
-        public int OnAfterLoadProjectBatch(bool fIsBackgroundIdleBatch)
-        {
-            return 0;
-        }
-
-        public int OnAfterBackgroundSolutionLoadComplete()
-        {
-            var test = true;
-            return 0;
-        }
     }
 }
