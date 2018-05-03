@@ -4,25 +4,22 @@
 // </copyright>
 //------------------------------------------------------------------------------
 
-using System;
-using System.ComponentModel.Design;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Runtime.InteropServices;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.OLE.Interop;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.Win32;
-using Microsoft.VisualStudio.TextManager.Interop;
-using VSIXProject5.Indexers;
-using System.IO;
-using System.Collections.Generic;
 using EnvDTE;
 using EnvDTE80;
+using Microsoft.CodeAnalysis;
+using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.LanguageServices;
-using System.Text;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.TextManager.Interop;
+using System;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using VSIXProject5.Helpers;
+using VSIXProject5.Indexers;
 
 namespace VSIXProject5
 {
@@ -82,75 +79,29 @@ namespace VSIXProject5
         {
             Goto.Initialize(this);
             base.Initialize();
+
+            BatisSHelperTestConsoleCommand.Initialize(this);
+            ResultWindowCommand.Initialize(this);
+
+            var componentModel2 = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
+            var workspace = componentModel2.GetService<VisualStudioWorkspace>();
+            workspace.WorkspaceChanged += Workspace_WorkspaceChanged;            
+
             _solution = base.GetService(typeof(SVsSolution)) as IVsSolution;
             _solutionEventsHandler = new SolutionEventsHandler(this);
             _textManagerEvents = new TextManagerEvents();
             _dte = base.GetService(typeof(DTE)) as DTE2;
             _solution.AdviseSolutionEvents(_solutionEventsHandler, out _solutionEventsCookie);
-            //IVsTextManager vsTextManager = base.GetService(typeof(IVsTextManager)) as IVsTextManager;
-            //IConnectionPointContainer textManager = (IConnectionPointContainer)GetService(typeof(SVsTextManager));
-            //Guid interfaceGuid = typeof(IVsTextManagerEvents).GUID;
-            //IConnectionPoint tmConnectionPoint;
-            //textManager.FindConnectionPoint(ref interfaceGuid, out tmConnectionPoint);
-            //uint cookie;
-            //tmConnectionPoint.Advise(_textManagerEvents, out cookie);
-            //var textManager = Microsoft.VisualStudio.Shell.ServiceProvider.GlobalProvider.GetService(typeof(SVsTextManager)) as IVsTextManager2;
-            //IConnectionPointContainer container = textManager as IConnectionPointContainer;
-            //IConnectionPoint textManagerEventsConnection = null;
-            //Guid eventGuid = typeof(IVsTextManagerEvents2).GUID;
-            //container.FindConnectionPoint(ref eventGuid, out textManagerEventsConnection);
-            //var textManagerEvents = new TextManagerEvents();
-            //uint textManagerCookie;
-            //textManagerEventsConnection.Advise(textManagerEvents, out textManagerCookie);
-            //var textManager = Microsoft.VisualStudio.Shell.ServiceProvider.GlobalProvider.GetService(typeof(SVsTextManager)) as IVsTextManager;
-            //IVsTextManager2 textLine = (IVsTextManager2)GetService(typeof(SVsTextManager));            
-            //IVsTextView actiV;
-            //IVsTextView _activeView;
-            //textLine.GetActiveView2(0, null, (uint)_VIEWFRAMETYPE.vftCodeWindow, out actiV);
-            //IVsTextLines _buffer = null;
-            //if (textLine.GetActiveView2(0, null, (uint)_VIEWFRAMETYPE.vftCodeWindow, out _activeView) == VSConstants.S_OK)
-            //{
-            //    _activeView.GetBuffer(out _buffer);
+            
 
-            //    string selectedText = string.Empty;
-            //    actiV.GetSelectedText(out selectedText);
-            //}
-            //IConnectionPointContainer container = _buffer as IConnectionPointContainer;
-            //IConnectionPoint textManagerEventsConnection = null;
-            //Guid eventGuid = typeof(IVsTextLinesEvents).GUID;
-            //container.FindConnectionPoint(ref eventGuid, out textManagerEventsConnection);
-            //uint textManagerCookie;
-            //textManagerEventsConnection.Advise(_textManagerLineEvents, out textManagerCookie);
-
-            BatisSHelperTestConsoleCommand.Initialize(this);
-            ResultWindowCommand.Initialize(this);
         }
 
-        public void OnChangeLineText(TextLineChange[] pTextLineChange, int fLast)
+        private void Workspace_WorkspaceChanged(object sender, Microsoft.CodeAnalysis.WorkspaceChangeEventArgs e)
         {
-            var test1 = 1;
+            var componentModel2 = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
+            var workspace = componentModel2.GetService<VisualStudioWorkspace>();
         }
-
-        public void OnChangeLineAttributes(int iFirstLine, int iLastLine)
-        {
-            var test1 = 1;
-        }
-        List<ProjectItem> projectItems = new List<ProjectItem>();
-
-        private ProjectItem GetFiles(ProjectItem item)
-        {
-            if (item.ProjectItems == null)
-                return item;
-
-            var items = item.ProjectItems.GetEnumerator();
-            while (items.MoveNext())
-            {
-                var currentItem = (ProjectItem)items.Current;
-                projectItems.Add(GetFiles(currentItem));
-            }
-
-            return item;
-        }
+ 
         internal async void HandleSolutionEvent(int eventNumber)
         {
             if (eventNumber == 2)
@@ -158,114 +109,30 @@ namespace VSIXProject5
                 Indexer.ClearAll();
             }
         }
+
         internal async void HandleSolutionEventAsync(int eventNumber)
         {
             Debug.WriteLine(eventNumber);
             if (eventNumber == 1)
             {
-                var projects = _dte.Solution.Projects.GetEnumerator();
-                if (projects != null)
-                {
-                    while (projects.MoveNext())
-                    {
-                        var project = projects.Current as Project;
-                        if (project != null && project.ProjectItems != null)
-                        {  
-                            var items = project.ProjectItems.GetEnumerator();
-                            while (items.MoveNext())
-                            {
-                                var item = (ProjectItem)items.Current;
-                                projectItems.Add(GetFiles(item));
-                            }
-                        }
-                    }
-                }
-                List<Tuple<string, string>> solutionCodeDocuments = new List<Tuple<string, string>>();
-                List<Tuple<string, string>> solutionXmlDocument = new List<Tuple<string, string>>();
-                foreach (var projectItem in projectItems)
-                {
-                    Document document = new Func<EnvDTE.Document>(() =>
-                    {
-                        try
-                        {
-                            return projectItem.Document;
-                        }
-                        catch (System.Runtime.InteropServices.COMException)
-                        {
-                            return null;
-                        }
-                    })();
-                    if (document != null && document.Language == "CSharp")
-                    {
-                        solutionCodeDocuments.Add(
-                            Tuple.Create<string, string>((string)projectItem.Properties.Item("FullPath").Value, projectItem.ContainingProject.Name));
-                    }
-                    else
-                    {
-                        //This is alternative approach for getting document...
-                        try
-                        {
-                            var projectItemsFileCount = projectItem.FileCount;
-                            for (int i = 0; i < projectItemsFileCount; i++)
-                            {
-                                try
-                                {
-                                    var test2 = projectItem.FileNames[(short)i];
-                                    var test4 = projectItem.ContainingProject.Name;
-                                    string extension = Path.GetExtension(test2);
-                                    if (extension == ".cs")
-                                    {
-                                        solutionCodeDocuments.Add(Tuple.Create<string, string>(test2, test4));
-                                    }
-                                    else if (extension == ".xml")
-                                    {
-                                        solutionXmlDocument.Add(Tuple.Create<string, string>(test2, test4));
-                                    }
-                                    var test3 = projectItem.ContainingProject.CodeModel.Language;
-                                }
-                                catch (Exception ex)
-                                {
-                                    Debug.WriteLine(ex.Message);
-                                    System.Diagnostics.Debugger.Break();
-                                }
-                            }
-                        }
-                        catch(COMException comException)
-                        {
-                            Debug.WriteLine(comException.Message);
-                            //System.Diagnostics.Debugger.Break();
-                        }
-                    }
-                }
+                var projectItemHelper = new ProjectItemHelper();
+                var projectItems = projectItemHelper.GetProjectItemsFromSolutionProjects(_dte.Solution.Projects);
+
+                var simpleSolutionItems = DocumentHelper.GetDocumentsFromProjectItemList(projectItems);
+
                 CSharpIndexer csIndexer = new CSharpIndexer();
-                XmlIndexer indexerInstance = new XmlIndexer();
+                XmlIndexer xmlIndexer = new XmlIndexer();
 
-                var testIndexerResult = indexerInstance.BuildIndexer(solutionXmlDocument, Path.GetFileNameWithoutExtension(_dte.Solution.FileName));
-                Indexer.Build(testIndexerResult);
-                //Indexer.BuildFromXml(testIndexerResult);
+                var xmlIndexerResult = xmlIndexer.BuildIndexer(simpleSolutionItems.Where(e=>!e.IsCSharpFile).ToList(), Path.GetFileNameWithoutExtension(_dte.Solution.FileName));
+                Indexer.Build(xmlIndexerResult);
 
-                var codeIndexerResult = await csIndexer.BuildIndexerAsync(solutionCodeDocuments, Path.GetFileNameWithoutExtension(_dte.Solution.FullName));
-                //Indexer.AppendCSharpFileStatment(codeIndexerResult);
+                var codeIndexerResult = await csIndexer.BuildIndexerAsync(simpleSolutionItems.Where(e => e.IsCSharpFile).ToList(), Path.GetFileNameWithoutExtension(_dte.Solution.FullName));     
                 Indexer.Build(codeIndexerResult);
 
             }
         }
         private SolutionEventsHandler _solutionEventsHandler;
         private TextManagerEvents _textManagerEvents;
-        private TextManagerLineEvents _textManagerLineEvents;
-
-        internal class TextManagerLineEvents : IVsTextLinesEvents
-        {
-            public void OnChangeLineText(TextLineChange[] pTextLineChange, int fLast)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void OnChangeLineAttributes(int iFirstLine, int iLastLine)
-            {
-                throw new NotImplementedException();
-            }
-        }
 
         internal class TextManagerEvents : IVsTextManagerEvents2
         {
@@ -323,7 +190,7 @@ namespace VSIXProject5
             }
 
             public int OnBeforeLoadProjectBatch(bool fIsBackgroundIdleBatch)
-            {
+            { 
                 return 0;
             }
 
@@ -334,12 +201,51 @@ namespace VSIXProject5
 
             public int OnAfterBackgroundSolutionLoadComplete()
             {
-                _package.HandleSolutionEventAsync(1);
-                return 0;
+                var componentModel2 = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
+                var workspace = componentModel2.GetService<VisualStudioWorkspace>();
+                if (workspace.CurrentSolution.FilePath != null)
+                {
+                    _package.HandleSolutionEventAsync(1);
+                }
+                else
+                {
+                    var _dte = Package.GetGlobalService(typeof(DTE)) as DTE2;
+                    var solution = _dte.Solution;
+                    if (solution.Projects.Count > 0)
+                    {
+                        //BUG with workspace.
+                        //Sometimes when project build version is != 15.0
+                        //Even after all projects are loaded, the roslyn workspace doesn't have any solution.
+                        //This is leading to:
+                        //1)Unable to retrieve Document.
+                        //2)Unable to get Semantic Model in CSharp indexer.
+                        //Workaround is to wait till workspace change, and than call indexer.
+                        //Ugly as my mother, posible 2nd workaround is to work with build.
+                        EventHandler<WorkspaceChangeEventArgs> workspaceEventHandler = null;
+                        workspaceEventHandler = (object sender, WorkspaceChangeEventArgs e) =>
+                        {
+                            var changedWorkspace = componentModel2.GetService<VisualStudioWorkspace>();
+                            if (changedWorkspace.CurrentSolution.FilePath != null)
+                            {
+                                _package.HandleSolutionEventAsync(1);
+                                workspace.WorkspaceChanged -= workspaceEventHandler;
+                            }
+                        };
+                    }
+                }
+                return 1;
             }
 
             public int OnAfterOpenProject(IVsHierarchy pHierarchy, int fAdded)
             {
+                var componentModel2 = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
+                var workspace = componentModel2.GetService<VisualStudioWorkspace>();
+                if (workspace.CurrentSolution.FilePath != null)
+                {
+
+                }
+                var _dte = Package.GetGlobalService(typeof(DTE)) as DTE2;
+                var solution = _dte.Solution;
                 return 0;
             }
 
@@ -370,7 +276,6 @@ namespace VSIXProject5
 
             public int OnAfterOpenSolution(object pUnkReserved, int fNewSolution)
             {
-                var test = true;
                 return 0;
             }
 

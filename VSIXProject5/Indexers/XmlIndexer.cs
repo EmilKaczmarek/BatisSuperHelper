@@ -5,6 +5,7 @@ using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 using VSIXProject5.Indexers.Models;
+using VSIXProject5.Models;
 
 namespace VSIXProject5.Indexers
 {
@@ -84,6 +85,74 @@ namespace VSIXProject5.Indexers
                 return batch;
             }
         }
+        public List<XmlIndexerResult> BuildIndexer(List<SimpleProjectItem> solutionXmlDocuments, string solutionName)
+        {
+            var result = new List<XmlIndexerResult>();
+            List<SimpleProjectItem> sqlMapsFilesCollection = new List<SimpleProjectItem>();
+            foreach (var xmlSolutionDocument in solutionXmlDocuments)
+            {
+                XDocument xdoc = null;
+                try
+                {
+                    xdoc = XDocument.Load(xmlSolutionDocument.FilePath);
+                }
+                catch (Exception)
+                {
+                    continue;
+                }
+                var nodes = xdoc.DescendantNodes();
+                bool isIBatisQueryXmlFile = ((XElement)nodes.First()).Name.NamespaceName == @"http://ibatis.apache.org/mapping";
+                if (isIBatisQueryXmlFile)
+                {
+                    sqlMapsFilesCollection.Add(xmlSolutionDocument);
+                }
+            }
+            return sqlMapsFilesCollection.Select(e =>
+            {
+                using (XmlTextReader reader = new XmlTextReader(e.FilePath))
+                {
+                    var splitted = e.FilePath.Split('\\').ToList();
+                    var projectNameIndex = splitted.LastIndexOf(e.ProjectName);
+                    var projectFilePath = splitted.Skip(projectNameIndex + 1);
+                    string relativePath = $"{solutionName}\\{e.ProjectName}\\{string.Join("\\", projectFilePath)}";
+                    string test = $"{relativePath.Replace(@"\\", @"\")}";
+                    var batch = new List<XmlIndexerResult>();
+                    while (reader.Read())
+                    {
+                        if (reader.NodeType == XmlNodeType.Element)
+                        {
+                            string elementName = reader.Name;
+                            if (elementName == "select" ||
+                               elementName == "insert" ||
+                               elementName == "delete" ||
+                               elementName == "update" ||
+                               elementName == "statement" ||
+                               elementName == "procedure" ||
+                               elementName == "sql"
+                               )
+                            {
+                                batch.Add(new XmlIndexerResult
+                                {
+                                    QueryId = reader.GetAttribute("id"),
+                                    QueryLineNumber = reader.LineNumber,
+                                    QueryFileName = Path.GetFileName(e.FilePath),
+                                    //QueryFileRelativeVsPath = $"{relativePath.Replace(@"\\", @"\")}",
+                                    QueryVsProjectName = e.ProjectName,
+                                    QueryFilePath = e.FilePath,
+                                });
+                            }
+                        }
+                    }
+                    return batch;
+                }
+            }).SelectMany(e => e).ToList();
+        }
+        /// <summary>
+        /// UNUSED, old ugly tuple crap
+        /// </summary>
+        /// <param name="solutionXmlDocuments"></param>
+        /// <param name="solutionName"></param>
+        /// <returns></returns>
         public List<XmlIndexerResult> BuildIndexer(List<Tuple<string,string>> solutionXmlDocuments, string solutionName)
         {
             var result = new List<XmlIndexerResult>();
