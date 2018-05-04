@@ -14,5 +14,7 @@ namespace VSIXProject5.Helpers
             var editPoint = document.StartPoint.CreateEditPoint();
             return editPoint.GetText(document.EndPoint);
         }
+        
+
     }
 }
