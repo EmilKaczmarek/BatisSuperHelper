@@ -22,7 +22,7 @@ namespace VSIXProject5.HelpersAndExtensions
 
             public static bool IsCommentEnd(string line)
             {
-                return line.Trim() != "-->";
+                return line.Trim() == "-->";
             }
 
             public static bool IsIgnored(string line)

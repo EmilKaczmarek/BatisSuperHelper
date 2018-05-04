@@ -21,8 +21,15 @@ namespace VSIXProject5.HelpersAndExtensions.VisualStudio
             int oldLineCharBeginOffset = pnt.LineCharOffset;
             int oldLineCharEndOffset = selection.AnchorPoint.LineCharOffset;
             selection.GotoLine(pnt.Line, true);
-            RedoMarker(pnt, selection, oldLineCharBeginOffset, oldLineCharEndOffset);
-            return selection.Text;
+            try
+            {  
+                return selection.Text;
+            }
+            finally
+            {
+                RedoMarker(pnt, selection, oldLineCharBeginOffset, oldLineCharEndOffset);
+            }
+            
         }
     }
 }
