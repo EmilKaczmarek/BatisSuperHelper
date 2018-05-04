@@ -20,7 +20,6 @@ using System;
 using System.ComponentModel.Design;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Xml;
 using System.Xml.Linq;
 using VSIXProject5.Constants;
@@ -29,6 +28,9 @@ using VSIXProject5.Indexers;
 using VSIXProject5.Models;
 using VSIXProject5.VSIntegration;
 using VSIXProject5.VSIntegration.Navigation;
+using VSIXProject5.HelpersAndExtensions.VisualStudio;
+using VSIXProject5.HelpersAndExtensions;
+using static VSIXProject5.HelpersAndExtensions.XmlHelper;
 
 namespace VSIXProject5
 {
@@ -250,17 +252,12 @@ namespace VSIXProject5
             else if (activeDocumentLanguage == "XML")
             {
                 EnvDTE.TextDocument doc = (EnvDTE.TextDocument)dte.ActiveDocument.Object("TextDocument");
-                TextSelection sel = (TextSelection)dte.ActiveDocument.Selection;
-                TextPoint pnt = (TextPoint)sel.ActivePoint;
-                int oldLineCharBeginOffset = pnt.LineCharOffset;
-                int oldLineCharEndOffset = sel.AnchorPoint.LineCharOffset;
-                sel.GotoLine(pnt.Line, true);
-                var lineText = sel.Text;
-                if (lineText.Trim() != "" && !lineText.StartsWith(@"<!--") && lineText.Trim() != "-->")
-                {
-                    sel.MoveToLineAndOffset(pnt.Line, oldLineCharBeginOffset);
-                    sel.MoveToLineAndOffset(pnt.Line, oldLineCharEndOffset, true);
 
+                TextSelection sel = (TextSelection)dte.ActiveDocument.Selection;               
+                var lineText = sel.GetText();
+
+                if (!XmlStringLine.IsIgnored(lineText))
+                {
                     string text = doc.GetText();
                     var xmlDoc = XDocument.Parse(text).DescendantNodes();
 
@@ -321,6 +318,7 @@ namespace VSIXProject5
             string solutionDir = Path.GetDirectoryName(dte.Solution.FullName);
 
             bool isXmlFile = dte.ActiveDocument.Language == "XML";
+            //Check if selection could be used here.
             IVsTextManager textManager = (IVsTextManager)this.ServiceProvider.GetService(typeof(SVsTextManager));
             IVsTextView textView = null;
             textManager.GetActiveView(1, null, out textView);
