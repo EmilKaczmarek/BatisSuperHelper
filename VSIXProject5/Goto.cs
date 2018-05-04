@@ -318,7 +318,7 @@ namespace VSIXProject5
             string solutionDir = Path.GetDirectoryName(dte.Solution.FullName);
 
             bool isXmlFile = dte.ActiveDocument.Language == "XML";
-            //Check if selection could be used here.
+
             IVsTextManager textManager = (IVsTextManager)this.ServiceProvider.GetService(typeof(SVsTextManager));
             IVsTextView textView = null;
             textManager.GetActiveView(1, null, out textView);
