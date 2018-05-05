@@ -145,8 +145,8 @@ namespace VSIXProject5
                 {
                     string documentText = EditedDocument.GetText();
 
-                    var xmlDoc = XDocument.Parse(documentText).DescendantNodes();
-                    bool isIBatisQueryXmlFile = XDocHelper.GetXDocumentNamespace(xmlDoc) == IBatisConstants.SqlMapNamespace;
+                    var xDoc = XDocument.Parse(documentText);
+                    bool isIBatisQueryXmlFile = XDocHelper.GetXDocumentNamespace(xDoc) == IBatisConstants.SqlMapNamespace;
                     if (isIBatisQueryXmlFile)
                     {
                         var newStatments = new XmlIndexer().BuildFromXDocString(documentText, EditedDocument.Parent.FullName, Path.GetDirectoryName(dte.Solution.FullName));
@@ -259,9 +259,9 @@ namespace VSIXProject5
                 if (!XmlStringLine.IsIgnored(lineText))
                 {
                     string text = doc.GetText();
-                    var xmlDoc = XDocument.Parse(text).DescendantNodes();
+                    var xDoc = XDocument.Parse(text);
 
-                    bool isIBatisQueryXmlFile = ((XElement)xmlDoc.First()).Name.NamespaceName == @"http://ibatis.apache.org/mapping";
+                    bool isIBatisQueryXmlFile = XDocHelper.GetXDocumentNamespace(xDoc) == @"http://ibatis.apache.org/mapping";
                     if (isIBatisQueryXmlFile)
                     {
                         myCommand.Visible = true;

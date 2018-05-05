@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
+using VSIXProject5.Helpers;
 using VSIXProject5.Indexers.Models;
 using VSIXProject5.Models;
 
@@ -100,8 +101,8 @@ namespace VSIXProject5.Indexers
                 {
                     continue;
                 }
-                var nodes = xdoc.DescendantNodes();
-                bool isIBatisQueryXmlFile = ((XElement)nodes.First()).Name.NamespaceName == @"http://ibatis.apache.org/mapping";
+
+                bool isIBatisQueryXmlFile = XDocHelper.GetXDocumentNamespace(xdoc) == @"http://ibatis.apache.org/mapping";
                 if (isIBatisQueryXmlFile)
                 {
                     sqlMapsFilesCollection.Add(xmlSolutionDocument);

@@ -9,23 +9,17 @@ namespace VSIXProject5.Helpers
 {
     public class XDocHelper
     {
-        public static string GetXDocumentNamespace(IEnumerable<XNode> xDocNodes)
-        {
-            if(xDocNodes == null || xDocNodes.Count()<1)
-                return null;
-            
-            return ((XElement)xDocNodes.First()).Name.NamespaceName;
-
-        }
         public static string GetXDocumentNamespace(XDocument xDoc)
         {
             if (xDoc == null)
                 return null;
 
-            var xDocNodes = xDoc.DescendantNodes();
+            if(xDoc.Root == null)
+                return null;
 
-            return GetXDocumentNamespace(xDocNodes);
+            string rootNamespace = xDoc.Root.GetDefaultNamespace().ToString();
 
+            return rootNamespace;
         }
         public static string GetXDocumentNamespace(string filePath)
         {
