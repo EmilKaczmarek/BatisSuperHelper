@@ -38,6 +38,9 @@ namespace VSIXProject5.Helpers
 
                 if (projectItem.Kind.Replace("-", "").Equals(VSConstants.ItemTypeGuid.PhysicalFolder_string.Replace("-", ""), StringComparison.OrdinalIgnoreCase))
                     return null;
+                //ProjectItem kind - file representing project in solution.
+                if (projectItem.Kind.Replace("-", "").Trim().Equals("66A26722 - 8FB5 - 11D2 - AA7E - 00C04F688DDE".Replace("-", "").Trim()))
+                    return null;
 
                 return projectItem.Document;
             }
