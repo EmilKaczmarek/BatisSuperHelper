@@ -116,9 +116,10 @@ namespace VSIXProject5
         {
             EnvDTE.Document newDocument = ProjectItem.GetDocumentOrDefault();
             string projectItemExtension = Path.GetExtension(ProjectItem.Name);
-            string projectItemPath = ProjectItem.FileNames[0];
+            
             if (projectItemExtension == ".cs")
             {
+                string projectItemPath = ProjectItem.FileNames[0];
                 CSharpIndexer csIndexer = new CSharpIndexer();
                 var buildTask = csIndexer.BuildFromFileAsync(Tuple.Create(projectItemPath, ProjectItem.ContainingProject.Name), Path.GetFileNameWithoutExtension(dte.Solution.FileName));
                 Indexer.Build(buildTask.Result);
