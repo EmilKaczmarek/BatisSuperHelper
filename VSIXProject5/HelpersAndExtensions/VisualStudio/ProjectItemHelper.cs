@@ -10,8 +10,8 @@ namespace VSIXProject5.Helpers
 {
     public class ProjectItemHelper
     {
-        private List<ProjectItem> _projectItems = new List<ProjectItem>();
-        private int maxDepth = 10000;
+        private readonly List<ProjectItem> _projectItems = new List<ProjectItem>();
+        private readonly int maxDepth = 10000;
         private int currentRecursiveCall = 1;
 
         private ProjectItem GetFiles(ProjectItem item)

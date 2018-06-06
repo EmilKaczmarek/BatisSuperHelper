@@ -12,7 +12,7 @@ namespace VSIXProject5.HelpersAndExtensions
         {
             public static bool IsBlank(string line)
             {
-                return line.Trim() == "";
+                return line.Trim() == String.Empty;
             }
 
             public static bool IsCommentBegin(string line)

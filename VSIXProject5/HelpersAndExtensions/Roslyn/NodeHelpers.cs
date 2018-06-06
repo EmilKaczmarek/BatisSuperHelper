@@ -3,20 +3,19 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace VSIXProject5.Helpers
 {
     public class NodeHelpers
     {
         private readonly SemanticModel _semanticModel;
+        /// <summary>
+        /// Ctor
+        /// </summary>
+        /// <param name="semanticModelForDocument">Roslyn semantic model of document</param>
         public NodeHelpers(SemanticModel semanticModelForDocument)
         {
             _semanticModel = semanticModelForDocument;
-        }
-        ~NodeHelpers()
-        {
         }
         /// <summary>
         /// Try to returns Node that is Return Statment type.
@@ -28,6 +27,8 @@ namespace VSIXProject5.Helpers
         {
             return SyntaxNodes.FirstOrDefault(x => x is ReturnStatementSyntax);
         }
+        //Method is working 100% correct, but could lead to unwanted behaviour.
+        //Should work on better method to determine if it's using iBatis.
         /// <summary>
         /// Looks for all nodes that has 'Batis' in namespace.
         /// Used to determine if method/class etc is iBatis in iBatis namespace.
@@ -38,7 +39,8 @@ namespace VSIXProject5.Helpers
         {
             var candidates = SyntaxNodes
                 .Select(x => _semanticModel.GetTypeInfo(x).Type)
-                .Where(x => x != null && x.ContainingNamespace != null);
+                .Where(x => x != null && x.ContainingNamespace != null)
+                .ToList();
             return candidates.Any(x => x.ContainingNamespace.ToDisplayString().Contains("Batis"));
         }
         /// <summary>
@@ -51,7 +53,6 @@ namespace VSIXProject5.Helpers
             return SyntaxNodes
                 .OfType<ArgumentListSyntax>()
                 .Where(x => x.Arguments.Any());
-
         }
         /// <summary>
         /// Gets ArgumentListSyntax for method that has proper argument number.
@@ -62,6 +63,7 @@ namespace VSIXProject5.Helpers
         {
             //Posibly not enough to determine if this is proper iBatis method.
             //Placeholder for handling other iBatis method.
+            //But what other factors could be used here?
             return ArgumentListSyntaxNodes.FirstOrDefault(e => e.Arguments.Count > 1) as ArgumentListSyntax;
         }
         /// <summary>
@@ -77,8 +79,8 @@ namespace VSIXProject5.Helpers
             {
                 var childNodes = argument.ChildNodes();
                 var firstChildNode = childNodes.First();
-                var testGetTypeInfo = _semanticModel.GetTypeInfo(firstChildNode);
-                var type = testGetTypeInfo.Type;
+                var typeInfo = _semanticModel.GetTypeInfo(firstChildNode);
+                var type = typeInfo.Type;
                 if (type != null)
                 {
                     if (type.Equals(stringISymbol))
@@ -89,7 +91,7 @@ namespace VSIXProject5.Helpers
                 else
                 {
                     //NULL type? check maybe it's function/expression?
-                    if (testGetTypeInfo.ConvertedType.Name.Equals("Func")){
+                    if (typeInfo.ConvertedType.Name.Equals("Func")){
                         //this is Function! now, lets test if this contains iBatis querry
                         var nodes = argument.DescendantNodes();
                         var syntaxArguments = GetArgumentListSyntaxFromSyntaxNodesWhereArgumentsAreNotEmpty(nodes);
@@ -99,11 +101,6 @@ namespace VSIXProject5.Helpers
                 }
             }
             return null;
-            //var f1 = argumentList.Arguments;
-            //return argumentList.Arguments
-            //    .FirstOrDefault(x => 
-            //        _semanticModel.GetTypeInfo(x.ChildNodes().First()).Type.Equals(stringISymbol)
-            //    );
         }
         /// <summary>
         /// Get text presentation of Query argument value

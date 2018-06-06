@@ -14,7 +14,7 @@ namespace VSIXProject5.VSIntegration
 
         public DocumentNavigation(DTE2 dte)
         {
-            _dte = dte ?? throw new ArgumentNullException("dte", "Passing null DTE2 is forbidden.");
+            _dte = dte ?? throw new ArgumentNullException(nameof(DTE2), "Passing null DTE2 is forbidden.");
         }
 
         public bool OpenDocument(string filePath)
