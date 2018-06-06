@@ -109,13 +109,11 @@ namespace VSIXProject5.Helpers
                 }
                 else
                 {
-                    //This is alternative approach for getting document...
-                    simpleProjectItems.AddRange(projectItem.GetSimpleProjectItemFromProjectItemNested());
+                    var pi= projectItem.GetSimpleProjectItemFromProjectItemNested();
+                    simpleProjectItems.AddRange(pi);
                 }
             }
             return simpleProjectItems;
         }
-
-
     }
 }

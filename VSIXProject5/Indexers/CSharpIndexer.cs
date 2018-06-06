@@ -9,6 +9,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VSIXProject5.Helpers;
+using VSIXProject5.HelpersAndExtensions.Roslyn;
 using VSIXProject5.Indexers.Models;
 using VSIXProject5.Models;
 
@@ -16,173 +18,73 @@ namespace VSIXProject5.Indexers
 {
     public class CSharpIndexer
     {
-        private Workspace _workspace;
+        private readonly Workspace _workspace;
         public CSharpIndexer()
         {
             var componentModel = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
             _workspace = componentModel.GetService<VisualStudioWorkspace>();
         }
-        /// <summary>
-        /// FUCK TUPLES DELETE IT
-        /// </summary>
-        /// <param name="fileInfo"></param>
-        /// <param name="solutionDir"></param>
-        /// <returns></returns>
-        public async Task<List<CSharpIndexerResult>> BuildFromFileAsync(Tuple<string, string> fileInfo, string solutionDir)
+        public CSharpIndexer(Workspace workspace)
         {
-            var documentid = _workspace.CurrentSolution.GetDocumentIdsWithFilePath(fileInfo.Item1).FirstOrDefault();
-
-            var docc = _workspace.CurrentSolution.GetDocument(documentid);
-
-            return await BuildFromDocumentAsync(docc, fileInfo, solutionDir);
+            _workspace = workspace;
         }
 
-        public async Task<List<CSharpIndexerResult>> BuildFromFileAsync(SimpleProjectItem fileInfo, string solutionDir)
+        public async Task<List<CSharpIndexerResult>> BuildFromFileAsync(SimpleProjectItem fileInfo)
         {
             var documentid = _workspace.CurrentSolution.GetDocumentIdsWithFilePath(fileInfo.FilePath).FirstOrDefault();
 
             var docc = _workspace.CurrentSolution.GetDocument(documentid);
 
-            return await BuildFromDocumentAsync(docc, fileInfo, solutionDir);
+            return await BuildFromDocumentAsync(docc, fileInfo);
         }
 
-        public async Task<List<CSharpIndexerResult>> BuildIndexerAsync(List<SimpleProjectItem> simpleProjectItems, string solutionDir)
+        public async Task<List<CSharpIndexerResult>> BuildIndexerAsync(List<SimpleProjectItem> simpleProjectItems)
         {
             var result = new List<CSharpIndexerResult>();
 
             foreach (var simpleProjectItem in simpleProjectItems)
             {
-                result.AddRange(await BuildFromFileAsync(simpleProjectItem, solutionDir));
+                result.AddRange(await BuildFromFileAsync(simpleProjectItem));
             }
 
             return result;
         }
 
-        /// <summary>
-        /// NOT USED FUCK TUPLES
-        /// </summary>
-        /// <param name="documentsFullNames"></param>
-        /// <param name="solutionDir"></param>
-        /// <returns></returns>
-        public async Task<List<CSharpIndexerResult>> BuildIndexerAsync(List<Tuple<string,string>> documentsFullNames, string solutionDir)
+        public async Task<List<CSharpIndexerResult>> BuildFromDocumentAsync(Document document, SimpleProjectItem fileInfo)
         {
+            SemanticModel semModel = await document.GetSemanticModelAsync();
+            return Build(semModel, document, fileInfo);
+        }
+
+        private List<CSharpIndexerResult> Build(SemanticModel semModel, Document document, SimpleProjectItem fileInfo)
+        {
+            var helper = new NodeHelpers(semModel);
             var result = new List<CSharpIndexerResult>();
-
-            foreach (var documentFullName in documentsFullNames)
-            {
-                result.AddRange(await BuildFromFileAsync(documentFullName, solutionDir));
-            }
-
-            return result;
-        }
-
-        public async Task<List<CSharpIndexerResult>> BuildFromDocumentAsync(Document document, Tuple<string, string> fileInfo, string solutionDir)
-        {
-            SemanticModel semModel2 = await document.GetSemanticModelAsync();
-            return Build(semModel2, document, fileInfo, solutionDir);           
-        }
-
-        public async Task<List<CSharpIndexerResult>> BuildFromDocumentAsync(Document document, SimpleProjectItem fileInfo, string solutionDir)
-        {
-            SemanticModel semModel2 = await document.GetSemanticModelAsync();
-            return Build(semModel2, document, fileInfo, solutionDir);
-        }
-        //public List<CSharpIndexerResult> BuildFromDocument(Document document, string fileDirectory, string solutionDir)
-        //{
-        //    SemanticModel semModel2 = document.GetSemanticModelAsync().Result;
-        //    return Build(semModel2, document, fileDirectory, solutionDir);
-        //}
-
-        private List<CSharpIndexerResult> Build(SemanticModel semModel2, Document document, Tuple<string, string> fileInfo, string solutionName)
-        {
-            var result = new List<CSharpIndexerResult>();
-            SyntaxTree synTree2 = null;
-            document.TryGetSyntaxTree(out synTree2);
-            var root2 = (CompilationUnitSyntax)synTree2.GetRoot();
-            var nodes = root2.DescendantNodesAndSelf();
-            var argumentNodes = nodes
-                .OfType<ArgumentListSyntax>()                
-                .Where(x => x.Arguments.Any())
-                .Select(x => x)
-                .ToList();
-            foreach (var n in argumentNodes)
-            {
-                if (n is ArgumentListSyntax)
-                {
-                    var t = n.Ancestors().ToList();
-                    if (t.Any(x =>
-                         semModel2.GetSymbolInfo(x).Symbol != null &&
-                         semModel2.GetSymbolInfo(x).Symbol.ContainingNamespace.ToDisplayString().Contains("Batis")
-                    ))
-                    {
-                        Location loc = Location.Create(synTree2, n.Span);
-
-                        string projectName = fileInfo.Item2;
-                        var splitted = fileInfo.Item1.Split('\\').ToList();
-                        var projectNameIndex = splitted.LastIndexOf(projectName);
-                        var projectFilePath = splitted.Skip(projectNameIndex + 1);
-                        string relativePath = $"{solutionName}\\{projectName}\\{string.Join("\\", projectFilePath)}";
-                        CodeStatmentInfo csInfo = new CodeStatmentInfo
-                        {
-                            LineNumber = loc.GetLineSpan().StartLinePosition.Line + 1,
-                            RelativePath = $"{relativePath.Replace(@"\\", @"\")}",
-                            StatmentFile = Path.GetFileName(fileInfo.Item1),
-                        };
-                        IndexerKey key = IndexerKey.ConvertToKey(n.Arguments.FirstOrDefault().ToString().Replace("\"", "").Trim(), document.Project.Name);
-                        result.Add(new CSharpIndexerResult
-                        {
-                            QueryFileName = Path.GetFileName(fileInfo.Item1),
-                            QueryId = n.Arguments.FirstOrDefault().ToString().Replace("\"", "").Trim(),
-                            QueryLineNumber = loc.GetLineSpan().StartLinePosition.Line + 1,
-                            QueryVsProjectName = document.Project.Name,
-                            QueryFilePath = fileInfo.Item1,
-                        });
-                    }
-                }
-            }
-            return result;
-        }
-
-        private List<CSharpIndexerResult> Build(SemanticModel semModel2, Document document, SimpleProjectItem fileInfo, string solutionName)
-        {
-            var result = new List<CSharpIndexerResult>();
-            SyntaxTree synTree2 = null;
-            document.TryGetSyntaxTree(out synTree2);
-            var root2 = (CompilationUnitSyntax)synTree2.GetRoot();
-            var nodes = root2.DescendantNodesAndSelf();
+            SyntaxTree synTree = null;
+            document.TryGetSyntaxTree(out synTree);
+            var treeRoot = (CompilationUnitSyntax)synTree.GetRoot();
+            var nodes = treeRoot.DescendantNodesAndSelf();
             var argumentNodes = nodes
                 .OfType<ArgumentListSyntax>()
                 .Where(x => x.Arguments.Any())
                 .Select(x => x)
                 .ToList();
-            foreach (var n in argumentNodes)
+            foreach (var argumentNode in argumentNodes)
             {
-                if (n is ArgumentListSyntax)
+                if (argumentNode is ArgumentListSyntax)
                 {
-                    var t = n.Ancestors().ToList();
-                    if (t.Any(x =>
-                         semModel2.GetSymbolInfo(x).Symbol != null &&
-                         semModel2.GetSymbolInfo(x).Symbol.ContainingNamespace.ToDisplayString().Contains("Batis")
+                    var nodeAncestors = argumentNode.Ancestors().ToList();
+                    if (nodeAncestors.Any(x =>
+                         semModel.GetSymbolInfo(x).Symbol != null &&
+                         semModel.GetSymbolInfo(x).Symbol.ContainingNamespace.ToDisplayString().Contains("Batis")
                     ))
                     {
-                        Location loc = Location.Create(synTree2, n.Span);
-
-                        string projectName = fileInfo.ProjectName;
-                        var splitted = fileInfo.FilePath.Split('\\').ToList();
-                        var projectNameIndex = splitted.LastIndexOf(projectName);
-                        var projectFilePath = splitted.Skip(projectNameIndex + 1);
-                        string relativePath = $"{solutionName}\\{projectName}\\{string.Join("\\", projectFilePath)}";
-                        CodeStatmentInfo csInfo = new CodeStatmentInfo
-                        {
-                            LineNumber = loc.GetLineSpan().StartLinePosition.Line + 1,
-                            RelativePath = $"{relativePath.Replace(@"\\", @"\")}",
-                            StatmentFile = Path.GetFileName(fileInfo.FilePath),
-                        };
-                        IndexerKey key = IndexerKey.ConvertToKey(n.Arguments.FirstOrDefault().ToString().Replace("\"", "").Trim(), document.Project.Name);
+                        Location loc = Location.Create(synTree, argumentNode.Span);
+                        IndexerKey key = IndexerKey.ConvertToKey(argumentNode.Arguments.FirstOrDefault().ToCleanString(), document.Project.Name);
                         result.Add(new CSharpIndexerResult
                         {
                             QueryFileName = Path.GetFileName(fileInfo.FilePath),
-                            QueryId = n.Arguments.FirstOrDefault().ToString().Replace("\"", "").Trim(),
+                            QueryId = argumentNode.Arguments.FirstOrDefault().ToCleanString(),
                             QueryLineNumber = loc.GetLineSpan().StartLinePosition.Line + 1,
                             QueryVsProjectName = document.Project.Name,
                             QueryFilePath = fileInfo.FilePath,

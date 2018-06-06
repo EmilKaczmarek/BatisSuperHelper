@@ -7,6 +7,7 @@
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.CodeAnalysis;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.LanguageServices;
 using Microsoft.VisualStudio.Shell;
@@ -41,7 +42,8 @@ namespace VSIXProject5
     /// </para>
     /// </remarks>
     /// 
-    [ProvideAutoLoad("{f1536ef8-92ec-443c-9ed7-fdadf150da82}")]
+    //[ProvideAutoLoad("{f1536ef8-92ec-443c-9ed7-fdadf150da82}")]
+    [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionExistsAndFullyLoaded_string)]   
     [PackageRegistration(UseManagedResourcesOnly = true)]
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)] // Info on this package for Help/About
     [ProvideMenuResource("Menus.ctmenu", 1)]
@@ -69,7 +71,7 @@ namespace VSIXProject5
 
         #region Package Members
         private IVsSolution _solution;
-        private uint _solutionEventsCookie = 0;
+        private uint _solutionEventsCookie;
         public DTE2 _dte;
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
@@ -85,11 +87,10 @@ namespace VSIXProject5
 
             var componentModel2 = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
             var workspace = componentModel2.GetService<VisualStudioWorkspace>();
-            workspace.WorkspaceChanged += Workspace_WorkspaceChanged;            
+            workspace.WorkspaceChanged += Workspace_WorkspaceChanged;
 
             _solution = base.GetService(typeof(SVsSolution)) as IVsSolution;
             _solutionEventsHandler = new SolutionEventsHandler(this);
-            _textManagerEvents = new TextManagerEvents();
             _dte = base.GetService(typeof(DTE)) as DTE2;
             _solution.AdviseSolutionEvents(_solutionEventsHandler, out _solutionEventsCookie);
             
@@ -100,6 +101,11 @@ namespace VSIXProject5
         {
             var componentModel2 = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
             var workspace = componentModel2.GetService<VisualStudioWorkspace>();
+            var kind = e.Kind;
+            if (workspace.CurrentSolution != null)
+            {
+
+            }
         }
  
         internal async void HandleSolutionEvent(int eventNumber)
@@ -123,52 +129,19 @@ namespace VSIXProject5
                 CSharpIndexer csIndexer = new CSharpIndexer();
                 XmlIndexer xmlIndexer = new XmlIndexer();
 
-                var xmlIndexerResult = xmlIndexer.BuildIndexer(simpleSolutionItems.Where(e=>!e.IsCSharpFile).ToList(), Path.GetFileNameWithoutExtension(_dte.Solution.FileName));
+                var xmlIndexerResult = xmlIndexer.BuildIndexer(simpleSolutionItems.Where(e=>!e.IsCSharpFile).ToList());
                 Indexer.Build(xmlIndexerResult);
 
-                var codeIndexerResult = await csIndexer.BuildIndexerAsync(simpleSolutionItems.Where(e => e.IsCSharpFile).ToList(), Path.GetFileNameWithoutExtension(_dte.Solution.FullName));     
+                var codeIndexerResult = await csIndexer.BuildIndexerAsync(simpleSolutionItems.Where(e => e.IsCSharpFile).ToList());     
                 Indexer.Build(codeIndexerResult);
 
             }
         }
         private SolutionEventsHandler _solutionEventsHandler;
-        private TextManagerEvents _textManagerEvents;
 
-        internal class TextManagerEvents : IVsTextManagerEvents2
-        {
-            public int OnRegisterMarkerType(int iMarkerType)
-            {
-                throw new NotImplementedException();
-            }
-
-            public int OnRegisterView(IVsTextView pView)
-            {
-                throw new NotImplementedException();
-            }
-
-            public int OnUnregisterView(IVsTextView pView)
-            {
-                throw new NotImplementedException();
-            }
-
-            public int OnUserPreferencesChanged2(VIEWPREFERENCES2[] pViewPrefs, FRAMEPREFERENCES2[] pFramePrefs, LANGPREFERENCES2[] pLangPrefs, FONTCOLORPREFERENCES2[] pColorPrefs)
-            {
-                throw new NotImplementedException();
-            }
-
-            public int OnReplaceAllInFilesBegin()
-            {
-                throw new NotImplementedException();
-            }
-
-            public int OnReplaceAllInFilesEnd()
-            {
-                throw new NotImplementedException();
-            }
-        }
         internal class SolutionEventsHandler : IVsSolutionLoadEvents, IVsSolutionEvents
         {
-            private GotoPackage _package;
+            private readonly GotoPackage _package;
             internal SolutionEventsHandler(GotoPackage package)
             {
                 _package = package;

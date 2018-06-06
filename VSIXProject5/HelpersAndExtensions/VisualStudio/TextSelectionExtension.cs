@@ -28,8 +28,7 @@ namespace VSIXProject5.HelpersAndExtensions.VisualStudio
             finally
             {
                 RedoMarker(pnt, selection, oldLineCharBeginOffset, oldLineCharEndOffset);
-            }
-            
+            }      
         }
     }
 }

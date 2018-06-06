@@ -29,7 +29,7 @@ using VSIXProject5.Models;
 using VSIXProject5.VSIntegration;
 using VSIXProject5.VSIntegration.Navigation;
 using VSIXProject5.HelpersAndExtensions.VisualStudio;
-using VSIXProject5.HelpersAndExtensions;
+
 using static VSIXProject5.HelpersAndExtensions.XmlHelper;
 
 namespace VSIXProject5
@@ -90,7 +90,6 @@ namespace VSIXProject5
 
         private void _findEvents_FindDone(vsFindResult Result, bool Cancelled)
         {
-            var cos = true;
         }
 
         private void TextDocumentKeyPressEvents_AfterKeyPress(string Keypress, TextSelection Selection, bool InStatementCompletion)
@@ -121,7 +120,12 @@ namespace VSIXProject5
             {
                 string projectItemPath = ProjectItem.FileNames[0];
                 CSharpIndexer csIndexer = new CSharpIndexer();
-                var buildTask = csIndexer.BuildFromFileAsync(Tuple.Create(projectItemPath, ProjectItem.ContainingProject.Name), Path.GetFileNameWithoutExtension(dte.Solution.FileName));
+                SimpleProjectItem simpleProjectItem = new SimpleProjectItem
+                {
+                    FilePath = projectItemPath,
+                    ProjectName = ProjectItem.ContainingProject.Name
+                };
+                var buildTask = csIndexer.BuildFromFileAsync(simpleProjectItem);
                 Indexer.Build(buildTask.Result);
             }
             else if(projectItemExtension == ".xml")
@@ -150,7 +154,7 @@ namespace VSIXProject5
                     bool isIBatisQueryXmlFile = XDocHelper.GetXDocumentNamespace(xDoc) == IBatisConstants.SqlMapNamespace;
                     if (isIBatisQueryXmlFile)
                     {
-                        var newStatments = new XmlIndexer().BuildFromXDocString(documentText, EditedDocument.Parent.FullName, Path.GetDirectoryName(dte.Solution.FullName));
+                        var newStatments = new XmlIndexer().BuildFromXDocString(documentText, EditedDocument.Parent.FullName);
 
                        Indexer.UpdateXmlStatmentForFile(newStatments);
                     }
@@ -171,7 +175,7 @@ namespace VSIXProject5
                         IsCSharpFile = true,
                     };
 
-                    var csIndexer = new CSharpIndexer().BuildFromDocumentAsync(roslynDocument, simpleProjectItem, Path.GetFileNameWithoutExtension(dte.Solution.FullName));
+                    var csIndexer = new CSharpIndexer().BuildFromDocumentAsync(roslynDocument, simpleProjectItem);
                     Indexer.UpdateCodeStatmentForFile(csIndexer.Result);  
                 }
             }
@@ -356,6 +360,9 @@ namespace VSIXProject5
                 }
                 var nodee = node.FirstOrDefault(x => ((IXmlLineInfo)x).LineNumber == elementLocation);
                 var queryName = nodee.FirstAttribute.Value;
+
+                var codeDict = Indexer.GetCodeStatmentsDictonary();
+                var sqlDict = Indexer.GetXmlStatmentsDictonary();
 
                 var statmentsKeys = Indexer.GetCodeKeysByQueryId(queryName);
                 ToolWindowPane window = package.FindToolWindow(typeof(ResultWindow), 0, true);
