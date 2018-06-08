@@ -85,8 +85,7 @@ namespace VSIXProject5
 
             DocumentNavigationInstance.InjectDTE(this.dte);
 
-            OleMenuCommandService commandService = this.ServiceProvider.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-            if (commandService != null)
+            if (ServiceProvider.GetService(typeof(IMenuCommandService)) is OleMenuCommandService commandService)
             {
                 var menuCommandID = new CommandID(CommandSet, CommandId);
                 var menuItem = new MenuCommand(this.MenuItemCallback, menuCommandID);
@@ -165,7 +164,7 @@ namespace VSIXProject5
             else if(projectItemExtension == ".xml")
             {
                 XmlIndexer indexerInstance = new XmlIndexer();
-                var xmlIndexer = indexerInstance.BuildFromFile(newDocument.FullName);
+                var xmlIndexer = indexerInstance.BuildUsingFilePath(newDocument.FullName);
                 Indexer.Build(xmlIndexer);
             }
         }
@@ -194,8 +193,7 @@ namespace VSIXProject5
                 else if (docLanguage == "CSharp")
                 {
                     //TODO: Check if file has any iBatis usings?
-                    IVsTextView textView = null;
-                    _textManager.GetActiveView(1, null, out textView);
+                    _textManager.GetActiveView(1, null, out IVsTextView textView);
 
                     var componentService = _componentModel.GetService<IVsEditorAdaptersFactoryService>().GetWpfTextView(textView);
                     SnapshotPoint caretPosition = componentService.Caret.Position.BufferPosition;
@@ -207,7 +205,7 @@ namespace VSIXProject5
                         IsCSharpFile = true,
                     };
 
-                    var csIndexer = await new CSharpIndexer().BuildFromDocumentAsync(roslynDocument, simpleProjectItem);
+                    var csIndexer = new CSharpIndexer().BuildFromDocumentAsync(roslynDocument, simpleProjectItem).Result;
                     Indexer.UpdateCodeStatmentForFile(csIndexer);  
                 }
             }
@@ -222,11 +220,8 @@ namespace VSIXProject5
             if (activeDocumentLanguage == "CSharp")
             {
                 //Get selection line number
-                IVsTextView textView = null;
-                _textManager.GetActiveView(1, null, out textView);
-                int selectionLineNum;
-                int selectionCol;
-                textView.GetCaretPos(out selectionLineNum, out selectionCol);
+                _textManager.GetActiveView(1, null, out IVsTextView textView);
+                textView.GetCaretPos(out int selectionLineNum, out int selectionCol);
                 //Get carret position
                 var wpfTextView = _componentModel.GetService<IVsEditorAdaptersFactoryService>().GetWpfTextView(textView);
                 SnapshotPoint caretPosition = wpfTextView.Caret.Position.BufferPosition;
@@ -244,8 +239,7 @@ namespace VSIXProject5
                 SemanticModel semModel = doc.GetSemanticModelAsync().Result;
                 
                 NodeHelpers helper = new NodeHelpers(semModel);
-                SyntaxTree synTree = null;
-                doc.TryGetSyntaxTree(out synTree);
+                doc.TryGetSyntaxTree(out SyntaxTree synTree);
 
                 var lineSpan = synTree.GetText().Lines[selectionLineNum].Span;
                 var treeRoot = (CompilationUnitSyntax)synTree.GetRoot();
@@ -332,8 +326,7 @@ namespace VSIXProject5
             IVsTextView textView = null;
             _textManager.GetActiveView(1, null, out textView);
             int selectionLineNum;
-            int selectionCol;
-            textView.GetCaretPos(out selectionLineNum, out selectionCol);
+            textView.GetCaretPos(out selectionLineNum, out int selectionCol);
             if (isXmlFile)
             {
                 EnvDTE.TextDocument doc = (EnvDTE.TextDocument)(dte.ActiveDocument.Object("TextDocument"));

@@ -51,8 +51,7 @@ namespace VSIXProject5.Helpers
             var enumerator = projects.GetEnumerator();
             while (enumerator.MoveNext())
             {
-                var project = enumerator.Current as Project;
-                if (project != null && project.ProjectItems != null)
+                if (enumerator.Current is Project project && project.ProjectItems != null)
                 {
                     var items = project.ProjectItems.GetEnumerator();
                     while (items.MoveNext())
