@@ -7,7 +7,7 @@ using System.Xml.Linq;
 
 namespace VSIXProject5.Helpers
 {
-    public class XDocHelper
+    public static class XDocHelper
     {
         public static string GetXDocumentNamespace(XDocument xDoc)
         {
