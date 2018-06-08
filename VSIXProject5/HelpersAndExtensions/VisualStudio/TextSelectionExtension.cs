@@ -9,12 +9,23 @@ namespace VSIXProject5.HelpersAndExtensions.VisualStudio
 {
     public static class TextSelectionExtension
     {
-        private static void RedoMarker(TextPoint pnt, TextSelection selection, int oldBeginOffset, int oldEndOffset)
+        /// <summary>
+        /// Places marker at given offsets.
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="selection"></param>
+        /// <param name="oldBeginOffset"></param>
+        /// <param name="oldEndOffset"></param>
+        private static void RedoMarker(TextPoint point, TextSelection selection, int oldBeginOffset, int oldEndOffset)
         {
-            selection.MoveToLineAndOffset(pnt.Line, oldBeginOffset);
-            selection.MoveToLineAndOffset(pnt.Line, oldEndOffset, true);
+            selection.MoveToLineAndOffset(point.Line, oldBeginOffset);
+            selection.MoveToLineAndOffset(point.Line, oldEndOffset, true);
         }
-
+        /// <summary>
+        /// Gets full text string from TextSelection.
+        /// </summary>
+        /// <param name="selection"></param>
+        /// <returns></returns>
         public static string GetText(this TextSelection selection)
         {
             TextPoint pnt = (TextPoint)selection.ActivePoint;

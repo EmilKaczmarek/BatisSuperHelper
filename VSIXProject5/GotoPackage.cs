@@ -108,7 +108,7 @@ namespace VSIXProject5
             }
         }
  
-        internal async void HandleSolutionEvent(int eventNumber)
+        internal void HandleSolutionEvent(int eventNumber)
         {
             if (eventNumber == 2)
             {
@@ -124,7 +124,7 @@ namespace VSIXProject5
                 var projectItemHelper = new ProjectItemHelper();
                 var projectItems = projectItemHelper.GetProjectItemsFromSolutionProjects(_dte.Solution.Projects);
 
-                var simpleSolutionItems = DocumentHelper.GetDocumentsFromProjectItemList(projectItems);
+                var simpleSolutionItems = DocumentHelper.GetUsableSimpleProjectItemsFromProjectItemList(projectItems);
 
                 CSharpIndexer csIndexer = new CSharpIndexer();
                 XmlIndexer xmlIndexer = new XmlIndexer();
@@ -134,7 +134,6 @@ namespace VSIXProject5
 
                 var codeIndexerResult = await csIndexer.BuildIndexerAsync(simpleSolutionItems.Where(e => e.IsCSharpFile).ToList());     
                 Indexer.Build(codeIndexerResult);
-
             }
         }
         private SolutionEventsHandler _solutionEventsHandler;
