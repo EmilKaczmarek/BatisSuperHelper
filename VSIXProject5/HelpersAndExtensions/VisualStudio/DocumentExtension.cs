@@ -14,6 +14,11 @@ namespace VSIXProject5.Helpers
 {
     public static class DocumentHelper
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="projectItem">ProjectItem</param>
+        /// <returns>EnvDTE Document, or null</returns>
         public static EnvDTE.Document GetDocumentOrDefault(this ProjectItem projectItem)
         {
             try
@@ -25,8 +30,14 @@ namespace VSIXProject5.Helpers
                 return null;
             }
         }
-
-        public static Document GetDocumentFromProjectItemNonNested(this ProjectItem projectItem)
+        //Usable? no idea for better name.
+        /// <summary>
+        /// Retrieves Project Items that is parsable by indexers.
+        /// Use when Project Item have only one document/file.
+        /// </summary>
+        /// <param name="projectItem">Project Item with single document</param>
+        /// <returns>Env DTE Document, or null on exception.</returns>
+        public static Document GetUsableDocumentFromProjectItemNonNested(this ProjectItem projectItem)
         {
             try
             {
@@ -49,7 +60,11 @@ namespace VSIXProject5.Helpers
                 return null;
             }
         }
-
+        /// <summary>
+        /// Use when Project Item could have more than 1 document/file.
+        /// </summary>
+        /// <param name="projectItem"></param>
+        /// <returns></returns>
         public static List<SimpleProjectItem> GetSimpleProjectItemFromProjectItemNested(this ProjectItem projectItem)
         {
             List<SimpleProjectItem> simpleProjectItemsForProjectItem = new List<SimpleProjectItem>();
@@ -74,19 +89,21 @@ namespace VSIXProject5.Helpers
                     catch (Exception ex)
                     {
                         Debug.WriteLine(ex.Message);
-                        System.Diagnostics.Debugger.Break();
                     }
                 }
             }
             catch (COMException comException)
             {
                 Debug.WriteLine(comException.Message);
-                //System.Diagnostics.Debugger.Break();
             }
             return simpleProjectItemsForProjectItem;
         }
-
-        public static List<SimpleProjectItem> GetDocumentsFromProjectItemList(List<ProjectItem> projectItems)
+        /// <summary>
+        /// Get Simple Project Item List for list of ProjectItems(nested and non nested)
+        /// </summary>
+        /// <param name="projectItems"></param>
+        /// <returns></returns>
+        public static List<SimpleProjectItem> GetUsableSimpleProjectItemsFromProjectItemList(List<ProjectItem> projectItems)
         {
             List<SimpleProjectItem> simpleProjectItems = new List<SimpleProjectItem>();
 
@@ -94,7 +111,7 @@ namespace VSIXProject5.Helpers
             {
                 if(projectItem.FileCount > 1)
                 {
-                    Document document = projectItem.GetDocumentFromProjectItemNonNested();
+                    Document document = projectItem.GetUsableDocumentFromProjectItemNonNested();
 
                     if (document != null && document.Language == "CSharp")
                     {
@@ -109,8 +126,7 @@ namespace VSIXProject5.Helpers
                 }
                 else
                 {
-                    var pi= projectItem.GetSimpleProjectItemFromProjectItemNested();
-                    simpleProjectItems.AddRange(pi);
+                    simpleProjectItems.AddRange(projectItem.GetSimpleProjectItemFromProjectItemNested());
                 }
             }
             return simpleProjectItems;

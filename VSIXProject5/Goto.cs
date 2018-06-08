@@ -31,6 +31,8 @@ using VSIXProject5.VSIntegration.Navigation;
 using VSIXProject5.HelpersAndExtensions.VisualStudio;
 
 using static VSIXProject5.HelpersAndExtensions.XmlHelper;
+using Microsoft.VisualStudio.LanguageServices;
+using System.Diagnostics;
 
 namespace VSIXProject5
 {
@@ -62,6 +64,42 @@ namespace VSIXProject5
         private TextDocumentKeyPressEvents _textDocumentKeyPressEvents;
         private StatusBarIntegration _statusBar;
 
+        private IComponentModel _componentModel; 
+        private IVsTextManager _textManager;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Goto"/> class.
+        /// Adds our command handlers for menu (commands must exist in the command table file)
+        /// </summary>
+        /// <param name="package">Owner package, not null.</param>
+        private Goto(Package package)
+        {
+            if (package == null)
+            {
+                throw new ArgumentNullException(nameof(package));
+            }
+
+            this.package = package;
+
+            SetupEvents();
+
+            DocumentNavigationInstance.InjectDTE(this.dte);
+
+            OleMenuCommandService commandService = this.ServiceProvider.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
+            if (commandService != null)
+            {
+                var menuCommandID = new CommandID(CommandSet, CommandId);
+                var menuItem = new MenuCommand(this.MenuItemCallback, menuCommandID);
+                var menuItem2 = new OleMenuCommand(new EventHandler(this.MenuItemCallback),
+                    new EventHandler(this.Change), new EventHandler(this.BeforeQuery), menuCommandID, "Go to Query");
+
+                commandService.AddCommand(menuItem2);
+            }
+
+            _componentModel = (IComponentModel)this.ServiceProvider.GetService(typeof(SComponentModel));
+            _textManager = (IVsTextManager)this.ServiceProvider.GetService(typeof(SVsTextManager));
+        }
+
         private void SetupEvents()
         {
             this.dte = this.ServiceProvider.GetService(typeof(DTE)) as DTE2;
@@ -86,10 +124,6 @@ namespace VSIXProject5
             _timer.Tick += _timer_Tick;
 
             _statusBar = new StatusBarIntegration(this.ServiceProvider.GetService(typeof(SVsStatusbar)) as IVsStatusbar);
-        }
-
-        private void _findEvents_FindDone(vsFindResult Result, bool Cancelled)
-        {
         }
 
         private void TextDocumentKeyPressEvents_AfterKeyPress(string Keypress, TextSelection Selection, bool InStatementCompletion)
@@ -139,13 +173,12 @@ namespace VSIXProject5
         private EnvDTE.TextDocument EditedDocument;
         private System.Windows.Forms.Timer _timer;
 
-        private void _timer_Tick(object sender, EventArgs e)
+        private async void _timer_Tick(object sender, EventArgs e)
         {
             _timer.Stop();
             if (EditedDocument != null)//Edited Document should never be null.
             {            
                 string docLanguage = EditedDocument.Language;
-                //if (EditedDocument.Selection.IsEmpty) return;
                 if (docLanguage == "XML")
                 {
                     string documentText = EditedDocument.GetText();
@@ -155,17 +188,16 @@ namespace VSIXProject5
                     if (isIBatisQueryXmlFile)
                     {
                         var newStatments = new XmlIndexer().BuildFromXDocString(documentText, EditedDocument.Parent.FullName);
-
-                       Indexer.UpdateXmlStatmentForFile(newStatments);
+                        Indexer.UpdateXmlStatmentForFile(newStatments);
                     }
                 }
                 else if (docLanguage == "CSharp")
                 {
-                    IVsTextManager textManager = (IVsTextManager)this.ServiceProvider.GetService(typeof(SVsTextManager));
+                    //TODO: Check if file has any iBatis usings?
                     IVsTextView textView = null;
-                    textManager.GetActiveView(1, null, out textView);
-                    IComponentModel componentModel = (IComponentModel)this.ServiceProvider.GetService(typeof(SComponentModel));
-                    var componentService = componentModel.GetService<IVsEditorAdaptersFactoryService>().GetWpfTextView(textView);
+                    _textManager.GetActiveView(1, null, out textView);
+
+                    var componentService = _componentModel.GetService<IVsEditorAdaptersFactoryService>().GetWpfTextView(textView);
                     SnapshotPoint caretPosition = componentService.Caret.Position.BufferPosition;
                     Microsoft.CodeAnalysis.Document roslynDocument = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
                    
@@ -175,77 +207,50 @@ namespace VSIXProject5
                         IsCSharpFile = true,
                     };
 
-                    var csIndexer = new CSharpIndexer().BuildFromDocumentAsync(roslynDocument, simpleProjectItem);
-                    Indexer.UpdateCodeStatmentForFile(csIndexer.Result);  
+                    var csIndexer = await new CSharpIndexer().BuildFromDocumentAsync(roslynDocument, simpleProjectItem);
+                    Indexer.UpdateCodeStatmentForFile(csIndexer);  
                 }
             }
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Goto"/> class.
-        /// Adds our command handlers for menu (commands must exist in the command table file)
-        /// </summary>
-        /// <param name="package">Owner package, not null.</param>
-        private Goto(Package package)
-        {
-            if (package == null)
-            {
-                throw new ArgumentNullException("package");
-            }
-
-            this.package = package;
-
-            SetupEvents();
-
-            DocumentNavigationInstance.InjectDTE(this.dte);
-
-            OleMenuCommandService commandService = this.ServiceProvider.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-            if (commandService != null)
-            {
-                var menuCommandID = new CommandID(CommandSet, CommandId);
-                var menuItem = new MenuCommand(this.MenuItemCallback, menuCommandID);
-                var menuItem2 = new OleMenuCommand(new EventHandler(this.MenuItemCallback),
-                    new EventHandler(this.Change), new EventHandler(this.BeforeQuery), menuCommandID, "Go to Query");
-
-                commandService.AddCommand(menuItem2);
-            }
-            
-            XmlIndexer indexerInstance = new XmlIndexer();
-            ActivityLog.LogInformation("solutionDir:", dte.Solution.FullName);
-        }
-
         //Action before opening menu
-        private async void BeforeQuery(object sender, EventArgs e)
+        private void BeforeQuery(object sender, EventArgs e)
         {
             var myCommand = sender as OleMenuCommand;
             myCommand.Visible = false;
             string activeDocumentLanguage = dte.ActiveDocument.Language;
             if (activeDocumentLanguage == "CSharp")
             {
-                IVsTextManager textManager = (IVsTextManager)this.ServiceProvider.GetService(typeof(SVsTextManager));
+                //Get selection line number
                 IVsTextView textView = null;
-                textManager.GetActiveView(1, null, out textView);
+                _textManager.GetActiveView(1, null, out textView);
                 int selectionLineNum;
                 int selectionCol;
                 textView.GetCaretPos(out selectionLineNum, out selectionCol);
-                IComponentModel componentModel = (IComponentModel)this.ServiceProvider.GetService(typeof(SComponentModel));
-                var componentService = componentModel.GetService<IVsEditorAdaptersFactoryService>().GetWpfTextView(textView);
-                SnapshotPoint caretPosition = componentService.Caret.Position.BufferPosition;
+                //Get carret position
+                var wpfTextView = _componentModel.GetService<IVsEditorAdaptersFactoryService>().GetWpfTextView(textView);
+                SnapshotPoint caretPosition = wpfTextView.Caret.Position.BufferPosition;
+
                 Microsoft.CodeAnalysis.Document doc = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
+
                 if (doc == null)
                 {
                     myCommand.Visible = true;
                     myCommand.Text = "Something went wrong";
                     return;
                 }
-                SemanticModel semModel = await doc.GetSemanticModelAsync();
+                //Cool case: there is doc.TryGetSemanticModel but if it's not ready it will be null.
+                //GetSemanticModelAsync will create it if needed, but not sure if using async event is good.
+                SemanticModel semModel = doc.GetSemanticModelAsync().Result;
+                
                 NodeHelpers helper = new NodeHelpers(semModel);
                 SyntaxTree synTree = null;
                 doc.TryGetSyntaxTree(out synTree);
-                var span = synTree.GetText().Lines[selectionLineNum].Span;
-                var root = (CompilationUnitSyntax)synTree.GetRoot();
-                var nodesAtLine = from method in root.DescendantNodesAndSelf(span)
-                                  select method;
+
+                var lineSpan = synTree.GetText().Lines[selectionLineNum].Span;
+                var treeRoot = (CompilationUnitSyntax)synTree.GetRoot();
+                var nodesAtLine = treeRoot.DescendantNodesAndSelf(lineSpan);
+
                 var returnNode = helper.GetFirstNodeOfReturnStatmentSyntaxType(nodesAtLine);
                 if(returnNode != null)
                 {
@@ -309,7 +314,10 @@ namespace VSIXProject5
         {
             Instance = new Goto(package);
         }
-
+        
+        //Too long and complicated...
+        //TODO: Cleanup on result window enchantments.
+        //TODO: Cleanup on multiple statments in xml logic.
         /// <summary>
         /// This function is the callback used to execute the command when the menu item is clicked.
         /// See the constructor to see how the menu item is associated with this function using
@@ -317,16 +325,12 @@ namespace VSIXProject5
         /// </summary>
         /// <param name="sender">Event sender.</param>
         /// <param name="e">Event args.</param>
-        private async void MenuItemCallback(object sender, EventArgs e)
+        private void MenuItemCallback(object sender, EventArgs e)
         { 
-            DTE2 dte = this.ServiceProvider.GetService(typeof(DTE)) as DTE2;
-            string solutionDir = Path.GetDirectoryName(dte.Solution.FullName);
-
             bool isXmlFile = dte.ActiveDocument.Language == "XML";
 
-            IVsTextManager textManager = (IVsTextManager)this.ServiceProvider.GetService(typeof(SVsTextManager));
             IVsTextView textView = null;
-            textManager.GetActiveView(1, null, out textView);
+            _textManager.GetActiveView(1, null, out textView);
             int selectionLineNum;
             int selectionCol;
             textView.GetCaretPos(out selectionLineNum, out selectionCol);
@@ -335,34 +339,22 @@ namespace VSIXProject5
                 EnvDTE.TextDocument doc = (EnvDTE.TextDocument)(dte.ActiveDocument.Object("TextDocument"));
                 string xmlTextContent = doc.GetText();
 
-                var doc2 = XDocument.Parse(xmlTextContent, LoadOptions.SetLineInfo);
-                var node = doc2.Descendants();
-                var emm = node.Select(x => ((IXmlLineInfo)x).LineNumber).ToList();
+                var xmlDocument = XDocument.Parse(xmlTextContent, LoadOptions.SetLineInfo);
+                var xElements = xmlDocument.Descendants();
+                var elementsLineNumbers = xElements.Select(x => ((IXmlLineInfo)x).LineNumber).ToList();
                 int lineNumber = selectionLineNum + 1;//Missmatch between visual studio lines numeration and text lines numeration
-                int? elementLocation = null;
-                //This is fucked up let me explain:
-                //I can't use .FirstOrDefault, it will give me 0 when no match. But 0 is legit index/location.
-                //Logic here is: If user clicks INSIDE tag, it will go to tag declaration that has statment name.
-                try
-                {
-                    elementLocation = emm.First(x => x == lineNumber);
-                }
-                catch (InvalidOperationException)
-                {
-                    elementLocation = -1;
-                }
-                if (elementLocation == -1)
-                {
-                    emm.Add(lineNumber);
-                    emm.Sort();
-                    int indexOfLineNumber = emm.IndexOf(lineNumber);
-                    elementLocation = emm[indexOfLineNumber == 0 ? 0 : indexOfLineNumber - 1];
-                }
-                var nodee = node.FirstOrDefault(x => ((IXmlLineInfo)x).LineNumber == elementLocation);
-                var queryName = nodee.FirstAttribute.Value;
+                int? elementLocation = elementsLineNumbers.Cast<int?>().FirstOrDefault(x => x == lineNumber);
 
-                var codeDict = Indexer.GetCodeStatmentsDictonary();
-                var sqlDict = Indexer.GetXmlStatmentsDictonary();
+                if (elementLocation == null)
+                {
+                    elementsLineNumbers.Add(lineNumber);
+                    elementsLineNumbers.Sort();
+                    int indexOfLineNumber = elementsLineNumbers.IndexOf(lineNumber);
+                    elementLocation = elementsLineNumbers[indexOfLineNumber == 0 ? 0 : indexOfLineNumber - 1];
+                }
+
+                var node = xElements.FirstOrDefault(x => ((IXmlLineInfo)x).LineNumber == elementLocation);
+                var queryName = node.Attributes().FirstOrDefault(x => x.Name.LocalName == IBatisConstants.StatmentIdAttributeName).Value;
 
                 var statmentsKeys = Indexer.GetCodeKeysByQueryId(queryName);
                 ToolWindowPane window = package.FindToolWindow(typeof(ResultWindow), 0, true);
@@ -389,12 +381,12 @@ namespace VSIXProject5
                         var statment = statments.FirstOrDefault();
                         dte.ItemOperations.OpenFile(statment.QueryFilePath);
                         TextSelection sel = (TextSelection)dte.ActiveDocument.Selection;
-                        TextPoint pnt = (TextPoint)sel.ActivePoint;
+                        TextPoint pnt = sel.ActivePoint;
                         sel.GotoLine(statment.QueryLineNumber, true);
                     }
                     else if (statments.Count > 1)
                     {
-                        _statusBar.ShowText("Multiple occurence of same statment for given project. Unimplemented");
+                        _statusBar.ShowText("Multiple occurence of same statment in project.");
                         ErrorHandler.ThrowOnFailure(windowFrame.Show());
                         return;
                     }
@@ -406,20 +398,18 @@ namespace VSIXProject5
             }
             else
             {
-                IComponentModel componentModel = (IComponentModel)this.ServiceProvider.GetService(typeof(SComponentModel));
-                var componentService = componentModel.GetService<IVsEditorAdaptersFactoryService>().GetWpfTextView(textView);
+                var componentService = _componentModel.GetService<IVsEditorAdaptersFactoryService>().GetWpfTextView(textView);
                 SnapshotPoint caretPosition = componentService.Caret.Position.BufferPosition;
                 Microsoft.CodeAnalysis.Document doc = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
-                SemanticModel semModel = await doc.GetSemanticModelAsync();
-                ActivityLog.TryLogInformation("GoToQuery", "Step 1 executes");
+
+                SemanticModel semModel = doc.GetSemanticModelAsync().Result;
+
                 NodeHelpers helper = new NodeHelpers(semModel);
                 SyntaxTree synTree = null;
                 doc.TryGetSyntaxTree(out synTree);
                 var span = synTree.GetText().Lines[selectionLineNum].Span;
                 var root = (CompilationUnitSyntax)synTree.GetRoot();
-                var nodesAtLine = from method in root.DescendantNodesAndSelf(span)
-                                  select method;
-                ActivityLog.TryLogInformation("GoToQuery", "Step 2 executes");
+                var nodesAtLine = root.DescendantNodesAndSelf(span);
                 string queryName = "";
                 var returnNode = helper.GetFirstNodeOfReturnStatmentSyntaxType(nodesAtLine);
                 //Check if current document line is having 'return' keyword.
@@ -445,6 +435,7 @@ namespace VSIXProject5
                     var windowContent = (ResultWindowControl)window.Content;
                     var statmentsToShow = keys.Select(x => Indexer.GetXmlStatment(x)).ToList();
                     windowContent.ShowResults(statmentsToShow);
+
                     IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
 
                     if (keys.Count == 1) { 
@@ -456,17 +447,11 @@ namespace VSIXProject5
                         TextPoint pnt = (TextPoint)sel.ActivePoint;
                         sel.GotoLine(statment.QueryLineNumber, true);
                     }
+                    //This should never happend without implementing logic for multiple xml statments of same name.
                     else
                     {
-                        //var statment = Indexer.GetXmlStatmentOrNull(keys.First());
-                        //dte.Windows.Item(EnvDTE.Constants.vsWindowKindSolutionExplorer).Activate();
-                        //var obj = dte.ActiveWindow.Object as UIHierarchy;
-                        //dte.ItemOperations.OpenFile(statment.QueryFilePath);
-                        //TextSelection sel = (TextSelection)dte.ActiveDocument.Selection;
-                        //TextPoint pnt = (TextPoint)sel.ActivePoint;
-                        //sel.GotoLine(statment.QueryLineNumber, true);
-                        _statusBar.ShowText($"Multiple statments of name:{queryName}, jumped to first occurence. Window is WIP");
-                        ErrorHandler.ThrowOnFailure(windowFrame.Show());
+                        _statusBar.ShowText($"Multiple statments of name:{queryName}");
+                        //ErrorHandler.ThrowOnFailure(windowFrame.Show());
                     }
                 }
                 else
@@ -475,11 +460,5 @@ namespace VSIXProject5
                 }
             }
         }
-
-        private void OnFindDone(vsFindResult Result, bool Cancelled)
-        {
-            var resultCopy = Result;
-        }
-
     }
 }

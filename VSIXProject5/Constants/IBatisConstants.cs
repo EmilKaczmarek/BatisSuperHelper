@@ -20,6 +20,6 @@ namespace VSIXProject5.Constants
             "procedure",
             "sql"
         };
-
+        public const string StatmentIdAttributeName = "id";
     }
 }
