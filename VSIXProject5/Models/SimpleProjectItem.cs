@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,5 +12,6 @@ namespace VSIXProject5.Models
         public string FilePath { get; set; }
         public string ProjectName { get; set; }
         public bool IsCSharpFile { get; set;}
+        public Document RoslynDocument { get; set; }
     }
 }

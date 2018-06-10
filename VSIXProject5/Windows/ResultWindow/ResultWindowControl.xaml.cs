@@ -19,6 +19,7 @@
         {
             this.InitializeComponent();
             this.MouseDoubleClick += ResultWindowControl_MouseDoubleClick;
+
         }
 
         private void ResultWindowControl_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)

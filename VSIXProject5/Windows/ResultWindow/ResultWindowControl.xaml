@@ -9,6 +9,14 @@
              d:DesignHeight="300" d:DesignWidth="300"
              Name="MyToolWindow">
     <Grid Margin="0,0,0,153">
-        <DataGrid x:Name="dataGrid" Grid.ColumnSpan="2" Margin="0,2,0,-154" ColumnWidth="Auto" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" SelectionMode="Single" IsReadOnly="True" GridLinesVisibility="None" HeadersVisibility="None"/>
+        <DataGrid x:Name="dataGrid" Grid.ColumnSpan="2" Margin="0,2,0,-154" ColumnWidth="Auto" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" SelectionMode="Single" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="None" Background="{DynamicResource VsBrush.RawBackground}" RowBackground="{DynamicResource VsBrush.RawBackground}">
+            <DataGrid.RowStyle>
+                <Style TargetType="{x:Type DataGridRow}">
+                    <Style.Resources>
+                        <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="{DynamicResource VsColor.GridHeadingTextKey}"/>
+                    </Style.Resources>
+                </Style>
+            </DataGrid.RowStyle>
+        </DataGrid>
     </Grid>
 </UserControl>
