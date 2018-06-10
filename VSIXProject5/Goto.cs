@@ -57,7 +57,7 @@ namespace VSIXProject5
         private readonly Package package;
 
         private DTE2 dte;
-        private Events _dteEvents;
+        private EnvDTE.Events _dteEvents;
 
         private Events2 _dteEvents2;
         private ProjectItemsEvents _projectItemEvents2;
@@ -205,7 +205,7 @@ namespace VSIXProject5
                         IsCSharpFile = true,
                     };
 
-                    var csIndexer = new CSharpIndexer().BuildFromDocumentAsync(roslynDocument, simpleProjectItem).Result;
+                    var csIndexer = new CSharpIndexer().BuildFromDocumentAsync(roslynDocument).Result;
                     Indexer.UpdateCodeStatmentForFile(csIndexer);  
                 }
             }

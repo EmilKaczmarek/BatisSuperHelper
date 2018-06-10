@@ -19,6 +19,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using VSIXProject5.Events;
 using VSIXProject5.Helpers;
 using VSIXProject5.Indexers;
 
@@ -42,7 +43,7 @@ namespace VSIXProject5
     /// </para>
     /// </remarks>
     /// 
-    //[ProvideAutoLoad("{f1536ef8-92ec-443c-9ed7-fdadf150da82}")]
+    [ProvideAutoLoad("{f1536ef8-92ec-443c-9ed7-fdadf150da82}")]
     [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionExistsAndFullyLoaded_string)]   
     [PackageRegistration(UseManagedResourcesOnly = true)]
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)] // Info on this package for Help/About
@@ -85,16 +86,14 @@ namespace VSIXProject5
             BatisSHelperTestConsoleCommand.Initialize(this);
             ResultWindowCommand.Initialize(this);
 
-            var componentModel2 = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
-            var workspace = componentModel2.GetService<VisualStudioWorkspace>();
-            workspace.WorkspaceChanged += Workspace_WorkspaceChanged;
-
             _solution = base.GetService(typeof(SVsSolution)) as IVsSolution;
             _solutionEventsHandler = new SolutionEventsHandler(this);
             _dte = base.GetService(typeof(DTE)) as DTE2;
             _solution.AdviseSolutionEvents(_solutionEventsHandler, out _solutionEventsCookie);
-            
 
+            var componentModel2 = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
+            var workspace = componentModel2.GetService<VisualStudioWorkspace>();
+            workspace.WorkspaceChanged += WorkspaceEvents.WorkspaceChanged;
         }
 
         private void Workspace_WorkspaceChanged(object sender, Microsoft.CodeAnalysis.WorkspaceChangeEventArgs e)
@@ -102,9 +101,21 @@ namespace VSIXProject5
             var componentModel2 = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
             var workspace = componentModel2.GetService<VisualStudioWorkspace>();
             var kind = e.Kind;
-            if (workspace.CurrentSolution != null)
+            if(kind == WorkspaceChangeKind.SolutionAdded)
             {
+                var projectItemHelper = new ProjectItemHelper();
+                var projectItems = projectItemHelper.GetProjectItemsFromSolutionProjects(_dte.Solution.Projects);
 
+                var simpleSolutionItems = DocumentHelper.GetUsableSimpleProjectItemsFromProjectItemList(projectItems);
+
+                CSharpIndexer csIndexer = new CSharpIndexer();
+                XmlIndexer xmlIndexer = new XmlIndexer();
+
+                var xmlIndexerResult = xmlIndexer.BuildIndexer(simpleSolutionItems.Where(x => !x.IsCSharpFile).ToList());
+                Indexer.Build(xmlIndexerResult);
+
+                var codeIndexerResult = csIndexer.BuildIndexerAsync(simpleSolutionItems.Where(x => x.IsCSharpFile).ToList()).Result;
+                Indexer.Build(codeIndexerResult);
             }
         }
  
@@ -121,6 +132,9 @@ namespace VSIXProject5
             Debug.WriteLine(eventNumber);
             if (eventNumber == 1)
             {
+                var componentModel2 = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
+                var workspace = componentModel2.GetService<VisualStudioWorkspace>();
+
                 var projectItemHelper = new ProjectItemHelper();
                 var projectItems = projectItemHelper.GetProjectItemsFromSolutionProjects(_dte.Solution.Projects);
 
@@ -129,11 +143,9 @@ namespace VSIXProject5
                 CSharpIndexer csIndexer = new CSharpIndexer();
                 XmlIndexer xmlIndexer = new XmlIndexer();
 
-                var xmlIndexerResult = xmlIndexer.BuildIndexer(simpleSolutionItems.Where(e=>!e.IsCSharpFile).ToList());
+                var xmlIndexerResult = xmlIndexer.BuildIndexer(simpleSolutionItems.Where(e => !e.IsCSharpFile).ToList());
                 Indexer.Build(xmlIndexerResult);
 
-                var codeIndexerResult = await csIndexer.BuildIndexerAsync(simpleSolutionItems.Where(e => e.IsCSharpFile).ToList());     
-                Indexer.Build(codeIndexerResult);
             }
         }
         private SolutionEventsHandler _solutionEventsHandler;
@@ -173,11 +185,12 @@ namespace VSIXProject5
 
             public int OnAfterBackgroundSolutionLoadComplete()
             {
+                _package.HandleSolutionEventAsync(1);
                 var componentModel2 = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
                 var workspace = componentModel2.GetService<VisualStudioWorkspace>();
                 if (workspace.CurrentSolution.FilePath != null)
                 {
-                    _package.HandleSolutionEventAsync(1);
+                    //_package.HandleSolutionEventAsync(1);
                 }
                 else
                 {
@@ -193,16 +206,16 @@ namespace VSIXProject5
                         //2)Unable to get Semantic Model in CSharp indexer.
                         //Workaround is to wait till workspace change, and than call indexer.
                         //Ugly as my mother, posible 2nd workaround is to work with build.
-                        EventHandler<WorkspaceChangeEventArgs> workspaceEventHandler = null;
-                        workspaceEventHandler = (object sender, WorkspaceChangeEventArgs e) =>
-                        {
-                            var changedWorkspace = componentModel2.GetService<VisualStudioWorkspace>();
-                            if (changedWorkspace.CurrentSolution.FilePath != null)
-                            {
-                                _package.HandleSolutionEventAsync(1);
-                                workspace.WorkspaceChanged -= workspaceEventHandler;
-                            }
-                        };
+                        //EventHandler<WorkspaceChangeEventArgs> workspaceEventHandler = null;
+                        //workspaceEventHandler = (object sender, WorkspaceChangeEventArgs e) =>
+                        //{
+                        //    var changedWorkspace = componentModel2.GetService<VisualStudioWorkspace>();
+                        //    if (changedWorkspace.CurrentSolution.FilePath != null)
+                        //    {
+                        //        _package.HandleSolutionEventAsync(1);
+                        //        workspace.WorkspaceChanged -= workspaceEventHandler;
+                        //    }
+                        //};
                     }
                 }
                 return 1;

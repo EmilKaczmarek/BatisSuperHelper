@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.LanguageServices;
 using Microsoft.VisualStudio.Shell;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -21,8 +22,8 @@ namespace VSIXProject5.Indexers
         private readonly Workspace _workspace;
         public CSharpIndexer()
         {
-            var componentModel = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
-            _workspace = componentModel.GetService<VisualStudioWorkspace>();
+            //var componentModel = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
+            //_workspace = componentModel.GetService<VisualStudioWorkspace>();
         }
         public CSharpIndexer(Workspace workspace)
         {
@@ -31,11 +32,25 @@ namespace VSIXProject5.Indexers
 
         public async Task<List<CSharpIndexerResult>> BuildFromFileAsync(SimpleProjectItem fileInfo)
         {
-            var documentid = _workspace.CurrentSolution.GetDocumentIdsWithFilePath(fileInfo.FilePath).FirstOrDefault();
+            //var documentid = _workspace.CurrentSolution.GetDocumentIdsWithFilePath(fileInfo.FilePath).FirstOrDefault();
 
-            var docc = _workspace.CurrentSolution.GetDocument(documentid);
+            var docc = _workspace.CurrentSolution.GetDocument(fileInfo.RoslynDocument.Id);
 
-            return await BuildFromDocumentAsync(docc, fileInfo);
+            return await BuildFromDocumentAsync(docc);
+        }
+
+        public async Task<List<CSharpIndexerResult>> BuildIndexerAsync(List<Document> documents)
+        {
+            var result = new List<CSharpIndexerResult>();
+
+            foreach (var document in documents)
+            {
+                Debug.WriteLine($"Adding {document.FilePath}");
+                result.AddRange(await BuildFromDocumentAsync(document));
+                Debug.WriteLine($"Added {document.FilePath}");
+            }
+
+            return result;
         }
 
         public async Task<List<CSharpIndexerResult>> BuildIndexerAsync(List<SimpleProjectItem> simpleProjectItems)
@@ -44,19 +59,23 @@ namespace VSIXProject5.Indexers
 
             foreach (var simpleProjectItem in simpleProjectItems)
             {
+                Debug.WriteLine($"Adding {simpleProjectItem.FilePath}");
                 result.AddRange(await BuildFromFileAsync(simpleProjectItem));
+                Debug.WriteLine($"Added {simpleProjectItem.FilePath}");
             }
 
             return result;
         }
 
-        public async Task<List<CSharpIndexerResult>> BuildFromDocumentAsync(Document document, SimpleProjectItem fileInfo)
+        public async Task<List<CSharpIndexerResult>> BuildFromDocumentAsync(Document document)
         {
+            SemanticModel semModel2;
+            var result = document.TryGetSemanticModel(out semModel2);
             SemanticModel semModel = await document.GetSemanticModelAsync();
-            return Build(semModel, document, fileInfo);
+            return Build(semModel, document);
         }
 
-        private List<CSharpIndexerResult> Build(SemanticModel semModel, Document document, SimpleProjectItem fileInfo)
+        private List<CSharpIndexerResult> Build(SemanticModel semModel, Document document)
         {
             var helper = new NodeHelpers(semModel);
             var result = new List<CSharpIndexerResult>();
@@ -83,11 +102,11 @@ namespace VSIXProject5.Indexers
                         IndexerKey key = IndexerKey.ConvertToKey(argumentNode.Arguments.FirstOrDefault().ToCleanString(), document.Project.Name);
                         result.Add(new CSharpIndexerResult
                         {
-                            QueryFileName = Path.GetFileName(fileInfo.FilePath),
+                            QueryFileName = Path.GetFileName(document.FilePath),
                             QueryId = argumentNode.Arguments.FirstOrDefault().ToCleanString(),
                             QueryLineNumber = loc.GetLineSpan().StartLinePosition.Line + 1,
                             QueryVsProjectName = document.Project.Name,
-                            QueryFilePath = fileInfo.FilePath,
+                            QueryFilePath = document.FilePath,
                         });
                     }
                 }

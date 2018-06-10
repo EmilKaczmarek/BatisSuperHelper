@@ -74,9 +74,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="EventHandlers\VSSolutionEventsHandler.cs" />
+    <Compile Include="EventHandlers\WorkspaceEvents.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="HelpersAndExtensions\IBatisHelper.cs" />
     <Compile Include="HelpersAndExtensions\Roslyn\ArgumentSyntaxExtension.cs" />
+    <Compile Include="HelpersAndExtensions\Roslyn\RoslynSolutionExtension.cs" />
     <Compile Include="HelpersAndExtensions\VisualStudio\ProjectItemHelper.cs" />
     <Compile Include="HelpersAndExtensions\VisualStudio\TextDocumentExtension.cs" />
     <Compile Include="HelpersAndExtensions\VisualStudio\TextSelectionExtension.cs" />
