@@ -342,7 +342,12 @@ namespace VSIXProject5
                 }
 
                 var node = xElements.FirstOrDefault(x => ((IXmlLineInfo)x).LineNumber == elementLocation);
-                var queryName = node.Attributes().FirstOrDefault(x => x.Name.LocalName == IBatisConstants.StatmentIdAttributeName).Value;
+                var idAtribute = node.Attributes().FirstOrDefault(x => x.Name.LocalName == IBatisConstants.StatmentIdAttributeName);
+                string queryName = "";
+                if (idAtribute == null)
+                    return;
+                
+                queryName = idAtribute.Value;
 
                 var statmentsKeys = Indexer.GetCodeKeysByQueryId(queryName);
                 ToolWindowPane window = package.FindToolWindow(typeof(ResultWindow), 0, true);
