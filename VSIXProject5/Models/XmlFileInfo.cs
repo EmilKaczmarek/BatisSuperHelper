@@ -7,11 +7,9 @@ using System.Threading.Tasks;
 
 namespace VSIXProject5.Models
 {
-    public class SimpleProjectItem
+    public class XmlFileInfo
     {
         public string FilePath { get; set; }
         public string ProjectName { get; set; }
-        public bool IsCSharpFile { get; set;}
-        public Document RoslynDocument { get; set; }
     }
 }

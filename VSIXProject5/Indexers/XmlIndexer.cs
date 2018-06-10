@@ -54,10 +54,10 @@ namespace VSIXProject5.Indexers
                 return BuildUsingReader(reader, filePath);
             }
         }
-        public List<XmlIndexerResult> BuildIndexer(List<SimpleProjectItem> solutionXmlDocuments)
+        public List<XmlIndexerResult> BuildIndexer(List<XmlFileInfo> solutionXmlDocuments)
         {
             var result = new List<XmlIndexerResult>();
-            List<SimpleProjectItem> sqlMapsFilesCollection = new List<SimpleProjectItem>();
+            List<XmlFileInfo> sqlMapsFilesCollection = new List<XmlFileInfo>();
             foreach (var xmlSolutionDocument in solutionXmlDocuments)
             {
                 XDocument xdoc = null;

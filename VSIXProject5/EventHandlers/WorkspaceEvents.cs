@@ -10,8 +10,7 @@ using VSIXProject5.Indexers;
 namespace VSIXProject5.Events
 {
     public class WorkspaceEvents
-    {
-        
+    {   
         private static async void BuildIndexerWithCSharpResults(Solution solution)
         {
             var solutionFiles = solution.Projects.SelectMany(x => x.Documents).ToList();
@@ -19,8 +18,26 @@ namespace VSIXProject5.Events
             var codeIndexerResult = await csIndexer.BuildIndexerAsync(solutionFiles);
             Indexer.Build(codeIndexerResult);
         }
+        private static async void DocumentsAddedAction(IEnumerable<Document> addedDocuments)
+        {
+            CSharpIndexer csIndexer = new CSharpIndexer();
+
+            foreach (var document in addedDocuments)
+            {
+                var documentIndexerResult = await csIndexer.BuildFromDocumentAsync(document);
+                Indexer.Build(documentIndexerResult);
+            }
+        }
+        private static async void DocumentRemovedAction(IEnumerable<DocumentId> removedDocumentsIds)
+        {
+            foreach(var documentId in removedDocumentsIds)
+            {
+                Indexer.RemoveCodeStatmentsForDocumentId(documentId);
+            }
+        }
         public static void WorkspaceChanged(object sender, WorkspaceChangeEventArgs e)
         {
+            var workspace = sender as VisualStudioWorkspace;
             switch (e.Kind)
             {
                 case WorkspaceChangeKind.SolutionAdded:
@@ -43,12 +60,25 @@ namespace VSIXProject5.Events
                 case WorkspaceChangeKind.ProjectReloaded:
                     break;
                 case WorkspaceChangeKind.DocumentAdded:
+                    var documentAddedChanges = e.NewSolution.GetChanges(e.OldSolution);
+                    var addedDocuments = documentAddedChanges.GetProjectChanges()
+                        .SelectMany(x => x.GetAddedDocuments())
+                        .Select(x => workspace.CurrentSolution.GetDocument(x));
+                    DocumentsAddedAction(addedDocuments);
                     break;
                 case WorkspaceChangeKind.DocumentRemoved:
+                    var documentRemovedChanges = e.NewSolution.GetChanges(e.OldSolution);
+                    var removedDocuments = documentRemovedChanges.GetProjectChanges()
+                        .SelectMany(x => x.GetRemovedDocuments());
+                    DocumentRemovedAction(removedDocuments);
                     break;
                 case WorkspaceChangeKind.DocumentReloaded:
                     break;
                 case WorkspaceChangeKind.DocumentChanged:
+                    var changes3 = e.NewSolution.GetChanges(e.OldSolution);
+                    var t12 = documentAddedChanges.GetAddedProjects();
+                    var t22 = documentAddedChanges.GetProjectChanges();
+                    var t32 = documentAddedChanges.GetRemovedProjects();
                     break;
                 case WorkspaceChangeKind.AdditionalDocumentAdded:
                     break;

@@ -30,14 +30,14 @@ namespace VSIXProject5.Indexers
             _workspace = workspace;
         }
 
-        public async Task<List<CSharpIndexerResult>> BuildFromFileAsync(SimpleProjectItem fileInfo)
-        {
-            //var documentid = _workspace.CurrentSolution.GetDocumentIdsWithFilePath(fileInfo.FilePath).FirstOrDefault();
+        //public async Task<List<CSharpIndexerResult>> BuildFromFileAsync(XmlFileInfo fileInfo)
+        //{
+        //    //var documentid = _workspace.CurrentSolution.GetDocumentIdsWithFilePath(fileInfo.FilePath).FirstOrDefault();
 
-            var docc = _workspace.CurrentSolution.GetDocument(fileInfo.RoslynDocument.Id);
+        //    var docc = _workspace.CurrentSolution.GetDocument(fileInfo.RoslynDocument.Id);
 
-            return await BuildFromDocumentAsync(docc);
-        }
+        //    return await BuildFromDocumentAsync(docc);
+        //}
 
         public async Task<List<CSharpIndexerResult>> BuildIndexerAsync(List<Document> documents)
         {
@@ -53,19 +53,19 @@ namespace VSIXProject5.Indexers
             return result;
         }
 
-        public async Task<List<CSharpIndexerResult>> BuildIndexerAsync(List<SimpleProjectItem> simpleProjectItems)
-        {
-            var result = new List<CSharpIndexerResult>();
+        //public async Task<List<CSharpIndexerResult>> BuildIndexerAsync(List<XmlFileInfo> simpleProjectItems)
+        //{
+        //    var result = new List<CSharpIndexerResult>();
 
-            foreach (var simpleProjectItem in simpleProjectItems)
-            {
-                Debug.WriteLine($"Adding {simpleProjectItem.FilePath}");
-                result.AddRange(await BuildFromFileAsync(simpleProjectItem));
-                Debug.WriteLine($"Added {simpleProjectItem.FilePath}");
-            }
+        //    foreach (var simpleProjectItem in simpleProjectItems)
+        //    {
+        //        Debug.WriteLine($"Adding {simpleProjectItem.FilePath}");
+        //        result.AddRange(await BuildFromFileAsync(simpleProjectItem));
+        //        Debug.WriteLine($"Added {simpleProjectItem.FilePath}");
+        //    }
 
-            return result;
-        }
+        //    return result;
+        //}
 
         public async Task<List<CSharpIndexerResult>> BuildFromDocumentAsync(Document document)
         {
@@ -107,6 +107,7 @@ namespace VSIXProject5.Indexers
                             QueryLineNumber = loc.GetLineSpan().StartLinePosition.Line + 1,
                             QueryVsProjectName = document.Project.Name,
                             QueryFilePath = document.FilePath,
+                            DocumentId = document.Id,
                         });
                     }
                 }

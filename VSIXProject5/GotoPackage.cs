@@ -6,22 +6,21 @@
 
 using EnvDTE;
 using EnvDTE80;
-using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.LanguageServices;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using VSIXProject5.Constants;
 using VSIXProject5.Events;
 using VSIXProject5.Helpers;
 using VSIXProject5.Indexers;
+using static VSIXProject5.Events.VSSolutionEventsHandler;
 
 namespace VSIXProject5
 {
@@ -74,6 +73,7 @@ namespace VSIXProject5
         private IVsSolution _solution;
         private uint _solutionEventsCookie;
         public DTE2 _dte;
+        private SolutionEventsHandler _solutionEventsHandler;
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
         /// where you can put all the initialization code that rely on services provided by VisualStudio.
@@ -86,198 +86,35 @@ namespace VSIXProject5
             BatisSHelperTestConsoleCommand.Initialize(this);
             ResultWindowCommand.Initialize(this);
 
-            _solution = base.GetService(typeof(SVsSolution)) as IVsSolution;
-            _solutionEventsHandler = new SolutionEventsHandler(this);
+
             _dte = base.GetService(typeof(DTE)) as DTE2;
-            _solution.AdviseSolutionEvents(_solutionEventsHandler, out _solutionEventsCookie);
 
-            var componentModel2 = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
-            var workspace = componentModel2.GetService<VisualStudioWorkspace>();
+             var componentModel2 = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
+             var workspace = componentModel2.GetService<VisualStudioWorkspace>();
             workspace.WorkspaceChanged += WorkspaceEvents.WorkspaceChanged;
+
+            _solution = base.GetService(typeof(SVsSolution)) as IVsSolution;
+            _solutionEventsHandler = new SolutionEventsHandler(
+                new Action<EventConstats.VS.SolutionLoad>(HandleSolutionEvent)
+            );      
+            _solution.AdviseSolutionEvents(_solutionEventsHandler, out _solutionEventsCookie);
         }
 
-        private void Workspace_WorkspaceChanged(object sender, Microsoft.CodeAnalysis.WorkspaceChangeEventArgs e)
-        {
-            var componentModel2 = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
-            var workspace = componentModel2.GetService<VisualStudioWorkspace>();
-            var kind = e.Kind;
-            if(kind == WorkspaceChangeKind.SolutionAdded)
-            {
-                var projectItemHelper = new ProjectItemHelper();
-                var projectItems = projectItemHelper.GetProjectItemsFromSolutionProjects(_dte.Solution.Projects);
-
-                var simpleSolutionItems = DocumentHelper.GetUsableSimpleProjectItemsFromProjectItemList(projectItems);
-
-                CSharpIndexer csIndexer = new CSharpIndexer();
-                XmlIndexer xmlIndexer = new XmlIndexer();
-
-                var xmlIndexerResult = xmlIndexer.BuildIndexer(simpleSolutionItems.Where(x => !x.IsCSharpFile).ToList());
-                Indexer.Build(xmlIndexerResult);
-
-                var codeIndexerResult = csIndexer.BuildIndexerAsync(simpleSolutionItems.Where(x => x.IsCSharpFile).ToList()).Result;
-                Indexer.Build(codeIndexerResult);
-            }
-        }
- 
-        internal void HandleSolutionEvent(int eventNumber)
-        {
-            if (eventNumber == 2)
-            {
-                Indexer.ClearAll();
-            }
-        }
-
-        internal async void HandleSolutionEventAsync(int eventNumber)
+        internal void HandleSolutionEvent(EventConstats.VS.SolutionLoad eventNumber)
         {
             Debug.WriteLine(eventNumber);
-            if (eventNumber == 1)
+            if (eventNumber == EventConstats.VS.SolutionLoad.SolutionLoadComplete)
             {
-                var componentModel2 = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
-                var workspace = componentModel2.GetService<VisualStudioWorkspace>();
-
                 var projectItemHelper = new ProjectItemHelper();
                 var projectItems = projectItemHelper.GetProjectItemsFromSolutionProjects(_dte.Solution.Projects);
 
-                var simpleSolutionItems = DocumentHelper.GetUsableSimpleProjectItemsFromProjectItemList(projectItems);
-
-                CSharpIndexer csIndexer = new CSharpIndexer();
                 XmlIndexer xmlIndexer = new XmlIndexer();
-
-                var xmlIndexerResult = xmlIndexer.BuildIndexer(simpleSolutionItems.Where(e => !e.IsCSharpFile).ToList());
+                var xmlIndexerResult = xmlIndexer.BuildIndexer(DocumentHelper.GetXmlFiles(projectItems));
                 Indexer.Build(xmlIndexerResult);
-
             }
-        }
-        private SolutionEventsHandler _solutionEventsHandler;
-
-        internal class SolutionEventsHandler : IVsSolutionLoadEvents, IVsSolutionEvents
-        {
-            private readonly GotoPackage _package;
-            internal SolutionEventsHandler(GotoPackage package)
+            if (eventNumber == EventConstats.VS.SolutionLoad.SolutionOnClose)
             {
-                _package = package;
-            }
-            public int OnBeforeOpenSolution(string pszSolutionFilename)
-            {
-                return 0;
-            }
-
-            public int OnBeforeBackgroundSolutionLoadBegins()
-            {
-                return 0;
-            }
-
-            public int OnQueryBackgroundLoadProjectBatch(out bool pfShouldDelayLoadToNextIdle)
-            {
-                pfShouldDelayLoadToNextIdle = false;
-                return 0;
-            }
-
-            public int OnBeforeLoadProjectBatch(bool fIsBackgroundIdleBatch)
-            { 
-                return 0;
-            }
-
-            public int OnAfterLoadProjectBatch(bool fIsBackgroundIdleBatch)
-            {
-                return 0;
-            }
-
-            public int OnAfterBackgroundSolutionLoadComplete()
-            {
-                _package.HandleSolutionEventAsync(1);
-                var componentModel2 = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
-                var workspace = componentModel2.GetService<VisualStudioWorkspace>();
-                if (workspace.CurrentSolution.FilePath != null)
-                {
-                    //_package.HandleSolutionEventAsync(1);
-                }
-                else
-                {
-                    var _dte = Package.GetGlobalService(typeof(DTE)) as DTE2;
-                    var solution = _dte.Solution;
-                    if (solution.Projects.Count > 0)
-                    {
-                        //BUG with workspace.
-                        //Sometimes when project build version is != 15.0
-                        //Even after all projects are loaded, the roslyn workspace doesn't have any solution.
-                        //This is leading to:
-                        //1)Unable to retrieve Document.
-                        //2)Unable to get Semantic Model in CSharp indexer.
-                        //Workaround is to wait till workspace change, and than call indexer.
-                        //Ugly as my mother, posible 2nd workaround is to work with build.
-                        //EventHandler<WorkspaceChangeEventArgs> workspaceEventHandler = null;
-                        //workspaceEventHandler = (object sender, WorkspaceChangeEventArgs e) =>
-                        //{
-                        //    var changedWorkspace = componentModel2.GetService<VisualStudioWorkspace>();
-                        //    if (changedWorkspace.CurrentSolution.FilePath != null)
-                        //    {
-                        //        _package.HandleSolutionEventAsync(1);
-                        //        workspace.WorkspaceChanged -= workspaceEventHandler;
-                        //    }
-                        //};
-                    }
-                }
-                return 1;
-            }
-
-            public int OnAfterOpenProject(IVsHierarchy pHierarchy, int fAdded)
-            {
-                var componentModel2 = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
-                var workspace = componentModel2.GetService<VisualStudioWorkspace>();
-                if (workspace.CurrentSolution.FilePath != null)
-                {
-
-                }
-                var _dte = Package.GetGlobalService(typeof(DTE)) as DTE2;
-                var solution = _dte.Solution;
-                return 0;
-            }
-
-            public int OnQueryCloseProject(IVsHierarchy pHierarchy, int fRemoving, ref int pfCancel)
-            {
-                return 0;
-            }
-
-            public int OnBeforeCloseProject(IVsHierarchy pHierarchy, int fRemoved)
-            {
-                return 0;
-            }
-
-            public int OnAfterLoadProject(IVsHierarchy pStubHierarchy, IVsHierarchy pRealHierarchy)
-            {
-                return 0;
-            }
-
-            public int OnQueryUnloadProject(IVsHierarchy pRealHierarchy, ref int pfCancel)
-            {
-                return 0;
-            }
-
-            public int OnBeforeUnloadProject(IVsHierarchy pRealHierarchy, IVsHierarchy pStubHierarchy)
-            {
-                return 0;
-            }
-
-            public int OnAfterOpenSolution(object pUnkReserved, int fNewSolution)
-            {
-                return 0;
-            }
-
-            public int OnQueryCloseSolution(object pUnkReserved, ref int pfCancel)
-            {
-                _package.HandleSolutionEvent(2);
-                return 1;
-            }
-
-            public int OnBeforeCloseSolution(object pUnkReserved)
-            {
-                return 0;
-            }
-
-            public int OnAfterCloseSolution(object pUnkReserved)
-            {
-                return 0;
+                Indexer.ClearAll();
             }
         }
         #endregion
