@@ -4,17 +4,23 @@
 // </copyright>
 //------------------------------------------------------------------------------
 
-using System;
-using System.ComponentModel.Design;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Runtime.InteropServices;
+using EnvDTE;
+using EnvDTE80;
 using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.OLE.Interop;
+using Microsoft.VisualStudio.ComponentModelHost;
+using Microsoft.VisualStudio.LanguageServices;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.Win32;
+using System;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Runtime.InteropServices;
+using VSIXProject5.Constants;
+using VSIXProject5.Events;
+using VSIXProject5.Helpers;
+using VSIXProject5.Indexers;
+using static VSIXProject5.Events.VSSolutionEventsHandler;
 
 namespace VSIXProject5
 {
@@ -37,17 +43,20 @@ namespace VSIXProject5
     /// </remarks>
     /// 
     [ProvideAutoLoad("{f1536ef8-92ec-443c-9ed7-fdadf150da82}")]
+    [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionExistsAndFullyLoaded_string)]   
     [PackageRegistration(UseManagedResourcesOnly = true)]
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)] // Info on this package for Help/About
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [Guid(GotoPackage.PackageGuidString)]
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
+    [ProvideToolWindow(typeof(BatisSHelperTestConsole))]
+    [ProvideToolWindow(typeof(ResultWindow))]
     public sealed class GotoPackage : Package
     {
         /// <summary>
         /// GotoPackage GUID string.
         /// </summary>
-        public const string PackageGuidString = "6a38185d-6f88-44d9-a7ba-59888f48c3d6";
+        public const string PackageGuidString = "0d0c7a5a-951b-4d78-ab1d-870fa377376f";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Goto"/> class.
@@ -61,7 +70,10 @@ namespace VSIXProject5
         }
 
         #region Package Members
-
+        private IVsSolution _solution;
+        private uint _solutionEventsCookie;
+        public DTE2 _dte;
+        private SolutionEventsHandler _solutionEventsHandler;
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
         /// where you can put all the initialization code that rely on services provided by VisualStudio.
@@ -70,8 +82,41 @@ namespace VSIXProject5
         {
             Goto.Initialize(this);
             base.Initialize();
+
+            BatisSHelperTestConsoleCommand.Initialize(this);
+            ResultWindowCommand.Initialize(this);
+
+
+            _dte = base.GetService(typeof(DTE)) as DTE2;
+
+             var componentModel2 = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
+             var workspace = componentModel2.GetService<VisualStudioWorkspace>();
+            workspace.WorkspaceChanged += WorkspaceEvents.WorkspaceChanged;
+
+            _solution = base.GetService(typeof(SVsSolution)) as IVsSolution;
+            _solutionEventsHandler = new SolutionEventsHandler(
+                new Action<EventConstats.VS.SolutionLoad>(HandleSolutionEvent)
+            );      
+            _solution.AdviseSolutionEvents(_solutionEventsHandler, out _solutionEventsCookie);
         }
 
+        internal void HandleSolutionEvent(EventConstats.VS.SolutionLoad eventNumber)
+        {
+            Debug.WriteLine(eventNumber);
+            if (eventNumber == EventConstats.VS.SolutionLoad.SolutionLoadComplete)
+            {
+                var projectItemHelper = new ProjectItemHelper();
+                var projectItems = projectItemHelper.GetProjectItemsFromSolutionProjects(_dte.Solution.Projects);
+
+                XmlIndexer xmlIndexer = new XmlIndexer();
+                var xmlIndexerResult = xmlIndexer.BuildIndexer(DocumentHelper.GetXmlFiles(projectItems));
+                Indexer.Build(xmlIndexerResult);
+            }
+            if (eventNumber == EventConstats.VS.SolutionLoad.SolutionOnClose)
+            {
+                Indexer.ClearAll();
+            }
+        }
         #endregion
     }
 }
