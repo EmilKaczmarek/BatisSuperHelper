@@ -99,7 +99,14 @@
       <Bitmap guid="guidImages3" href="Resources\ResultWindowCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough" />
     </Bitmaps>
   </Commands>
-
+  
+  <KeyBindings>
+    <KeyBinding guid="guidCommand1PackageCmdSet"
+                    id="GoToId"
+                    editor="guidVSStd97"
+                    key1="x" mod1="Control" mod2="Shift" />
+  </KeyBindings>
+  
   <Symbols>
     <!-- This is the package guid. -->
     <GuidSymbol name="guidCommand1Package" value="{0d0c7a5a-951b-4d78-ab1d-870fa377376f}" />
