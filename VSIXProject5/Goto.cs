@@ -141,32 +141,33 @@ namespace VSIXProject5
         private void _projectItemEvents2_ItemRemoved(ProjectItem ProjectItem)
         {
             string fileName = ProjectItem.Name;
-            Indexer.RemoveStatmentsForFile(fileName, Path.GetExtension(fileName)==".cs");
+            Indexer.RemoveStatmentsForFile(fileName, false);
         }
 
         private void _projectItemEvents2_ItemAdded(ProjectItem ProjectItem)
         {
-            EnvDTE.Document newDocument = ProjectItem.GetDocumentOrDefault();
             string projectItemExtension = Path.GetExtension(ProjectItem.Name);
-            
-            if (projectItemExtension == ".cs")
-            {
-                string projectItemPath = ProjectItem.FileNames[0];
-                CSharpIndexer csIndexer = new CSharpIndexer();
-                SimpleProjectItem simpleProjectItem = new SimpleProjectItem
-                {
-                    FilePath = projectItemPath,
-                    ProjectName = ProjectItem.ContainingProject.Name
-                };
-                var buildTask = csIndexer.BuildFromFileAsync(simpleProjectItem);
-                Indexer.Build(buildTask.Result);
-            }
-            else if(projectItemExtension == ".xml")
+            if (projectItemExtension == ".xml")
             {
                 XmlIndexer indexerInstance = new XmlIndexer();
-                var xmlIndexer = indexerInstance.BuildUsingFilePath(newDocument.FullName);
+                var xmlIndexer = indexerInstance.BuildUsingFilePath(ProjectItem.FileNames[0]);
                 Indexer.Build(xmlIndexer);
             }
+
+            //Adding code document is handled by Workspace
+            //if (projectItemExtension == ".cs")
+            //{
+            //    string projectItemPath = ProjectItem.FileNames[0];
+            //    CSharpIndexer csIndexer = new CSharpIndexer();
+            //    XmlFileInfo simpleProjectItem = new XmlFileInfo
+            //    {
+            //        FilePath = projectItemPath,
+            //        ProjectName = ProjectItem.ContainingProject.Name
+            //    };
+            //    //var buildTask = csIndexer.BuildFromFileAsync(simpleProjectItem);
+            //    //Indexer.Build(buildTask.Result);
+            //}
+
         }
 
         private EnvDTE.TextDocument EditedDocument;
@@ -198,12 +199,6 @@ namespace VSIXProject5
                     var componentService = _componentModel.GetService<IVsEditorAdaptersFactoryService>().GetWpfTextView(textView);
                     SnapshotPoint caretPosition = componentService.Caret.Position.BufferPosition;
                     Microsoft.CodeAnalysis.Document roslynDocument = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
-                   
-                    var simpleProjectItem = new SimpleProjectItem {
-                        FilePath = EditedDocument.Parent.FullName,
-                        ProjectName = EditedDocument.Parent.ProjectItem.ContainingProject.Name,
-                        IsCSharpFile = true,
-                    };
 
                     var csIndexer = new CSharpIndexer().BuildFromDocumentAsync(roslynDocument).Result;
                     Indexer.UpdateCodeStatmentForFile(csIndexer);  

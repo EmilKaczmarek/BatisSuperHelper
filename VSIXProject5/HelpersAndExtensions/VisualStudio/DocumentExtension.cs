@@ -65,71 +65,85 @@ namespace VSIXProject5.Helpers
         /// </summary>
         /// <param name="projectItem"></param>
         /// <returns></returns>
-        public static List<SimpleProjectItem> GetSimpleProjectItemFromProjectItemNested(this ProjectItem projectItem)
-        {
-            List<SimpleProjectItem> simpleProjectItemsForProjectItem = new List<SimpleProjectItem>();
+        //public static List<XmlFileInfo> Get2SimpleProjectItemFromProjectItemNested(this ProjectItem projectItem)
+        //{
+        //    List<XmlFileInfo> simpleProjectItemsForProjectItem = new List<XmlFileInfo>();
             
-            try
-            {
-                var projectItemsFileCount = projectItem.FileCount;
-                var projectName = projectItem.ContainingProject.Name;
-                for (int i = 0; i < projectItemsFileCount; i++)
-                {
-                    try
-                    {
-                        var filePath = projectItem.FileNames[(short)i];
-                        SimpleProjectItem simpleProjectItem = new SimpleProjectItem
-                        {
-                            FilePath = filePath,
-                            ProjectName = projectName,
-                            IsCSharpFile = Path.GetExtension(filePath) == ".cs",
-                        };
-                        simpleProjectItemsForProjectItem.Add(simpleProjectItem);
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine(ex.Message);
-                    }
-                }
-            }
-            catch (COMException comException)
-            {
-                Debug.WriteLine(comException.Message);
-            }
-            return simpleProjectItemsForProjectItem;
-        }
+        //    try
+        //    {
+        //        var projectItemsFileCount = projectItem.FileCount;
+        //        var projectName = projectItem.ContainingProject.Name;
+        //        for (int i = 0; i < projectItemsFileCount; i++)
+        //        {
+        //            try
+        //            {
+        //                var filePath = projectItem.FileNames[(short)i];
+        //                Debug.WriteLine(filePath + " " + projectItem.Kind);
+        //                XmlFileInfo simpleProjectItem = new XmlFileInfo
+        //                {
+        //                    FilePath = filePath,
+        //                    ProjectName = projectName,
+        //                    IsCSharpFile = Path.GetExtension(filePath) == ".cs",
+        //                };
+        //                simpleProjectItemsForProjectItem.Add(simpleProjectItem);
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                Debug.WriteLine(ex.Message);
+        //            }
+        //        }
+        //    }
+        //    catch (COMException comException)
+        //    {
+        //        Debug.WriteLine(comException.Message);
+        //    }
+        //    return simpleProjectItemsForProjectItem;
+        //}
         /// <summary>
         /// Get Simple Project Item List for list of ProjectItems(nested and non nested)
         /// </summary>
         /// <param name="projectItems"></param>
         /// <returns></returns>
-        public static List<SimpleProjectItem> GetUsableSimpleProjectItemsFromProjectItemList(List<ProjectItem> projectItems)
+        //public static List<XmlFileInfo> GetUsableSimpleProjectItemsFromProjectItemList(List<ProjectItem> projectItems)
+        //{
+        //    List<XmlFileInfo> simpleProjectItems = new List<XmlFileInfo>();
+
+        //    foreach (var projectItem in projectItems)
+        //    {
+        //        if(projectItem.FileCount > 1)
+        //        {
+        //            Document document = projectItem.GetUsableDocumentFromProjectItemNonNested();
+
+        //            if (document != null && document.Language == "CSharp")
+        //            {
+        //                XmlFileInfo simpleProjectItem = new XmlFileInfo
+        //                {
+        //                    FilePath = (string)projectItem.Properties.Item("FullPath").Value,
+        //                    ProjectName = projectItem.ContainingProject.Name,
+        //                    IsCSharpFile = true,
+        //                };
+        //                simpleProjectItems.Add(simpleProjectItem);
+        //            }
+        //        }
+        //        else
+        //        {
+        //            simpleProjectItems.AddRange(projectItem.GetSimpleProjectItemFromProjectItemNested());
+        //        }
+        //    }
+        //    return simpleProjectItems;
+        //}
+
+        public static List<XmlFileInfo> GetXmlFiles(List<ProjectItem> projectItems)
         {
-            List<SimpleProjectItem> simpleProjectItems = new List<SimpleProjectItem>();
-
-            foreach (var projectItem in projectItems)
-            {
-                if(projectItem.FileCount > 1)
+            return projectItems
+                .Where(x => x.FileCount == 1)
+                .Where(x => Path.GetExtension(x.FileNames[0]).Equals(".xml", StringComparison.CurrentCultureIgnoreCase))
+                .Select(x => new XmlFileInfo
                 {
-                    Document document = projectItem.GetUsableDocumentFromProjectItemNonNested();
-
-                    if (document != null && document.Language == "CSharp")
-                    {
-                        SimpleProjectItem simpleProjectItem = new SimpleProjectItem
-                        {
-                            FilePath = (string)projectItem.Properties.Item("FullPath").Value,
-                            ProjectName = projectItem.ContainingProject.Name,
-                            IsCSharpFile = true,
-                        };
-                        simpleProjectItems.Add(simpleProjectItem);
-                    }
-                }
-                else
-                {
-                    simpleProjectItems.AddRange(projectItem.GetSimpleProjectItemFromProjectItemNested());
-                }
-            }
-            return simpleProjectItems;
+                    FilePath = (string)x.Properties.Item("FullPath").Value,
+                    ProjectName = x.ContainingProject.Name,
+                })
+                .ToList();
         }
     }
 }

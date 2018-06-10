@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ namespace VSIXProject5.Indexers.Models
 {
     public class CSharpIndexerResult : BaseIndexerValue
     {
+        public DocumentId DocumentId { get; set; }
         public int HashCode
         {
             get

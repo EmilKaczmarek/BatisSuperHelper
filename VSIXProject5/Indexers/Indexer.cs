@@ -1,4 +1,5 @@
 ﻿using EnvDTE;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -202,6 +203,29 @@ namespace VSIXProject5.Indexers
             else if (typeof(T) == typeof(CSharpIndexerResult))
             {
                 RemoveCodeStatment(item as CSharpIndexerResult);
+            }
+        }
+        public static void RemoveCodeStatmentsForDocumentId(DocumentId documentId)
+        {
+            codeStatments.Values.Select(x => x);
+            List<int> hashCodes = codeStatments.Values.SelectMany(
+                x => x
+                .Where(e => e.DocumentId.Equals(documentId))
+                .Select(statment => statment.HashCode))
+                .ToList();
+            foreach (var hashCode in hashCodes)
+            {
+                var singleStatment = codeStatments.FirstOrDefault(x => x.Value.Any(e => e.HashCode == hashCode));
+                var oneOfListStatment = codeStatments[singleStatment.Key];
+                if (singleStatment.Value.Count < 2)
+                {
+                    codeStatments.Remove(singleStatment.Key);
+                }
+                else
+                {
+                    oneOfListStatment.RemoveAll(e => e.HashCode == hashCode);
+                    codeStatments[singleStatment.Key] = oneOfListStatment;
+                }
             }
         }
         public static void RemoveCodeStatmentsForFile(string filePath)
