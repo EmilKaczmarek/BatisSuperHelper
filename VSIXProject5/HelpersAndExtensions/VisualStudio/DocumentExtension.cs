@@ -135,15 +135,34 @@ namespace VSIXProject5.Helpers
 
         public static List<XmlFileInfo> GetXmlFiles(List<ProjectItem> projectItems)
         {
-            return projectItems
+            var xmlFilesList = new List<XmlFileInfo>();
+            var filteredProjectItems = projectItems
+                .Where(x => x.Kind == EnvDTE.Constants.vsProjectItemKindPhysicalFile)
                 .Where(x => x.FileCount == 1)
-                .Where(x => Path.GetExtension(x.FileNames[0]).Equals(".xml", StringComparison.CurrentCultureIgnoreCase))
-                .Select(x => new XmlFileInfo
-                {
-                    FilePath = (string)x.Properties.Item("FullPath").Value,
-                    ProjectName = x.ContainingProject.Name,
-                })
                 .ToList();
+            foreach (var item in filteredProjectItems)
+            {
+                string fileName = null;
+                try
+                {
+                    fileName = item.FileNames[0];
+                    if (Path.GetExtension(fileName).Equals(".xml", StringComparison.CurrentCultureIgnoreCase))
+                        xmlFilesList.Add(new XmlFileInfo
+                        {
+                            FilePath = (string)item.Properties.Item("FullPath").Value,
+                            ProjectName = item.ContainingProject.Name,
+                        });
+                }
+                catch (ArgumentException ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                }
+                catch(Exception ex)
+                {
+                    System.Diagnostics.Debugger.Break();
+                }
+            }
+            return xmlFilesList;
         }
     }
 }
