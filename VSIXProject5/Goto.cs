@@ -45,7 +45,7 @@ namespace VSIXProject5
             {
                 throw new ArgumentNullException(nameof(package));
             }
-
+            
             this.package = package;
  
             _commandActions = new GoToQueryActions(this.package as GotoPackage);
@@ -60,10 +60,12 @@ namespace VSIXProject5
                     menuCommandID, 
                     "Go to Query");
 
+                menuItem.Enabled = false;//Disable till indexers finished
+
                 commandService.AddCommand(menuItem);
             }           
         }
-
+       
         /// <summary>
         /// Gets the instance of the command.
         /// </summary>

@@ -193,11 +193,18 @@ namespace VSIXProject5
             switch (eventNumber)
             {
                 case EventConstats.VS.SolutionLoad.SolutionLoadComplete:
+                    Debug.WriteLine("Solution loaded event Start");
                     var projectItemHelper = new ProjectItemHelper();
                     var projectItems = projectItemHelper.GetProjectItemsFromSolutionProjects(EnvDTE.Solution.Projects);
+                    Debug.WriteLine($"Found {projectItems.Count} items.\n {string.Join("\n", projectItems.Select(e => e.Name).ToList())}");
                     XmlIndexer xmlIndexer = new XmlIndexer();
-                    var xmlIndexerResult = xmlIndexer.BuildIndexer(DocumentHelper.GetXmlFiles(projectItems));
+                    var xmlFiles = DocumentHelper.GetXmlFiles(projectItems);
+                    Debug.Write(xmlFiles);
+                    Debug.WriteLine($"Xml Files: {xmlFiles.Count}.\n {string.Join("\n", xmlFiles.Select(e=>e.FilePath))}");
+                    var xmlIndexerResult = xmlIndexer.BuildIndexer(xmlFiles);
                     Indexer.Build(xmlIndexerResult);
+                    IndexersProcessStatus.XmlIndexerFinished = true;
+                    Debug.WriteLine("Solution loaded event Start");
                     break;
                 case EventConstats.VS.SolutionLoad.SolutionOnClose:
                     Indexer.ClearAll();

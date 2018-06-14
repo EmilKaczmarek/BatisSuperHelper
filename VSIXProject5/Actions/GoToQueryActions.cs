@@ -47,6 +47,11 @@ namespace VSIXProject5.Actions
         public override void BeforeQuery(object sender, EventArgs e)
         {
             OleMenuCommand menuCommand = sender as OleMenuCommand;
+            if(IndexersProcessStatus.CodeIndexerFinished && IndexersProcessStatus.XmlIndexerFinished)
+            {
+                menuCommand.Enabled = true;
+                return;
+            }
             string activeDocumentLanguage = _envDTE.ActiveDocument.Language;
             if (activeDocumentLanguage == "CSharp")
             {

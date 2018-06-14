@@ -42,6 +42,7 @@ namespace VSIXProject5.Events
             {
                 case WorkspaceChangeKind.SolutionAdded:
                     BuildIndexerWithCSharpResults(e.NewSolution);
+                    IndexersProcessStatus.CodeIndexerFinished = true;
                     break;
                 case WorkspaceChangeKind.SolutionChanged:
                     break;

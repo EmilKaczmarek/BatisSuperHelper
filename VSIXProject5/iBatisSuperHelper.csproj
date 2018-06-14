@@ -88,6 +88,7 @@
     <Compile Include="HelpersAndExtensions\VisualStudio\TextDocumentExtension.cs" />
     <Compile Include="HelpersAndExtensions\VisualStudio\TextSelectionExtension.cs" />
     <Compile Include="HelpersAndExtensions\XmlHelper.cs" />
+    <Compile Include="Indexers\IndexersProcessStatus.cs" />
     <Compile Include="Models\XmlFileInfo.cs" />
     <Compile Include="VSIntegration\Navigation\DocumentNavigation.cs" />
     <Compile Include="VSIntegration\Navigation\DocumentNavigationInstance.cs" />
