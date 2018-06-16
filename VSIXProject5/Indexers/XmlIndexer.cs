@@ -50,7 +50,8 @@ namespace VSIXProject5.Indexers
         }
         public List<XmlIndexerResult> BuildFromXDocString(string fileContent, string filePath)
         {
-            using (var reader = new XmlTextReader(new StringReader(fileContent))){
+            using (var reader = new XmlTextReader(new StringReader(fileContent)))
+            {
                 return BuildUsingReader(reader, filePath);
             }
         }
