@@ -30,15 +30,6 @@ namespace VSIXProject5.Indexers
             _workspace = workspace;
         }
 
-        //public async Task<List<CSharpIndexerResult>> BuildFromFileAsync(XmlFileInfo fileInfo)
-        //{
-        //    //var documentid = _workspace.CurrentSolution.GetDocumentIdsWithFilePath(fileInfo.FilePath).FirstOrDefault();
-
-        //    var docc = _workspace.CurrentSolution.GetDocument(fileInfo.RoslynDocument.Id);
-
-        //    return await BuildFromDocumentAsync(docc);
-        //}
-
         public async Task<List<CSharpIndexerResult>> BuildIndexerAsync(List<Document> documents)
         {
             var result = new List<CSharpIndexerResult>();
@@ -53,26 +44,29 @@ namespace VSIXProject5.Indexers
             return result;
         }
 
-        //public async Task<List<CSharpIndexerResult>> BuildIndexerAsync(List<XmlFileInfo> simpleProjectItems)
-        //{
-        //    var result = new List<CSharpIndexerResult>();
-
-        //    foreach (var simpleProjectItem in simpleProjectItems)
-        //    {
-        //        Debug.WriteLine($"Adding {simpleProjectItem.FilePath}");
-        //        result.AddRange(await BuildFromFileAsync(simpleProjectItem));
-        //        Debug.WriteLine($"Added {simpleProjectItem.FilePath}");
-        //    }
-
-        //    return result;
-        //}
-
         public async Task<List<CSharpIndexerResult>> BuildFromDocumentAsync(Document document)
         {
             SemanticModel semModel2;
             var result = document.TryGetSemanticModel(out semModel2);
             SemanticModel semModel = await document.GetSemanticModelAsync();
             return Build(semModel, document);
+        }
+
+        public bool HasBatisUsing(CompilationUnitSyntax treeRoot)
+        {
+            var identifiers = treeRoot.Usings.Select(x => x.Name).OfType<IdentifierNameSyntax>().ToList();
+            if (identifiers.Any(e => e.Identifier.ValueText.ToLower().Contains("batis")))
+            {
+                return true;
+            }
+
+            var identifiers2 = treeRoot.Usings.Select(x => x.ToString()).ToList();
+            if (identifiers2.Any(e => e.ToLower().Contains("batis")))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private List<CSharpIndexerResult> Build(SemanticModel semModel, Document document)
@@ -82,6 +76,12 @@ namespace VSIXProject5.Indexers
             SyntaxTree synTree = null;
             document.TryGetSyntaxTree(out synTree);
             var treeRoot = (CompilationUnitSyntax)synTree.GetRoot();
+
+            if (!HasBatisUsing(treeRoot))
+            {
+                return new List<CSharpIndexerResult>();
+            }
+          
             var nodes = treeRoot.DescendantNodesAndSelf();
             var argumentNodes = nodes
                 .OfType<ArgumentListSyntax>()

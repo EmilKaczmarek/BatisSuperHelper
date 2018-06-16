@@ -56,14 +56,14 @@ namespace VSIXProject5
                 menuItem = new OleMenuCommand(
                     new EventHandler(this._commandActions.MenuItemCallback),
                     new EventHandler(this._commandActions.Change),
-                    new EventHandler(this._commandActions.BeforeQuery), 
-                    menuCommandID, 
+                    new EventHandler(this._commandActions.BeforeQuery),
+                    menuCommandID,
                     "Go to Query");
 
                 menuItem.Enabled = false;//Disable till indexers finished
 
                 commandService.AddCommand(menuItem);
-            }           
+            }                     
         }
        
         /// <summary>
