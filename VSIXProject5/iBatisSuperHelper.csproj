@@ -76,6 +76,7 @@
   <ItemGroup>
     <Compile Include="Actions\Abstracts\BaseActions.cs" />
     <Compile Include="Actions\GoToQueryActions.cs" />
+    <Compile Include="Actions\QueryRenameActions.cs" />
     <Compile Include="Constants\EventConstats.cs" />
     <Compile Include="EventHandlers\ProjectItemEvents.cs" />
     <Compile Include="EventHandlers\VSSolutionEventsHandler.cs" />
