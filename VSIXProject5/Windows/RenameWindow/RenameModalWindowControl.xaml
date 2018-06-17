@@ -1,0 +1,41 @@
+﻿<platformUi:DialogWindow x:Class="VSIXProject5.Windows.RenameWindow.RenameModalWindowControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:platformUi="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.14.0"
+             Background="{DynamicResource VsBrush.Window}"
+             Foreground="{DynamicResource VsBrush.WindowText}"
+             WindowStyle="None"
+             WindowStartupLocation="CenterScreen"
+             Width="307.5" 
+             Height="129.5" ShowInTaskbar="False" HasDialogFrame="True" ResizeMode="NoResize"
+             KeyDown="DialogWindow_KeyDown"
+             >
+    <platformUi:DialogWindow.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource VsBrush.Window}"/>
+            <Setter Property="Foreground" Value="{DynamicResource VsBrush.WindowText}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="Black" BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource VsBrush.ButtonHighlight}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </platformUi:DialogWindow.Resources>
+    <Grid Background="{DynamicResource VsBrush.Window}" Height="130" VerticalAlignment="Top">
+        <Button Content="Rename" HorizontalAlignment="Left" Margin="185,100,0,0" VerticalAlignment="Top" Width="50" Height="25" Grid.RowSpan="2" Click="RenameButton_Click"/>
+        <Button Content="Cancel" HorizontalAlignment="Left" Margin="240,100,0,0" VerticalAlignment="Top" Height="25" Width="50" Grid.RowSpan="2" Click="CancelButton_Click"/>
+        <TextBox x:Name="QueryTextBox" Background="{DynamicResource VsBrush.Window}" Foreground="{DynamicResource VsBrush.WindowText}" HorizontalAlignment="Left" Height="37" Margin="10,10,0,0" TextWrapping="Wrap" Text="{Binding QueryText}" VerticalAlignment="Top" Width="280" FontSize="14"/>
+        <CheckBox IsChecked="{Binding IsMethodRenameChecked}" x:Name="RenameMethodCheckBox"  Background="{DynamicResource VsBrush.Window}" Foreground="{DynamicResource VsBrush.WindowText}" Content="Rename method" HorizontalAlignment="Left" Margin="10,62,0,0" VerticalAlignment="Top"/>
+    </Grid>
+</platformUi:DialogWindow>

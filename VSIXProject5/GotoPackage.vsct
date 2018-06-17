@@ -39,6 +39,9 @@
       <Group guid="guidCommand1PackageCmdSet" id="MyMenuGroup" priority="0x0600">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN" />
       </Group>
+      <Group guid="guidGotoPackageCmdSet1" id="MyMenuGroup" priority="0x0600">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS" />
+      </Group>
     </Groups>
 
     <!--Buttons section. -->
@@ -84,6 +87,20 @@
           <ButtonText>ResultWindow</ButtonText>
         </Strings>
       </Button>
+      <Button guid="guidGotoPackageCmdSet" id="cmdidRenameModalWindowCommand" priority="0x0100" type="Button">
+        <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
+        <Icon guid="guidImages4" id="bmpPic1" />
+        <Strings>
+          <ButtonText>RenameModalWindow</ButtonText>
+        </Strings>
+      </Button>
+      <Button guid="guidGotoPackageCmdSet1" id="cmdidRenameCommand" priority="0x0100" type="Button">
+        <Parent guid="guidCommand1PackageCmdSet" id="MyMenuGroup" />
+        <Icon guid="guidImages5" id="bmpPic1" />
+        <Strings>
+          <ButtonText>Rename query</ButtonText>
+        </Strings>
+      </Button>
     </Buttons>
 
     <!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
@@ -97,14 +114,13 @@
       <Bitmap guid="guidImages1" href="Resources\TestWindowCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough" />
       <Bitmap guid="guidImages2" href="Resources\BatisSHelperTestConsoleCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough" />
       <Bitmap guid="guidImages3" href="Resources\ResultWindowCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough" />
+      <Bitmap guid="guidImages4" href="Windows\RenameWindow\Resources\RenameModalWindowCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough" />
+      <Bitmap guid="guidImages5" href="Resources\RenameCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough" />
     </Bitmaps>
   </Commands>
   
   <KeyBindings>
-    <KeyBinding guid="guidCommand1PackageCmdSet"
-                    id="GoToId"
-                    editor="guidVSStd97"
-                    key1="x" mod1="Control" mod2="Shift" />
+    <KeyBinding guid="guidCommand1PackageCmdSet" id="GoToId" editor="guidVSStd97" key1="x" mod1="Control" mod2="Shift" />
   </KeyBindings>
   
   <Symbols>
@@ -115,6 +131,7 @@
     <GuidSymbol name="guidCommand1PackageCmdSet" value="{74b835d6-70a4-4629-9d2c-520ce16236b5}">
       <IDSymbol name="MyMenuGroup" value="0x1020" />
       <IDSymbol name="GoToId" value="0x0100" />
+      <IDSymbol name="cmdidRenameCommand" value="0x0100" />
     </GuidSymbol>
 
     <GuidSymbol name="guidImages" value="{f203d830-7c1e-436c-bdc9-44ef8db344cc}">
@@ -130,6 +147,7 @@
       <IDSymbol value="256" name="cmdidTestWindowCommand" />
       <IDSymbol value="257" name="cmdidBatisSHelperTestConsoleCommand" />
       <IDSymbol value="258" name="cmdidResultWindowCommand" />
+      <IDSymbol value="259" name="cmdidRenameModalWindowCommand" />
     </GuidSymbol>
   
     <GuidSymbol value="{388305b3-d6ef-43db-bb4e-7ba9c20ce84b}" name="guidImages1">
@@ -151,6 +169,38 @@
     </GuidSymbol>
   
     <GuidSymbol value="{6bdf1595-65f8-4720-9067-d3d8c01ebbbf}" name="guidImages3">
+      <IDSymbol name="bmpPic1" value="1" />
+      <IDSymbol name="bmpPic2" value="2" />
+      <IDSymbol name="bmpPicSearch" value="3" />
+      <IDSymbol name="bmpPicX" value="4" />
+      <IDSymbol name="bmpPicArrows" value="5" />
+      <IDSymbol name="bmpPicStrikethrough" value="6" />
+    </GuidSymbol>
+  
+    <GuidSymbol value="{ebed70c4-9b4f-434e-9e29-d9d739419400}" name="guidImages4">
+      <IDSymbol name="bmpPic1" value="1" />
+      <IDSymbol name="bmpPic2" value="2" />
+      <IDSymbol name="bmpPicSearch" value="3" />
+      <IDSymbol name="bmpPicX" value="4" />
+      <IDSymbol name="bmpPicArrows" value="5" />
+      <IDSymbol name="bmpPicStrikethrough" value="6" />
+    </GuidSymbol>
+  
+    <GuidSymbol value="{5c26ab2a-b2b0-47f6-9eb7-6534d0b372f2}" name="guidGotoPackageCmdSet1">
+      <IDSymbol value="4128" name="MyMenuGroup" />
+      <IDSymbol value="256" name="cmdidRenameCommand" />
+    </GuidSymbol>
+  
+    <GuidSymbol value="{5522f03c-90dc-41da-8d77-42afa3170fbc}" name="guidImages5">
+      <IDSymbol name="bmpPic1" value="1" />
+      <IDSymbol name="bmpPic2" value="2" />
+      <IDSymbol name="bmpPicSearch" value="3" />
+      <IDSymbol name="bmpPicX" value="4" />
+      <IDSymbol name="bmpPicArrows" value="5" />
+      <IDSymbol name="bmpPicStrikethrough" value="6" />
+    </GuidSymbol>
+  
+    <GuidSymbol value="{ee547f75-6c29-4331-9a62-ad444220a754}" name="guidImages6">
       <IDSymbol name="bmpPic1" value="1" />
       <IDSymbol name="bmpPic2" value="2" />
       <IDSymbol name="bmpPicSearch" value="3" />
