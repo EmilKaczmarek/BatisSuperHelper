@@ -60,6 +60,7 @@ namespace VSIXProject5
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
     //[ProvideToolWindow(typeof(BatisSHelperTestConsole))]
     [ProvideToolWindow(typeof(ResultWindow))]
+    [ProvideToolWindow(typeof(VSIXProject5.Windows.RenameWindow.RenameModalWindow))]
     public sealed class GotoPackage : Package
     {
         /// <summary>
@@ -143,6 +144,8 @@ namespace VSIXProject5
             _timer.Tick += _timer_Tick;
             //Initialize commands
             Goto.Initialize(this);
+            VSIXProject5.Windows.RenameWindow.RenameModalWindowCommand.Initialize(this);
+            RenameCommand.Initialize(this);
         }
 
         private EnvDTE.TextDocument _editedDocument;
