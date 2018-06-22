@@ -77,10 +77,10 @@ namespace VSIXProject5.Indexers
             document.TryGetSyntaxTree(out synTree);
             var treeRoot = (CompilationUnitSyntax)synTree.GetRoot();
 
-            if (!HasBatisUsing(treeRoot))
-            {
-                return new List<CSharpIndexerResult>();
-            }
+            //if (!HasBatisUsing(treeRoot))
+            //{
+            //    return new List<CSharpIndexerResult>();
+            //}
           
             var nodes = treeRoot.DescendantNodesAndSelf();
             var argumentNodes = nodes
