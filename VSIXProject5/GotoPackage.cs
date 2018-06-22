@@ -22,6 +22,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Timers;
+using System.Xml;
 using System.Xml.Linq;
 using VSIXProject5.Constants;
 using VSIXProject5.EventHandlers;
@@ -163,8 +164,15 @@ namespace VSIXProject5
                 if (docLanguage == "XML")
                 {
                     string documentText = _editedDocument.GetText();
-
-                    var xDoc = XDocument.Parse(documentText);
+                    XDocument xDoc = null;
+                    try
+                    {
+                        xDoc = XDocument.Parse(documentText);
+                    }
+                    catch (Exception ex)
+                    {
+                        return;
+                    }
                     bool isIBatisQueryXmlFile = XDocHelper.GetXDocumentNamespace(xDoc) == IBatisConstants.SqlMapNamespace;
                     if (isIBatisQueryXmlFile)
                     {

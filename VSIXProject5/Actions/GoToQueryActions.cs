@@ -50,7 +50,6 @@ namespace VSIXProject5.Actions
             if(IndexersProcessStatus.CodeIndexerFinished && IndexersProcessStatus.XmlIndexerFinished)
             {
                 menuCommand.Enabled = true;
-                return;
             }
             string activeDocumentLanguage = _envDTE.ActiveDocument.Language;
             if (activeDocumentLanguage == "CSharp")
@@ -99,8 +98,18 @@ namespace VSIXProject5.Actions
                 if (!XmlStringLine.IsIgnored(lineText))
                 {
                     string text = doc.GetText();
-                    var xDoc = XDocument.Parse(text);
-
+                    XDocument xDoc = null;
+                    try
+                    {
+                        xDoc = XDocument.Parse(text);
+                    }
+                    catch(Exception ex)
+                    {
+                        menuCommand.Enabled = false;
+                        menuCommand.Text = "Go to Query execution";
+                        _statusBar.ShowText($"Unable to parse xml document.");
+                        return;
+                    }
                     bool isIBatisQueryXmlFile = XDocHelper.GetXDocumentNamespace(xDoc) == @"http://ibatis.apache.org/mapping";
                     if (isIBatisQueryXmlFile)
                     {
