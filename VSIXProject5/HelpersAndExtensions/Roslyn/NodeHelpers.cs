@@ -8,7 +8,7 @@ namespace VSIXProject5.Helpers
 {
     public class NodeHelpers
     {
-        private readonly SemanticModel _semanticModel;
+        public readonly SemanticModel _semanticModel;
         /// <summary>
         /// Ctor
         /// </summary>
@@ -48,7 +48,7 @@ namespace VSIXProject5.Helpers
         /// </summary>
         /// <param name="SyntaxNodes"></param>
         /// <returns></returns>
-        private IEnumerable<ArgumentListSyntax> GetArgumentListSyntaxFromSyntaxNodesWhereArgumentsAreNotEmpty(IEnumerable<SyntaxNode> SyntaxNodes)
+        public IEnumerable<ArgumentListSyntax> GetArgumentListSyntaxFromSyntaxNodesWhereArgumentsAreNotEmpty(IEnumerable<SyntaxNode> SyntaxNodes)
         {
             return SyntaxNodes
                 .OfType<ArgumentListSyntax>()
@@ -59,7 +59,7 @@ namespace VSIXProject5.Helpers
         /// </summary>
         /// <param name="ArgumentListSyntaxNodes"></param>
         /// <returns></returns>
-        private ArgumentListSyntax GetProperArgumentSyntaxNode(IEnumerable<ArgumentListSyntax> ArgumentListSyntaxNodes)
+        public ArgumentListSyntax GetProperArgumentSyntaxNode(IEnumerable<ArgumentListSyntax> ArgumentListSyntaxNodes)
         {
             //Posibly not enough to determine if this is proper iBatis method.
             //Placeholder for handling other iBatis method.
@@ -71,7 +71,7 @@ namespace VSIXProject5.Helpers
         /// </summary>
         /// <param name="argumentList"></param>
         /// <returns></returns>
-        private ArgumentSyntax GetArgumentSyntaxOfStringType(ArgumentListSyntax argumentList)
+        public ArgumentSyntax GetArgumentSyntaxOfStringType(ArgumentListSyntax argumentList)
         {
             ISymbol stringISymbol= _semanticModel.Compilation.GetTypeByMetadataName(typeof(String).FullName);
             var arguments = argumentList.Arguments;
