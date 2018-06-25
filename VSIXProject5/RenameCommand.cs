@@ -5,6 +5,20 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using VSIXProject5.Windows.RenameWindow;
 using VSIXProject5.Windows.RenameWindow.ViewModel;
+using VSIXProject5.Indexers;
+using EnvDTE;
+using EnvDTE80;
+using Microsoft.VisualStudio.TextManager.Interop;
+using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.ComponentModelHost;
+using Microsoft.VisualStudio.Editor;
+using System.Linq;
+using System.Xml.Linq;
+using System.Xml;
+using VSIXProject5.Constants;
+using VSIXProject5.Helpers;
+using VSIXProject5.Actions;
+using VSIXProject5.Actions.Abstracts;
 
 namespace VSIXProject5
 {
@@ -28,6 +42,8 @@ namespace VSIXProject5
         /// </summary>
         private readonly Package package;
 
+        private BaseActions _commandActions;
+        private OleMenuCommand menuItem;
         /// <summary>
         /// Initializes a new instance of the <see cref="RenameCommand"/> class.
         /// Adds our command handlers for menu (commands must exist in the command table file)
@@ -42,11 +58,13 @@ namespace VSIXProject5
 
             this.package = package;
 
+            _commandActions = new QueryRenameActions(this.package as GotoPackage);
+
             OleMenuCommandService commandService = this.ServiceProvider.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
             if (commandService != null)
             {
                 var menuCommandID = new CommandID(CommandSet, CommandId);
-                var menuItem = new MenuCommand(this.MenuItemCallback, menuCommandID);
+                var menuItem = new OleMenuCommand(_commandActions.MenuItemCallback,_commandActions.Change, _commandActions.BeforeQuery, menuCommandID);
                 commandService.AddCommand(menuItem);
             }
         }
@@ -78,24 +96,6 @@ namespace VSIXProject5
         public static void Initialize(Package package)
         {
             Instance = new RenameCommand(package);
-        }
-
-        /// <summary>
-        /// This function is the callback used to execute the command when the menu item is clicked.
-        /// See the constructor to see how the menu item is associated with this function using
-        /// OleMenuCommandService service and MenuCommand class.
-        /// </summary>
-        /// <param name="sender">Event sender.</param>
-        /// <param name="e">Event args.</param>
-        private void MenuItemCallback(object sender, EventArgs e)
-        {
-            RenameModalWindowControl window = new RenameModalWindowControl(
-                new RenameViewModel
-                {
-                    QueryText = ""
-                });
-            var wtfbool = window.ShowModal();
-            var returnViewModel = window.DataContext as RenameViewModel;
         }
     }
 }

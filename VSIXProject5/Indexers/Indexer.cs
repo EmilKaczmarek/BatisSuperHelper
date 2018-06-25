@@ -326,6 +326,32 @@ namespace VSIXProject5.Indexers
                 RenameXmlStatmentsForFile(oldFileName, newFileName);
             }
         }
+        public static void RenameXmlQuery(IndexerKey key, string newQueryId)
+        {
+            var statmentInfo = xmlStatments[key];
+            var newKey = new IndexerKey { StatmentName = newQueryId, VsProjectName = key.VsProjectName };
+            statmentInfo.QueryId = newQueryId;
+            xmlStatments.Remove(key);
+            xmlStatments.Add(newKey, statmentInfo);
+        }
+        public static void RenameCodeQueries(IndexerKey key, string newQueryId)
+        {
+            var statments = codeStatments[key];
+            foreach(var statment in statments)
+            {
+                statment.QueryId = newQueryId;
+            }
+            var newKey = new IndexerKey {StatmentName = newQueryId, VsProjectName = key.VsProjectName };
+            codeStatments.Remove(key);
+            if (codeStatments.ContainsKey(newKey))
+            {
+                codeStatments[newKey] = statments;
+            }
+            else
+            {
+                codeStatments.Add(newKey, statments);
+            }
+        }
     }
 
 }

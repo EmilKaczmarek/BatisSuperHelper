@@ -33,9 +33,9 @@
         </Style>
     </platformUi:DialogWindow.Resources>
     <Grid Background="{DynamicResource VsBrush.Window}" Height="130" VerticalAlignment="Top">
+        <TextBox x:Name="QueryTextBox" Background="{DynamicResource VsBrush.Window}" Foreground="{DynamicResource VsBrush.WindowText}" HorizontalAlignment="Left" Height="37" Margin="10,10,0,0" TextWrapping="Wrap" Text="{Binding QueryText}" VerticalAlignment="Top" Width="280" FontSize="14"/>
         <Button Content="Rename" HorizontalAlignment="Left" Margin="185,100,0,0" VerticalAlignment="Top" Width="50" Height="25" Grid.RowSpan="2" Click="RenameButton_Click"/>
         <Button Content="Cancel" HorizontalAlignment="Left" Margin="240,100,0,0" VerticalAlignment="Top" Height="25" Width="50" Grid.RowSpan="2" Click="CancelButton_Click"/>
-        <TextBox x:Name="QueryTextBox" Background="{DynamicResource VsBrush.Window}" Foreground="{DynamicResource VsBrush.WindowText}" HorizontalAlignment="Left" Height="37" Margin="10,10,0,0" TextWrapping="Wrap" Text="{Binding QueryText}" VerticalAlignment="Top" Width="280" FontSize="14"/>
         <CheckBox IsChecked="{Binding IsMethodRenameChecked}" x:Name="RenameMethodCheckBox"  Background="{DynamicResource VsBrush.Window}" Foreground="{DynamicResource VsBrush.WindowText}" Content="Rename method" HorizontalAlignment="Left" Margin="10,62,0,0" VerticalAlignment="Top"/>
     </Grid>
 </platformUi:DialogWindow>
