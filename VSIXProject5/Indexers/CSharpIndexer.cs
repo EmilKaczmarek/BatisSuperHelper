@@ -46,8 +46,6 @@ namespace VSIXProject5.Indexers
 
         public async Task<List<CSharpIndexerResult>> BuildFromDocumentAsync(Document document)
         {
-            SemanticModel semModel2;
-            var result = document.TryGetSemanticModel(out semModel2);
             SemanticModel semModel = await document.GetSemanticModelAsync();
             return Build(semModel, document);
         }
