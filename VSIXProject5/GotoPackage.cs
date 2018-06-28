@@ -188,7 +188,11 @@ namespace VSIXProject5
                     var componentService = EditorAdaptersFactory.GetWpfTextView(textView);
                     SnapshotPoint caretPosition = componentService.Caret.Position.BufferPosition;
                     Microsoft.CodeAnalysis.Document roslynDocument = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
-
+                    if (roslynDocument == null)
+                    {
+                        Debug.WriteLine($"Document code model: {caretPosition.Snapshot.ContentType.DisplayName}");
+                        return;
+                    }
                     var csIndexer = new CSharpIndexer().BuildFromDocumentAsync(roslynDocument).Result;
                     Indexer.UpdateCodeStatmentForFile(csIndexer);
                 }
