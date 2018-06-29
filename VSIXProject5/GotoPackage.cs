@@ -61,6 +61,7 @@ namespace VSIXProject5
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
     //[ProvideToolWindow(typeof(BatisSHelperTestConsole))]
     [ProvideToolWindow(typeof(ResultWindow))]
+    //[ProvideToolWindow(typeof(VSIXProject5.Windows.RenameWindow.RenameModalWindow))]
     public sealed class GotoPackage : Package
     {
         /// <summary>
@@ -95,6 +96,7 @@ namespace VSIXProject5
         public IVsStatusbar IStatusBar;
         public ToolWindowPane ResultWindow;
         public Window SolutionExplorer;
+        public VisualStudioWorkspace Workspace;
 
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
@@ -116,8 +118,8 @@ namespace VSIXProject5
             ResultWindow = FindToolWindow(typeof(ResultWindow), 0, true);
             DocumentNavigationInstance.InjectDTE(this.EnvDTE);
             //Prepare package events
-            var workspace = componentModel.GetService<VisualStudioWorkspace>();
-            workspace.WorkspaceChanged += WorkspaceEvents.WorkspaceChanged;
+            Workspace = componentModel.GetService<VisualStudioWorkspace>();
+            Workspace.WorkspaceChanged += WorkspaceEvents.WorkspaceChanged;
 
             _solution = base.GetService(typeof(SVsSolution)) as IVsSolution;
             _solutionEventsHandler = new SolutionEventsHandler(
@@ -144,6 +146,8 @@ namespace VSIXProject5
             _timer.Tick += _timer_Tick;
             //Initialize commands
             Goto.Initialize(this);
+            VSIXProject5.Windows.RenameWindow.RenameModalWindowCommand.Initialize(this);
+            RenameCommand.Initialize(this);
         }
 
         private EnvDTE.TextDocument _editedDocument;

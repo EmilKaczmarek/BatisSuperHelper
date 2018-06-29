@@ -76,6 +76,7 @@
   <ItemGroup>
     <Compile Include="Actions\Abstracts\BaseActions.cs" />
     <Compile Include="Actions\GoToQueryActions.cs" />
+    <Compile Include="Actions\QueryRenameActions.cs" />
     <Compile Include="Constants\EventConstats.cs" />
     <Compile Include="EventHandlers\ProjectItemEvents.cs" />
     <Compile Include="EventHandlers\VSSolutionEventsHandler.cs" />
@@ -90,6 +91,7 @@
     <Compile Include="HelpersAndExtensions\XmlHelper.cs" />
     <Compile Include="Indexers\IndexersProcessStatus.cs" />
     <Compile Include="Models\XmlFileInfo.cs" />
+    <Compile Include="RenameCommand.cs" />
     <Compile Include="VSIntegration\Navigation\DocumentNavigation.cs" />
     <Compile Include="VSIntegration\Navigation\DocumentNavigationInstance.cs" />
     <Compile Include="Windows\DebugConsole\BatisSHelperTestConsole.cs" />
@@ -112,6 +114,12 @@
     <Compile Include="Indexers\XmlIndexer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyChange.cs" />
+    <Compile Include="Windows\RenameWindow\RenameModalWindow.cs" />
+    <Compile Include="Windows\RenameWindow\RenameModalWindowCommand.cs" />
+    <Compile Include="Windows\RenameWindow\RenameModalWindowControl.xaml.cs">
+      <DependentUpon>RenameModalWindowControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\RenameWindow\ViewModel\RenameViewModel.cs" />
     <Compile Include="Windows\ResultWindow\ResultWindow.cs" />
     <Compile Include="Windows\ResultWindow\ResultWindowCommand.cs" />
     <Compile Include="Windows\ResultWindow\ResultWindowControl.xaml.cs">
@@ -128,6 +136,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\RenameCommand.png" />
+    <Content Include="Windows\RenameWindow\Resources\RenameModalWindowCommand.png" />
     <VSCTCompile Include="GotoPackage.vsct">
       <ResourceName>Menus.ctmenu</ResourceName>
       <SubType>Designer</SubType>
@@ -348,6 +358,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="Windows\DebugConsole\BatisSHelperTestConsoleControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\RenameWindow\RenameModalWindowControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
