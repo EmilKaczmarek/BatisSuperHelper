@@ -188,11 +188,15 @@ namespace VSIXProject5.Actions
             RenameModalWindowControl window = new RenameModalWindowControl(
                 new RenameViewModel
                 {
-                    QueryText = queryName
+                    QueryText = queryName,
                 });
+
             var wtfbool = window.ShowModal();
             var returnViewModel = window.DataContext as RenameViewModel;
-
+            if (returnViewModel.WasInputCanceled || returnViewModel.QueryText == queryName)
+            {
+                return;
+            }
             var codeKeys = Indexer.GetCodeKeysByQueryId(queryName);
             var xmlKeys = Indexer.GetXmlKeysByQueryId(queryName);
             foreach (var xmlQuery in xmlKeys)
@@ -227,7 +231,6 @@ namespace VSIXProject5.Actions
                         SyntaxTree synTree = null;
                         doc.TryGetSyntaxTree(out synTree);
                         var span = synTree.GetText().Lines[query.QueryLineNumber - 1].Span;
-
                         var root = (CompilationUnitSyntax)synTree.GetRoot();
                         var nodes = root.DescendantNodesAndSelf(span);
                         var syntaxArguments = helper.GetArgumentListSyntaxFromSyntaxNodesWhereArgumentsAreNotEmpty(nodes);
@@ -240,14 +243,8 @@ namespace VSIXProject5.Actions
                         var sucess = _workspace.TryApplyChanges(doc.Project.Solution);
                     }
                 }
-                foreach(var codeQuery in codeQueries)
-                {
-
-
-                    
-                }
                 Indexer.RenameCodeQueries(codeKey, returnViewModel.QueryText);
-            }  
+            }
         }
     }
 }
