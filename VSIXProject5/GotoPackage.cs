@@ -6,6 +6,7 @@
 
 using EnvDTE;
 using EnvDTE80;
+using HtmlAgilityPack;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
@@ -24,6 +25,7 @@ using System.Runtime.InteropServices;
 using System.Timers;
 using System.Xml;
 using System.Xml.Linq;
+using System.Xml.Schema;
 using VSIXProject5.Constants;
 using VSIXProject5.EventHandlers;
 using VSIXProject5.Events;
@@ -157,17 +159,24 @@ namespace VSIXProject5
             _timer.Start();
             var StartPointParent = Selection.Parent.Parent;
             _editedDocument = StartPointParent != null ? (EnvDTE.TextDocument)Selection.Parent.Parent.Object("TextDocument") : (TextDocument)EnvDTE.ActiveDocument.Object("TextDocument");
+            //Use task with delay, if next comes up, cancel task.
         }
 
         private void _timer_Tick(object sender, EventArgs e)
         {
             _timer.Stop();
+            
             if (_editedDocument != null)//Edited Document should never be null.
             {
                 string docLanguage = _editedDocument.Language;
                 if (docLanguage == "XML")
                 {
                     string documentText = _editedDocument.GetText();
+
+                    //HtmlDocument doc = new HtmlDocument();
+                    //doc.Load(new StringReader(documentText));
+                    //var nodes = doc.DocumentNode.DescendantsAndSelf();
+
                     XDocument xDoc = null;
                     try
                     {
