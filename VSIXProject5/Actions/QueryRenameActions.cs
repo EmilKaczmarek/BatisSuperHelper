@@ -29,7 +29,7 @@ using static VSIXProject5.HelpersAndExtensions.XmlHelper;
 
 namespace VSIXProject5.Actions
 {
-    public class QueryRenameActions : BaseActions
+    public class QueryRenameActions : BaseStatementAtLineActions
     {
         private IVsTextManager _textManager;
         private IVsEditorAdaptersFactoryService _editorAdaptersFactory;
@@ -37,7 +37,7 @@ namespace VSIXProject5.Actions
         private DTE2 _envDTE;
         private Workspace _workspace;
 
-        public QueryRenameActions(GotoPackage package)
+        public QueryRenameActions(GotoPackage package) : base(package.TextManager, package.EditorAdaptersFactory, new StatusBarIntegration(package.IStatusBar))
         {
             base.package = package;
             _textManager = package.TextManager;
@@ -48,72 +48,12 @@ namespace VSIXProject5.Actions
         }
         public override void BeforeQuery(object sender, EventArgs e)
         {
-            OleMenuCommand menuCommand = sender as OleMenuCommand;
-            if(IndexersProcessStatus.CodeIndexerFinished && IndexersProcessStatus.XmlIndexerFinished)
-            {
-                menuCommand.Enabled = true;
-                return;
-            }
-            string activeDocumentLanguage = _envDTE.ActiveDocument.Language;
-            if (activeDocumentLanguage == "CSharp")
-            {
-                //Get selection line number
-                _textManager.GetActiveView(1, null, out IVsTextView textView);
-                textView.GetCaretPos(out int selectionLineNum, out int selectionCol);
-                //Get carret position
-                var wpfTextView = _editorAdaptersFactory.GetWpfTextView(textView);
-                SnapshotPoint caretPosition = wpfTextView.Caret.Position.BufferPosition;
-
-                Microsoft.CodeAnalysis.Document doc = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
-
-                if (doc == null)
-                {
-                    menuCommand.Visible = true;
-                    menuCommand.Text = "Something went wrong";
-                    return;
-                }
-                //Cool case: there is doc.TryGetSemanticModel but if it's not ready it will be null.
-                //GetSemanticModelAsync will create it if needed, but not sure if using async event is good.
-                SemanticModel semModel = doc.GetSemanticModelAsync().Result;
-
-                NodeHelpers helper = new NodeHelpers(semModel);
-                doc.TryGetSyntaxTree(out SyntaxTree synTree);
-
-                var lineSpan = synTree.GetText().Lines[selectionLineNum].Span;
-                var treeRoot = (CompilationUnitSyntax)synTree.GetRoot();
-                var nodesAtLine = treeRoot.DescendantNodesAndSelf(lineSpan);
-
-                var returnNode = helper.GetFirstNodeOfReturnStatmentSyntaxType(nodesAtLine);
-                if (returnNode != null)
-                {
-                    nodesAtLine = returnNode.DescendantNodesAndSelf();
-                }
-                menuCommand.Visible = helper.IsAnySyntaxNodeContainIBatisNamespace(nodesAtLine);
-            }
-            else if (activeDocumentLanguage == "XML")
-            {
-                EnvDTE.TextDocument doc = (EnvDTE.TextDocument)_envDTE.ActiveDocument.Object("TextDocument");
-
-                EnvDTE.TextSelection sel = (EnvDTE.TextSelection)_envDTE.ActiveDocument.Selection;
-                var lineText = sel.GetText();
-
-                if (!XmlStringLine.IsIgnored(lineText))
-                {
-                    string text = doc.GetText();
-                    var xDoc = XDocument.Parse(text);
-
-                    bool isIBatisQueryXmlFile = XDocHelper.GetXDocumentNamespace(xDoc) == @"http://ibatis.apache.org/mapping";
-                    if (isIBatisQueryXmlFile)
-                    {
-                        menuCommand.Visible = true;
-                    }
-                }
-            }
+            base.BeforeQuery(sender, e);
         }
 
         public override void Change(object sender, EventArgs e)
         {
-            
+            base.Change(sender, e);
         }
 
         public override void MenuItemCallback(object sender, EventArgs e)

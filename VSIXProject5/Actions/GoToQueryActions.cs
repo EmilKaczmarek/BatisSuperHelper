@@ -26,102 +26,32 @@ using static VSIXProject5.HelpersAndExtensions.XmlHelper;
 
 namespace VSIXProject5.Actions
 {
-    public class GoToQueryActions : BaseActions
+    public class GoToQueryActions : BaseStatementAtLineActions
     {
         private IVsTextManager _textManager;
         private IVsEditorAdaptersFactoryService _editorAdaptersFactory;
         private StatusBarIntegration _statusBar;
         private ToolWindowPane _resultWindow;
         private DTE2 _envDTE;
-
-        public GoToQueryActions(GotoPackage package) 
+  
+        public GoToQueryActions(GotoPackage package) : base(package.TextManager, package.EditorAdaptersFactory, new StatusBarIntegration(package.IStatusBar))
         {
             base.package = package;
-             _textManager = package.TextManager;
+            _textManager = package.TextManager;
              _editorAdaptersFactory = package.EditorAdaptersFactory;
-            _statusBar = new StatusBarIntegration(package.IStatusBar);
             _resultWindow = package.ResultWindow;
             _envDTE = package.EnvDTE;
+            _statusBar = new StatusBarIntegration(package.IStatusBar);
         }
 
         public override void BeforeQuery(object sender, EventArgs e)
         {
-            OleMenuCommand menuCommand = sender as OleMenuCommand;
-            if(IndexersProcessStatus.CodeIndexerFinished && IndexersProcessStatus.XmlIndexerFinished)
-            {
-                menuCommand.Enabled = true;
-            }
-            string activeDocumentLanguage = _envDTE.ActiveDocument.Language;
-            if (activeDocumentLanguage == "CSharp")
-            {
-                //Get selection line number
-                _textManager.GetActiveView(1, null, out IVsTextView textView);
-                textView.GetCaretPos(out int selectionLineNum, out int selectionCol);
-                //Get carret position
-                var wpfTextView = _editorAdaptersFactory.GetWpfTextView(textView);
-                SnapshotPoint caretPosition = wpfTextView.Caret.Position.BufferPosition;
-
-                Microsoft.CodeAnalysis.Document doc = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
-
-                if (doc == null)
-                {
-                    menuCommand.Visible = true;
-                    menuCommand.Text = "Something went wrong";
-                    return;
-                }
-                //Cool case: there is doc.TryGetSemanticModel but if it's not ready it will be null.
-                //GetSemanticModelAsync will create it if needed, but not sure if using async event is good.
-                SemanticModel semModel = doc.GetSemanticModelAsync().Result;
-
-                NodeHelpers helper = new NodeHelpers(semModel);
-                doc.TryGetSyntaxTree(out SyntaxTree synTree);
-
-                var lineSpan = synTree.GetText().Lines[selectionLineNum].Span;
-                var treeRoot = (CompilationUnitSyntax)synTree.GetRoot();
-                var nodesAtLine = treeRoot.DescendantNodesAndSelf(lineSpan);
-
-                var returnNode = helper.GetFirstNodeOfReturnStatmentSyntaxType(nodesAtLine);
-                if (returnNode != null)
-                {
-                    nodesAtLine = returnNode.DescendantNodesAndSelf();
-                }
-                menuCommand.Visible = helper.IsAnySyntaxNodeContainIBatisNamespace(nodesAtLine);
-                menuCommand.Text = "Go to Query";
-            }
-            else if (activeDocumentLanguage == "XML")
-            {
-                EnvDTE.TextDocument doc = (EnvDTE.TextDocument)_envDTE.ActiveDocument.Object("TextDocument");
-
-                TextSelection sel = (TextSelection)_envDTE.ActiveDocument.Selection;
-                var lineText = sel.GetText();
-
-                if (!XmlStringLine.IsIgnored(lineText))
-                {
-                    string text = doc.GetText();
-                    XDocument xDoc = null;
-                    try
-                    {
-                        xDoc = XDocument.Parse(text);
-                    }
-                    catch(Exception ex)
-                    {
-                        menuCommand.Enabled = false;
-                        menuCommand.Text = "Go to Query execution";
-                        _statusBar.ShowText($"Unable to parse xml document.");
-                        return;
-                    }
-                    bool isIBatisQueryXmlFile = XDocHelper.GetXDocumentNamespace(xDoc) == @"http://ibatis.apache.org/mapping";
-                    if (isIBatisQueryXmlFile)
-                    {
-                        menuCommand.Visible = true;
-                        menuCommand.Text = "Go to Query execution";
-                    }
-                }
-            }
+            base.BeforeQuery(sender, e);
         }
 
         public override void Change(object sender, EventArgs e)
         {
+            base.Change(sender, e);
         }
 
         public override void MenuItemCallback(object sender, EventArgs e)
