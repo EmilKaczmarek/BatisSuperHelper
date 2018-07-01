@@ -31,6 +31,7 @@ using VSIXProject5.EventHandlers;
 using VSIXProject5.Events;
 using VSIXProject5.Helpers;
 using VSIXProject5.Indexers;
+using VSIXProject5.Parsers;
 using VSIXProject5.VSIntegration.Navigation;
 using static VSIXProject5.Events.VSSolutionEventsHandler;
 
@@ -177,19 +178,12 @@ namespace VSIXProject5
                     //doc.Load(new StringReader(documentText));
                     //var nodes = doc.DocumentNode.DescendantsAndSelf();
 
-                    XDocument xDoc = null;
-                    try
-                    {
-                        xDoc = XDocument.Parse(documentText);
-                    }
-                    catch (Exception ex)
-                    {
-                        return;
-                    }
-                    bool isIBatisQueryXmlFile = XDocHelper.GetXDocumentNamespace(xDoc) == IBatisConstants.SqlMapNamespace;
+                    XmlParser parser = XmlParser.WithStringReaderAndFileInfo(new StringReader(documentText), _editedDocument.Parent.FullName, EnvDTE.ActiveDocument.ProjectItem.Name);
+
+                    bool isIBatisQueryXmlFile = parser.XmlNamespace == IBatisConstants.SqlMapNamespace;
                     if (isIBatisQueryXmlFile)
                     {
-                        var newStatments = new XmlIndexer().BuildFromXDocString(documentText, _editedDocument.Parent.FullName);
+                        var newStatments = parser.GetMapFileStatments();
                         Indexer.UpdateXmlStatmentForFile(newStatments);
                     }
                 }

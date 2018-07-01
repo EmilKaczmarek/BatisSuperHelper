@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace VSIXProject5.Indexers
 {
+    //change to events
     public static class IndexersProcessStatus
     {
         public static bool XmlIndexerFinished = false;
