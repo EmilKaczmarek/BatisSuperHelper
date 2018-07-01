@@ -16,6 +16,9 @@ namespace VSIXProject5.VSIntegration
         }
         public void ShowText(string text)
         {
+            if (string.IsNullOrEmpty(text))
+                return;
+
             int frozen;
             _statusBar.IsFrozen(out frozen);
             if (frozen == 0)

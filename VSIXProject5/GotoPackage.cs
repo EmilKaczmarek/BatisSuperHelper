@@ -174,10 +174,6 @@ namespace VSIXProject5
                 {
                     string documentText = _editedDocument.GetText();
 
-                    //HtmlDocument doc = new HtmlDocument();
-                    //doc.Load(new StringReader(documentText));
-                    //var nodes = doc.DocumentNode.DescendantsAndSelf();
-
                     XmlParser parser = XmlParser.WithStringReaderAndFileInfo(new StringReader(documentText), _editedDocument.Parent.FullName, EnvDTE.ActiveDocument.ProjectItem.Name);
 
                     bool isIBatisQueryXmlFile = parser.XmlNamespace == IBatisConstants.SqlMapNamespace;
