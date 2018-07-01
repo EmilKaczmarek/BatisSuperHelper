@@ -20,6 +20,11 @@ namespace VSIXProject5.Constants
             "procedure",
             "sql"
         };
+        public const string StatementsRootElementName = "statements";
+        public const string StatementsRootElementXPath = "/sqlmap[1]/statements[1]";
         public const string StatmentIdAttributeName = "id";
+
+        public const string MapFileRootElementName = "sqlMap";
+        public const string MapFileRootElementXPath = "/sqlmap[1]";
     }
 }

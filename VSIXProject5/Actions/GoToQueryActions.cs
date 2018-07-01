@@ -11,6 +11,7 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,12 +22,13 @@ using VSIXProject5.Constants;
 using VSIXProject5.Helpers;
 using VSIXProject5.HelpersAndExtensions.VisualStudio;
 using VSIXProject5.Indexers;
+using VSIXProject5.Parsers;
 using VSIXProject5.VSIntegration;
 using static VSIXProject5.HelpersAndExtensions.XmlHelper;
 
 namespace VSIXProject5.Actions
 {
-    public class GoToQueryActions : BaseStatementAtLineActions
+    public class GoToQueryActions : BaseActions
     {
         private IVsTextManager _textManager;
         private IVsEditorAdaptersFactoryService _editorAdaptersFactory;
@@ -44,16 +46,6 @@ namespace VSIXProject5.Actions
             _statusBar = new StatusBarIntegration(package.IStatusBar);
         }
 
-        public override void BeforeQuery(object sender, EventArgs e)
-        {
-            base.BeforeQuery(sender, e);
-        }
-
-        public override void Change(object sender, EventArgs e)
-        {
-            base.Change(sender, e);
-        }
-
         public override void MenuItemCallback(object sender, EventArgs e)
         {
             bool isXmlFile = _envDTE.ActiveDocument.Language == "XML";
@@ -67,9 +59,9 @@ namespace VSIXProject5.Actions
                 EnvDTE.TextDocument doc = (EnvDTE.TextDocument)(_envDTE.ActiveDocument.Object("TextDocument"));
                 string xmlTextContent = doc.GetText();
 
-                var xmlDocument = XDocument.Parse(xmlTextContent, LoadOptions.SetLineInfo);
-                var xElements = xmlDocument.Descendants();
-                var elementsLineNumbers = xElements.Select(x => ((IXmlLineInfo)x).LineNumber).ToList();
+                XmlParser parser = XmlParser.WithStringReader(new StringReader(xmlTextContent));
+                var elementsLineNumbers = parser.GetStatmentElementsLineNumber();
+               
                 int lineNumber = selectionLineNum + 1;//Missmatch between visual studio lines numeration and text lines numeration
                 int? elementLocation = elementsLineNumbers.Cast<int?>().FirstOrDefault(x => x == lineNumber);
 
@@ -81,13 +73,7 @@ namespace VSIXProject5.Actions
                     elementLocation = elementsLineNumbers[indexOfLineNumber == 0 ? 0 : indexOfLineNumber - 1];
                 }
 
-                var node = xElements.FirstOrDefault(x => ((IXmlLineInfo)x).LineNumber == elementLocation);
-                var idAtribute = node.Attributes().FirstOrDefault(x => x.Name.LocalName == IBatisConstants.StatmentIdAttributeName);
-                string queryName = "";
-                if (idAtribute == null)
-                    return;
-
-                queryName = idAtribute.Value;
+                string queryName = parser.GetQueryAtLineOrNull(elementLocation.Value);
 
                 var statmentsKeys = Indexer.GetCodeKeysByQueryId(queryName);
 
