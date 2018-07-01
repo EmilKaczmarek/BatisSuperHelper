@@ -26,6 +26,7 @@
         {
             DataGridRow row = sender as DataGridRow;
             var currentItem = dataGrid.CurrentItem as BaseIndexerValue;
+            //exception on opening visual studio
             DocumentNavigationInstance.instance.OpenDocumentAndHighlightLine(currentItem.QueryFilePath, currentItem.QueryLineNumber);
         }
 

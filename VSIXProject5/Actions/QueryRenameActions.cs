@@ -19,6 +19,7 @@ using System.Windows.Documents;
 using System.Xml;
 using System.Xml.Linq;
 using VSIXProject5.Actions.Abstracts;
+using VSIXProject5.Actions.Shared;
 using VSIXProject5.Constants;
 using VSIXProject5.Helpers;
 using VSIXProject5.HelpersAndExtensions.VisualStudio;
@@ -27,7 +28,6 @@ using VSIXProject5.Parsers;
 using VSIXProject5.VSIntegration;
 using VSIXProject5.Windows.RenameWindow;
 using VSIXProject5.Windows.RenameWindow.ViewModel;
-using static VSIXProject5.HelpersAndExtensions.XmlHelper;
 
 namespace VSIXProject5.Actions
 {
@@ -49,69 +49,17 @@ namespace VSIXProject5.Actions
             _workspace = package.Workspace;
         }
 
-        public override void Change(object sender, EventArgs e)
-        {
-            base.Change(sender, e);
-        }
-
         public override void MenuItemCallback(object sender, EventArgs e)
         {
             IVsTextView textView = null;
             _textManager.GetActiveView(1, null, out textView);
             textView.GetCaretPos(out int selectionLineNum, out int selectionCol);
+            var wpfTextView = _editorAdaptersFactory.GetWpfTextView(textView);
 
-            string queryName = null;
-            if(_envDTE.ActiveDocument.Language == "XML")
-            {
-                EnvDTE.TextDocument doc = (EnvDTE.TextDocument)(_envDTE.ActiveDocument.Object("TextDocument"));
-                string xmlTextContent = doc.GetText();
+            ITextSnapshot snapshot = wpfTextView.Caret.Position.BufferPosition.Snapshot;
+            ILineOperation lineOperation = snapshot.IsCSharpType() ? new CodeLineOperations() : (ILineOperation)(new XmlLineOperations());
 
-                XmlParser parser = XmlParser.WithStringReader(new StringReader(xmlTextContent));
-                var elementsLineNumbers = parser.GetStatmentElementsLineNumber();
-
-                int lineNumber = selectionLineNum + 1;//Missmatch between visual studio lines numeration and text lines numeration
-                int? elementLocation = elementsLineNumbers.Cast<int?>().FirstOrDefault(x => x == lineNumber);
-
-                if (elementLocation == null)
-                {
-                    elementsLineNumbers.Add(lineNumber);
-                    elementsLineNumbers.Sort();
-                    int indexOfLineNumber = elementsLineNumbers.IndexOf(lineNumber);
-                    elementLocation = elementsLineNumbers[indexOfLineNumber == 0 ? 0 : indexOfLineNumber - 1];
-                }
-
-                queryName = parser.GetQueryAtLineOrNull(elementLocation.Value);
-            }
-            else
-            {
-                var wpfTextView = _editorAdaptersFactory.GetWpfTextView(textView);
-                SnapshotPoint caretPosition = wpfTextView.Caret.Position.BufferPosition;
-                Microsoft.CodeAnalysis.Document doc = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
-
-                SemanticModel semModel = doc.GetSemanticModelAsync().Result;
-
-                NodeHelpers helper = new NodeHelpers(semModel);
-                SyntaxTree synTree = null;
-                doc.TryGetSyntaxTree(out synTree);
-                var span = synTree.GetText().Lines[selectionLineNum].Span;
-                var root = (CompilationUnitSyntax)synTree.GetRoot();
-                var nodesAtLine = root.DescendantNodesAndSelf(span);
-
-                var returnNode = helper.GetFirstNodeOfReturnStatmentSyntaxType(nodesAtLine);
-                //Check if current document line is having 'return' keyword.
-                //In this case we need to Descendant Node to find ArgumentList
-                if (returnNode != null)
-                {
-                    var ReturnNodeDescendanted = returnNode.DescendantNodesAndSelf();
-                    queryName = helper.GetQueryStringFromSyntaxNodes(ReturnNodeDescendanted);
-                }
-                //In case we don't have cursor around 'return', SyntaxNodes taken from line
-                //should have needed ArgumentLineSyntax
-                else
-                {
-                    queryName = helper.GetQueryStringFromSyntaxNodes(nodesAtLine);
-                }
-            }
+            string queryName = lineOperation.GetQueryNameAtLine(snapshot, selectionLineNum);
 
             if (queryName == null)
             {
@@ -130,8 +78,10 @@ namespace VSIXProject5.Actions
             {
                 return;
             }
+
             var codeKeys = Indexer.GetCodeKeysByQueryId(queryName);
             var xmlKeys = Indexer.GetXmlKeysByQueryId(queryName);
+
             foreach (var xmlQuery in xmlKeys)
             {
                 var query = Indexer.GetXmlStatment(xmlQuery);

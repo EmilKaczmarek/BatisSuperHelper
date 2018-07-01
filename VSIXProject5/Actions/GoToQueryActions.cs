@@ -18,12 +18,15 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using VSIXProject5.Actions.Abstracts;
+using VSIXProject5.Actions.Shared;
 using VSIXProject5.Constants;
 using VSIXProject5.Helpers;
 using VSIXProject5.HelpersAndExtensions.VisualStudio;
 using VSIXProject5.Indexers;
+using VSIXProject5.Indexers.Models;
 using VSIXProject5.Parsers;
 using VSIXProject5.VSIntegration;
+using VSIXProject5.VSIntegration.Navigation;
 using static VSIXProject5.HelpersAndExtensions.XmlHelper;
 
 namespace VSIXProject5.Actions
@@ -48,127 +51,55 @@ namespace VSIXProject5.Actions
 
         public override void MenuItemCallback(object sender, EventArgs e)
         {
-            bool isXmlFile = _envDTE.ActiveDocument.Language == "XML";
-
             IVsTextView textView = null;
             _textManager.GetActiveView(1, null, out textView);
-            int selectionLineNum;
-            textView.GetCaretPos(out selectionLineNum, out int selectionCol);
-            if (isXmlFile)
+            textView.GetCaretPos(out int selectionLineNum, out int selectionCol);
+            var wpfTextView = _editorAdaptersFactory.GetWpfTextView(textView);
+            ITextSnapshot snapshot = wpfTextView.Caret.Position.BufferPosition.Snapshot;
+
+            List<BaseIndexerValue> statments = null;
+            ILineOperation lineOperation = snapshot.IsCSharpType() ? new CodeLineOperations() : (ILineOperation)(new XmlLineOperations());
+
+            var queryName = lineOperation.GetQueryNameAtLine(snapshot, selectionLineNum);
+
+            if (snapshot.GetContentTypeName() == "XML")
             {
-                EnvDTE.TextDocument doc = (EnvDTE.TextDocument)(_envDTE.ActiveDocument.Object("TextDocument"));
-                string xmlTextContent = doc.GetText();
-
-                XmlParser parser = XmlParser.WithStringReader(new StringReader(xmlTextContent));
-                var elementsLineNumbers = parser.GetStatmentElementsLineNumber();
-               
-                int lineNumber = selectionLineNum + 1;//Missmatch between visual studio lines numeration and text lines numeration
-                int? elementLocation = elementsLineNumbers.Cast<int?>().FirstOrDefault(x => x == lineNumber);
-
-                if (elementLocation == null)
-                {
-                    elementsLineNumbers.Add(lineNumber);
-                    elementsLineNumbers.Sort();
-                    int indexOfLineNumber = elementsLineNumbers.IndexOf(lineNumber);
-                    elementLocation = elementsLineNumbers[indexOfLineNumber == 0 ? 0 : indexOfLineNumber - 1];
-                }
-
-                string queryName = parser.GetQueryAtLineOrNull(elementLocation.Value);
-
                 var statmentsKeys = Indexer.GetCodeKeysByQueryId(queryName);
+                statments = statmentsKeys.Select(Indexer.GetCodeStatments).SelectMany(x => x).Cast<BaseIndexerValue>().ToList();
 
-                var windowContent = (ResultWindowControl)_resultWindow.Content;
-                var statmentsToShow = statmentsKeys.Select(x => Indexer.GetCodeStatments(x)).ToList().SelectMany(x => x).ToList();
-                windowContent.ShowResults(statmentsToShow);
-                IVsWindowFrame windowFrame = (IVsWindowFrame)_resultWindow.Frame;
-
-                if (statmentsKeys.Count > 1)
+                if(statments.Count == 1)
                 {
-                    _statusBar.ShowText($"Multiple occurence of same statment({queryName}) in solution.");
-                    ErrorHandler.ThrowOnFailure(windowFrame.Show());
-                    return;
+                    DocumentNavigationInstance.instance.OpenDocumentAndHighlightLine(statments.First().QueryFilePath, statments.First().QueryLineNumber);
                 }
-                var statmentKey = statmentsKeys.FirstOrDefault();
-                if (statmentKey != null)
-                {
-                    var statments = Indexer.GetCodeStatmentOrNull(statmentKey);
-                    if (statments.Count == 1)
-                    {
-                        var statment = statments.FirstOrDefault();
-                        _envDTE.ItemOperations.OpenFile(statment.QueryFilePath);
-                        TextSelection sel = (TextSelection)_envDTE.ActiveDocument.Selection;
-                        TextPoint pnt = sel.ActivePoint;
-                        sel.GotoLine(statment.QueryLineNumber, true);
-                    }
-                    else if (statments.Count > 1)
-                    {
-                        _statusBar.ShowText("Multiple occurence of same statment in project.");
-                        ErrorHandler.ThrowOnFailure(windowFrame.Show());
-                        return;
-                    }
-                }
-                else
+                else if (!statments.Any())
                 {
                     _statusBar.ShowText($"No occurence of query named: {queryName} find in Code.");
                 }
-            }
-            else
-            {
-                var wpfTextView = _editorAdaptersFactory.GetWpfTextView(textView);
-                SnapshotPoint caretPosition = wpfTextView.Caret.Position.BufferPosition;
-                Microsoft.CodeAnalysis.Document doc = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
-
-                SemanticModel semModel = doc.GetSemanticModelAsync().Result;
-
-                NodeHelpers helper = new NodeHelpers(semModel);
-                SyntaxTree synTree = null;
-                doc.TryGetSyntaxTree(out synTree);
-                var span = synTree.GetText().Lines[selectionLineNum].Span;
-                var root = (CompilationUnitSyntax)synTree.GetRoot();
-                var nodesAtLine = root.DescendantNodesAndSelf(span);
-                string queryName = "";
-                var returnNode = helper.GetFirstNodeOfReturnStatmentSyntaxType(nodesAtLine);
-                //Check if current document line is having 'return' keyword.
-                //In this case we need to Descendant Node to find ArgumentList
-                if (returnNode != null)
-                {
-                    var ReturnNodeDescendanted = returnNode.DescendantNodesAndSelf();
-                    queryName = helper.GetQueryStringFromSyntaxNodes(ReturnNodeDescendanted);
-                }
-                //In case we don't have cursor around 'return', SyntaxNodes taken from line
-                //should have needed ArgumentLineSyntax
                 else
                 {
-                    queryName = helper.GetQueryStringFromSyntaxNodes(nodesAtLine);
+                    _statusBar.ShowText($"Multiple occurence of same statment({queryName}) found.");
                 }
+            }
+            else
+            { 
                 var keys = Indexer.GetXmlKeysByQueryId(queryName);
                 if (keys.Any())
                 {
-                    var windowContent = (ResultWindowControl)_resultWindow.Content;
-                    var statmentsToShow = keys.Select(x => Indexer.GetXmlStatment(x)).ToList();
-                    windowContent.ShowResults(statmentsToShow);
-
-                    IVsWindowFrame windowFrame = (IVsWindowFrame)_resultWindow.Frame;
-
-                    if (keys.Count == 1)
-                    {
-                        var statment = Indexer.GetXmlStatmentOrNull(keys.First());
-                        _envDTE.ItemOperations.OpenFile(statment.QueryFilePath);
-                        TextSelection sel = (TextSelection)_envDTE.ActiveDocument.Selection;
-                        TextPoint pnt = sel.ActivePoint;
-                        sel.GotoLine(statment.QueryLineNumber, true);
-                    }
-                    //This should never happend without implementing logic for multiple xml statments of same name.
-                    else
-                    {
-                        _statusBar.ShowText($"Multiple statments of name:{queryName}");
-                        //ErrorHandler.ThrowOnFailure(windowFrame.Show());
-                    }
+                    var statment = Indexer.GetXmlStatmentOrNull(keys.First());
+                    DocumentNavigationInstance.instance.OpenDocumentAndHighlightLine(statment.QueryFilePath, statment.QueryLineNumber);
                 }
                 else
                 {
-                    _statusBar.ShowText($"No occurence of query named: {queryName} find in SqlMaps.");
+                    statments = keys.Select(Indexer.GetXmlStatment).Cast<BaseIndexerValue>().ToList();
+                    _statusBar.ShowText($"No occurence of query named: {queryName} found in SqlMaps.");
                 }
+            }
+            if(statments != null && statments.Count > 1)
+            {
+                var windowContent = (ResultWindowControl)_resultWindow.Content;
+                windowContent.ShowResults(statments);
+                IVsWindowFrame windowFrame = (IVsWindowFrame)_resultWindow.Frame;
+                ErrorHandler.ThrowOnFailure(windowFrame.Show());
             }
         }
     }
