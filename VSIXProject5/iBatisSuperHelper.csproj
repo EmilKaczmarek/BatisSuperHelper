@@ -93,7 +93,7 @@
     <Compile Include="HelpersAndExtensions\VisualStudio\TextDocumentExtension.cs" />
     <Compile Include="HelpersAndExtensions\VisualStudio\TextSelectionExtension.cs" />
     <Compile Include="HelpersAndExtensions\XmlHelper.cs" />
-    <Compile Include="Indexers\IndexersProcessStatus.cs" />
+    <Compile Include="Indexers\Models\BaseIndexer.cs" />
     <Compile Include="Models\XmlFileInfo.cs" />
     <Compile Include="Parsers\XmlParser.cs" />
     <Compile Include="RenameCommand.cs" />
@@ -159,6 +159,9 @@
     <Content Include="stylesheet.css" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="AsyncEnumerable, Version=2.2.1.0, Culture=neutral, PublicKeyToken=0426b068161bd1d1, processorArchitecture=MSIL">
+      <HintPath>..\packages\AsyncEnumerator.2.2.1\lib\net45\AsyncEnumerable.dll</HintPath>
+    </Reference>
     <Reference Include="EnvDTE, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>

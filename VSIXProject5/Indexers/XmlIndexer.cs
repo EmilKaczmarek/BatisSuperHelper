@@ -12,9 +12,9 @@ using VSIXProject5.Parsers;
 
 namespace VSIXProject5.Indexers
 {
-    public class XmlIndexer
+    public class XmlIndexer:BaseIndexer
     {
-        public List<XmlIndexerResult> BuildIndexer(List<XmlFileInfo> solutionXmlDocuments)
+        public List<XmlIndexerResult> BuildIndexerAsync(List<XmlFileInfo> solutionXmlDocuments)
         {
             var result = new List<XmlIndexerResult>();
             foreach (var xmlSolutionDocument in solutionXmlDocuments)

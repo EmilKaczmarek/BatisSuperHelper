@@ -39,10 +39,6 @@ namespace VSIXProject5.Actions.Abstracts
         public virtual void BeforeQuery(object sender, EventArgs e)
         {
             OleMenuCommand menuCommand = sender as OleMenuCommand;
-            if (IndexersProcessStatus.CodeIndexerFinished && IndexersProcessStatus.XmlIndexerFinished)
-            {
-                menuCommand.Enabled = true;
-            }
             _textManager.GetActiveView(1, null, out IVsTextView textView);
             textView.GetCaretPos(out int selectionLineNum, out int selectionCol);
             //Get carret position

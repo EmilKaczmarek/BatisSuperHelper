@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using HtmlAgilityPack;
 using VSIXProject5.Constants;
 using VSIXProject5.Helpers;
@@ -11,8 +12,11 @@ namespace VSIXProject5.Parsers
 {
     public class XmlParser
     {
-        private Lazy<string> _xmlNamespace => new Lazy<string>(GetDocumentNamespace);
+        private Lazy<string> _xmlNamespace => new Lazy<string>(GetDocumentXmlNamespace);
         public string XmlNamespace => _xmlNamespace.Value;
+
+        private Lazy<string> _mapNamespace => new Lazy<string>(GetDocumentMapNamespace);
+        public string MapNamespace =>_mapNamespace.Value;
 
         private HtmlDocument _xmlDocument;
         private string _filePath;
@@ -29,6 +33,13 @@ namespace VSIXProject5.Parsers
             _filePath = filePath;
             _fileName = Path.GetFileName(filePath);
             _fileProjectName = fileProject;
+        }
+
+        public static async Task<XmlParser> WithFilePathAndFileInfoAsync(string filePath, string fileProjectName)
+        {
+            var instance = new XmlParser(filePath, fileProjectName);
+            await Task.Run(() => instance._xmlDocument.Load(filePath));
+            return instance;
         }
 
         public static XmlParser WithStringReaderAndFileInfo(StringReader stringReader, string filePath, string fileProjectName)
@@ -66,9 +77,10 @@ namespace VSIXProject5.Parsers
             {
                 QueryFileName = _fileName,
                 QueryFilePath = _filePath,
-                QueryId = e.Id,
+                QueryId = MapNamespace==null?e.Id:$"{MapNamespace}.{e.Id}",
                 QueryLineNumber = e.Line,
                 QueryVsProjectName = _fileProjectName,
+                MapNamespace = MapNamespace
             }).ToList();
         }
 
@@ -76,7 +88,11 @@ namespace VSIXProject5.Parsers
         {
             var nodes = _xmlDocument.DocumentNode.Descendants();
             var lineNode = nodes.Where(e=>e.Name != "#text").FirstOrDefault(e => e.Line == lineNumber);
-            return lineNode?.Id;
+            if (string.IsNullOrEmpty(MapNamespace))
+            {
+                return lineNode?.Id;
+            }
+            return lineNode == null?null:$"{MapNamespace}.{lineNode.Id}";
         }
 
         public List<int> GetStatmentElementsLineNumber()
@@ -96,10 +112,21 @@ namespace VSIXProject5.Parsers
             return statementRootNode.Descendants();
         }
 
-        private string GetDocumentNamespace()
+        private string GetDocumentXmlNamespace()
         {
-            var fileRootNode = _xmlDocument.DocumentNode.SelectSingleNode(IBatisConstants.MapFileRootElementXPath);
+            var fileRootNode = GetMapDocumentRootNode();
             return fileRootNode.Attributes.FirstOrDefault(e => e.Name == "xmlns").Value;
+        }
+
+        private string GetDocumentMapNamespace()
+        {
+            var fileRootNode = GetMapDocumentRootNode();
+            return fileRootNode.Attributes.FirstOrDefault(e => e.Name == "namespace")?.Value;
+        }
+
+        private HtmlNode GetMapDocumentRootNode()
+        {
+            return _xmlDocument.DocumentNode.SelectSingleNode(IBatisConstants.MapFileRootElementXPath);
         }
     }
 }

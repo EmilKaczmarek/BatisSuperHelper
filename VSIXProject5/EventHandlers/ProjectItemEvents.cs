@@ -14,13 +14,13 @@ namespace VSIXProject5.EventHandlers
     {
         public void ItemRenamed(ProjectItem ProjectItem, string OldName)
         {
-            Indexer.RenameStatmentsFile(OldName, ProjectItem.Name);
+            Indexer.Instance.RenameStatmentsFile(OldName, ProjectItem.Name);
         }
 
         public void ItemRemoved(ProjectItem ProjectItem)
         {
             string fileName = ProjectItem.Name;
-            Indexer.RemoveStatmentsForFile(fileName, false);
+            Indexer.Instance.RemoveStatmentsForFile(fileName, false);
         }
 
         public void ItemAdded(ProjectItem ProjectItem)
@@ -29,7 +29,7 @@ namespace VSIXProject5.EventHandlers
             if (projectItemExtension == ".xml")
             {
                 XmlParser parser = XmlParser.WithFilePathAndFileInfo(ProjectItem.FileNames[0], ProjectItem.ContainingProject.Name);
-                Indexer.Build(parser.GetMapFileStatments());
+                Indexer.Instance.Build(parser.GetMapFileStatments());
             }
         }
     }
