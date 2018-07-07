@@ -100,7 +100,6 @@ namespace VSIXProject5
         public ToolWindowPane ResultWindow;
         public Window SolutionExplorer;
         public VisualStudioWorkspace Workspace;
-
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
         /// where you can put all the initialization code that rely on services provided by VisualStudio.
@@ -180,7 +179,7 @@ namespace VSIXProject5
                     if (isIBatisQueryXmlFile)
                     {
                         var newStatments = parser.GetMapFileStatments();
-                        Indexer.UpdateXmlStatmentForFile(newStatments);
+                        Indexer.Instance.UpdateXmlStatmentForFile(newStatments);
                     }
                 }
                 else if (docLanguage == "CSharp")
@@ -197,7 +196,7 @@ namespace VSIXProject5
                         return;
                     }
                     var csIndexer = new CSharpIndexer().BuildFromDocumentAsync(roslynDocument).Result;
-                    Indexer.UpdateCodeStatmentForFile(csIndexer);
+                    Indexer.Instance.UpdateCodeStatmentForFile(csIndexer);
                 }
             }
         }
@@ -216,13 +215,12 @@ namespace VSIXProject5
                     var xmlFiles = DocumentHelper.GetXmlFiles(projectItems);
                     Debug.Write(xmlFiles);
                     Debug.WriteLine($"Xml Files: {xmlFiles.Count}.\n {string.Join("\n", xmlFiles.Select(e=>e.FilePath))}");
-                    var xmlIndexerResult = xmlIndexer.BuildIndexer(xmlFiles);
-                    Indexer.Build(xmlIndexerResult);
-                    IndexersProcessStatus.XmlIndexerFinished = true;
+                    var xmlIndexerResult = xmlIndexer.BuildIndexerAsync(xmlFiles);
+                    Indexer.Instance.Build(xmlIndexerResult);
                     Debug.WriteLine("Solution loaded event Start");
                     break;
                 case EventConstats.VS.SolutionLoad.SolutionOnClose:
-                    Indexer.ClearAll();
+                    Indexer.Instance.ClearAll();
                     break;
                 default:
                     break;

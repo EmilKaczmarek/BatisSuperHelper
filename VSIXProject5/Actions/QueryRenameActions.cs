@@ -3,28 +3,16 @@ using EnvDTE80;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Editor;
-using Microsoft.VisualStudio.LanguageServices;
-using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Documents;
-using System.Xml;
-using System.Xml.Linq;
 using VSIXProject5.Actions.Abstracts;
 using VSIXProject5.Actions.Shared;
-using VSIXProject5.Constants;
 using VSIXProject5.Helpers;
 using VSIXProject5.HelpersAndExtensions.VisualStudio;
 using VSIXProject5.Indexers;
-using VSIXProject5.Parsers;
 using VSIXProject5.VSIntegration;
 using VSIXProject5.Windows.RenameWindow;
 using VSIXProject5.Windows.RenameWindow.ViewModel;
@@ -72,19 +60,20 @@ namespace VSIXProject5.Actions
                     QueryText = queryName,
                 });
 
-            var wtfbool = window.ShowModal();
+            window.ShowModal();
             var returnViewModel = window.DataContext as RenameViewModel;
+
             if (returnViewModel.WasInputCanceled || returnViewModel.QueryText == queryName)
             {
                 return;
             }
 
-            var codeKeys = Indexer.GetCodeKeysByQueryId(queryName);
-            var xmlKeys = Indexer.GetXmlKeysByQueryId(queryName);
+            var codeKeys = Indexer.Instance.GetCodeKeysByQueryId(queryName);
+            var xmlKeys = Indexer.Instance.GetXmlKeysByQueryId(queryName);
 
             foreach (var xmlQuery in xmlKeys)
             {
-                var query = Indexer.GetXmlStatment(xmlQuery);
+                var query = Indexer.Instance.GetXmlStatment(xmlQuery);
 
                 var projectItem = _envDTE.Solution.FindProjectItem(query.QueryFileName);
                 var isProjectItemOpened = projectItem.IsOpen;
@@ -92,17 +81,15 @@ namespace VSIXProject5.Actions
                 {
                     projectItem.Open();
                 }
-                var kurwa = projectItem.Properties;
-                var wtfDocument = projectItem.Document;
                 var projectItemSelection = projectItem.Document.Selection as EnvDTE.TextSelection;
                 projectItemSelection.StartOfDocument();
 
-                var wtf = projectItemSelection.FindPattern(xmlQuery.StatmentName, (int)(vsFindOptions.vsFindOptionsMatchWholeWord));
-                var wtfBool = projectItemSelection.ReplacePattern(xmlQuery.StatmentName, returnViewModel.QueryText, (int)(vsFindOptions.vsFindOptionsMatchWholeWord));
-                Indexer.RenameXmlQuery(xmlQuery, returnViewModel.QueryText);
+                var findResult = projectItemSelection.FindPattern(xmlQuery.StatmentName, (int)(vsFindOptions.vsFindOptionsMatchWholeWord));
+                var replaceResult = projectItemSelection.ReplacePattern(xmlQuery.StatmentName, returnViewModel.QueryText, (int)(vsFindOptions.vsFindOptionsMatchWholeWord));
+                Indexer.Instance.RenameXmlQuery(xmlQuery, returnViewModel.QueryText);
             }
             foreach (var codeKey in codeKeys) { 
-                var codeQueries = Indexer.GetCodeStatments(codeKey);
+                var codeQueries = Indexer.Instance.GetCodeStatments(codeKey);
                 var group = codeQueries.GroupBy(x => x.DocumentId, x => x);
                 foreach(var file in group)
                 {
@@ -126,7 +113,7 @@ namespace VSIXProject5.Actions
                         var sucess = _workspace.TryApplyChanges(doc.Project.Solution);
                     }
                 }
-                Indexer.RenameCodeQueries(codeKey, returnViewModel.QueryText);
+                Indexer.Instance.RenameCodeQueries(codeKey, returnViewModel.QueryText);
             }
         }
     }

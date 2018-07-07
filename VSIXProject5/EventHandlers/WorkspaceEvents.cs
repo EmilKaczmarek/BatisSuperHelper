@@ -11,12 +11,13 @@ namespace VSIXProject5.Events
 {
     public class WorkspaceEvents
     {   
+
         private static async void BuildIndexerWithCSharpResults(Solution solution)
         {
             var solutionFiles = solution.Projects.SelectMany(x => x.Documents).ToList();
             CSharpIndexer csIndexer = new CSharpIndexer();
             var codeIndexerResult = await csIndexer.BuildIndexerAsync(solutionFiles);
-            Indexer.Build(codeIndexerResult);
+            Indexer.Instance.Build(codeIndexerResult);
         }
         private static async void DocumentsAddedAction(IEnumerable<Document> addedDocuments)
         {
@@ -25,14 +26,14 @@ namespace VSIXProject5.Events
             foreach (var document in addedDocuments)
             {
                 var documentIndexerResult = await csIndexer.BuildFromDocumentAsync(document);
-                Indexer.Build(documentIndexerResult);
+                Indexer.Instance.Build(documentIndexerResult);
             }
         }
         private static async void DocumentRemovedAction(IEnumerable<DocumentId> removedDocumentsIds)
         {
             foreach(var documentId in removedDocumentsIds)
             {
-                Indexer.RemoveCodeStatmentsForDocumentId(documentId);
+                Indexer.Instance.RemoveCodeStatmentsForDocumentId(documentId);
             }
         }
         public static void WorkspaceChanged(object sender, WorkspaceChangeEventArgs e)
@@ -42,7 +43,6 @@ namespace VSIXProject5.Events
             {
                 case WorkspaceChangeKind.SolutionAdded:
                     BuildIndexerWithCSharpResults(e.NewSolution);
-                    IndexersProcessStatus.CodeIndexerFinished = true;
                     break;
                 case WorkspaceChangeKind.SolutionChanged:
                     break;

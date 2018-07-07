@@ -4,6 +4,8 @@ using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.LanguageServices;
 using Microsoft.VisualStudio.Shell;
 using System;
+using System.Collections.Async;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -17,7 +19,7 @@ using VSIXProject5.Models;
 
 namespace VSIXProject5.Indexers
 {
-    public class CSharpIndexer
+    public class CSharpIndexer: BaseIndexer
     {
         private readonly Workspace _workspace;
         public CSharpIndexer()
@@ -35,10 +37,8 @@ namespace VSIXProject5.Indexers
             var result = new List<CSharpIndexerResult>();
 
             foreach (var document in documents)
-            {
-                Debug.WriteLine($"Adding {document.FilePath}");
+            { 
                 result.AddRange(await BuildFromDocumentAsync(document));
-                Debug.WriteLine($"Added {document.FilePath}");
             }
 
             return result;
@@ -69,6 +69,7 @@ namespace VSIXProject5.Indexers
 
         private List<CSharpIndexerResult> Build(SemanticModel semModel, Document document)
         {
+            Stopwatch sw = new Stopwatch();
             var helper = new NodeHelpers(semModel);
             var result = new List<CSharpIndexerResult>();
             SyntaxTree synTree = null;
@@ -90,10 +91,9 @@ namespace VSIXProject5.Indexers
             {
                 if (argumentNode is ArgumentListSyntax)
                 {
-                    var nodeAncestors = argumentNode.Ancestors().ToList();
+                    var nodeAncestors = argumentNode.Ancestors().OfType<InvocationExpressionSyntax>().ToList();
                     if (nodeAncestors.Any(x =>
-                         semModel.GetSymbolInfo(x).Symbol != null &&
-                         semModel.GetSymbolInfo(x).Symbol.ContainingNamespace.ToDisplayString().Contains("Batis")
+                         semModel.GetSymbolInfo(x).Symbol?.ContainingNamespace?.ToDisplayString().Contains("Batis") ==  true
                     ))
                     {
                         Location loc = Location.Create(synTree, argumentNode.Span);
@@ -110,6 +110,8 @@ namespace VSIXProject5.Indexers
                     }
                 }
             }
+            sw.Stop();
+            Debug.WriteLine($"Build: {sw.Elapsed}");
             return result;
         }
     }

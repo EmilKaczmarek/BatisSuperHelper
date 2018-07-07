@@ -1,8 +1,6 @@
-﻿using EnvDTE;
-using EnvDTE80;
+﻿using EnvDTE80;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell;
@@ -11,23 +9,14 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
-using System.Xml.Linq;
 using VSIXProject5.Actions.Abstracts;
 using VSIXProject5.Actions.Shared;
-using VSIXProject5.Constants;
-using VSIXProject5.Helpers;
 using VSIXProject5.HelpersAndExtensions.VisualStudio;
 using VSIXProject5.Indexers;
 using VSIXProject5.Indexers.Models;
-using VSIXProject5.Parsers;
 using VSIXProject5.VSIntegration;
 using VSIXProject5.VSIntegration.Navigation;
-using static VSIXProject5.HelpersAndExtensions.XmlHelper;
 
 namespace VSIXProject5.Actions
 {
@@ -64,8 +53,8 @@ namespace VSIXProject5.Actions
 
             if (snapshot.GetContentTypeName() == "XML")
             {
-                var statmentsKeys = Indexer.GetCodeKeysByQueryId(queryName);
-                statments = statmentsKeys.Select(Indexer.GetCodeStatments).SelectMany(x => x).Cast<BaseIndexerValue>().ToList();
+                var statmentsKeys = Indexer.Instance.GetCodeKeysByQueryId(queryName);
+                statments = statmentsKeys.Select(Indexer.Instance.GetCodeStatments).SelectMany(x => x).Cast<BaseIndexerValue>().ToList();
 
                 if(statments.Count == 1)
                 {
@@ -82,18 +71,21 @@ namespace VSIXProject5.Actions
             }
             else
             { 
-                var keys = Indexer.GetXmlKeysByQueryId(queryName);
+                var keys = Indexer.Instance.GetXmlKeysByQueryId(queryName);
+                var testCode = Indexer.Instance.GetCodeStatmentsDictonary();
+                var testXml = Indexer.Instance.GetXmlStatmentsDictonary();
                 if (keys.Any())
                 {
-                    var statment = Indexer.GetXmlStatmentOrNull(keys.First());
+                    var statment = Indexer.Instance.GetXmlStatmentOrNull(keys.First());
                     DocumentNavigationInstance.instance.OpenDocumentAndHighlightLine(statment.QueryFilePath, statment.QueryLineNumber);
                 }
                 else
                 {
-                    statments = keys.Select(Indexer.GetXmlStatment).Cast<BaseIndexerValue>().ToList();
+                    statments = keys.Select(Indexer.Instance.GetXmlStatment).Cast<BaseIndexerValue>().ToList();
                     _statusBar.ShowText($"No occurence of query named: {queryName} found in SqlMaps.");
                 }
             }
+
             if(statments != null && statments.Count > 1)
             {
                 var windowContent = (ResultWindowControl)_resultWindow.Content;

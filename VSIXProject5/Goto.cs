@@ -60,8 +60,6 @@ namespace VSIXProject5
                     menuCommandID,
                     "Go to Query");
 
-                menuItem.Enabled = false;//Disable till indexers finished
-
                 commandService.AddCommand(menuItem);
             }                     
         }
