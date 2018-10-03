@@ -20,6 +20,13 @@ namespace VSIXProject5.Constants
             "procedure",
             "sql"
         };
+        public static readonly List<string> MethodNames = new List<string>
+        {
+            "QueryForList",
+            "Delete",
+            "Insert",
+            "QueryForObject"
+        };
         public const string StatementsRootElementName = "statements";
         public const string StatementsRootElementXPath = "/sqlmap[1]/statements[1]";
         public const string StatmentIdAttributeName = "id";

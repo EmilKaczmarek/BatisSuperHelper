@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VSIXProject5.Constants;
 using VSIXProject5.Helpers;
 using VSIXProject5.HelpersAndExtensions.Roslyn;
 using VSIXProject5.Indexers.Models;
@@ -69,49 +70,34 @@ namespace VSIXProject5.Indexers
 
         private List<CSharpIndexerResult> Build(SemanticModel semModel, Document document)
         {
-            Stopwatch sw = new Stopwatch();
-            var helper = new NodeHelpers(semModel);
             var result = new List<CSharpIndexerResult>();
             SyntaxTree synTree = null;
             document.TryGetSyntaxTree(out synTree);
             var treeRoot = (CompilationUnitSyntax)synTree.GetRoot();
 
-            //if (!HasBatisUsing(treeRoot))
-            //{
-            //    return new List<CSharpIndexerResult>();
-            //}
-          
             var nodes = treeRoot.DescendantNodesAndSelf();
             var argumentNodes = nodes
                 .OfType<ArgumentListSyntax>()
-                .Where(x => x.Arguments.Any())
-                .Select(x => x)
-                .ToList();
-            foreach (var argumentNode in argumentNodes)
+                .Where(x => x.Arguments.Any());
+
+            foreach (var node in argumentNodes)
             {
-                if (argumentNode is ArgumentListSyntax)
+                var nodeAncestors = node.Ancestors().OfType<InvocationExpressionSyntax>().FirstOrDefault().Expression.DescendantNodes().OfType<IdentifierNameSyntax>();
+                if (nodeAncestors.Any(e => IBatisConstants.MethodNames.Contains(e.Identifier.ValueText)))
                 {
-                    var nodeAncestors = argumentNode.Ancestors().OfType<InvocationExpressionSyntax>().ToList();
-                    if (nodeAncestors.Any(x =>
-                         semModel.GetSymbolInfo(x).Symbol?.ContainingNamespace?.ToDisplayString().Contains("Batis") ==  true
-                    ))
+                    Location loc = Location.Create(synTree, node.Span);
+                    result.Add(new CSharpIndexerResult
                     {
-                        Location loc = Location.Create(synTree, argumentNode.Span);
-                        IndexerKey key = IndexerKey.ConvertToKey(argumentNode.Arguments.FirstOrDefault().ToCleanString(), document.Project.Name);
-                        result.Add(new CSharpIndexerResult
-                        {
-                            QueryFileName = Path.GetFileName(document.FilePath),
-                            QueryId = argumentNode.Arguments.FirstOrDefault().ToCleanString(),
-                            QueryLineNumber = loc.GetLineSpan().StartLinePosition.Line + 1,
-                            QueryVsProjectName = document.Project.Name,
-                            QueryFilePath = document.FilePath,
-                            DocumentId = document.Id,
-                        });
-                    }
+                        QueryFileName = Path.GetFileName(document.FilePath),
+                        QueryId = node.Arguments.FirstOrDefault().ToCleanString(),
+                        QueryLineNumber = loc.GetLineSpan().StartLinePosition.Line + 1,
+                        QueryVsProjectName = document.Project.Name,
+                        QueryFilePath = document.FilePath,
+                        DocumentId = document.Id,
+                    });
                 }
             }
-            sw.Stop();
-            Debug.WriteLine($"Build: {sw.Elapsed}");
+
             return result;
         }
     }
