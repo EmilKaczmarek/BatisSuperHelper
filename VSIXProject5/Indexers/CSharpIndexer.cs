@@ -82,14 +82,19 @@ namespace VSIXProject5.Indexers
 
             foreach (var node in argumentNodes)
             {
-                var nodeAncestors = node.Ancestors().OfType<InvocationExpressionSyntax>().FirstOrDefault().Expression.DescendantNodes().OfType<IdentifierNameSyntax>();
-                if (nodeAncestors.Any(e => IBatisConstants.MethodNames.Contains(e.Identifier.ValueText)))
+                var firstInvocationOfNodeAncestors = node.Ancestors().OfType<InvocationExpressionSyntax>().FirstOrDefault();
+
+                if (firstInvocationOfNodeAncestors == null)
+                    continue;
+
+                var nameIdentifiers = firstInvocationOfNodeAncestors.Expression.DescendantNodes().OfType<IdentifierNameSyntax>();
+                if (nameIdentifiers.Any(e => IBatisConstants.MethodNames.Contains(e.Identifier.ValueText)))
                 {
                     Location loc = Location.Create(synTree, node.Span);
                     result.Add(new CSharpIndexerResult
                     {
                         QueryFileName = Path.GetFileName(document.FilePath),
-                        QueryId = node.Arguments.FirstOrDefault().ToCleanString(),
+                        QueryId = semModel.GetConstantValue(node.Arguments.FirstOrDefault().Expression).Value.ToString(),
                         QueryLineNumber = loc.GetLineSpan().StartLinePosition.Line + 1,
                         QueryVsProjectName = document.Project.Name,
                         QueryFilePath = document.FilePath,
