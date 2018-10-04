@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -112,8 +113,11 @@ namespace VSIXProject5.Helpers
             {
                 var syntaxArguments = GetArgumentListSyntaxFromSyntaxNodesWhereArgumentsAreNotEmpty(SyntaxNodes);
                 var singleArgumentListSyntax = GetProperArgumentSyntaxNode(syntaxArguments);
+
                 var queryArgument = GetArgumentSyntaxOfStringType(singleArgumentListSyntax);
-                return queryArgument.ToString().Replace("\"", "").Trim();
+                var constantValue = _semanticModel.GetConstantValue(queryArgument.Expression).Value;
+
+                return constantValue != null?constantValue.ToString(): queryArgument.ToString().Replace("\"", "").Trim();//TODO: Use scripting to handle even more crazy cases.
             }
             return null;
         }
