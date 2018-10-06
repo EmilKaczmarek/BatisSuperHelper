@@ -77,7 +77,7 @@ namespace VSIXProject5.Parsers
             {
                 QueryFileName = _fileName,
                 QueryFilePath = _filePath,
-                QueryId = MapNamespace==null?e.Id:$"{MapNamespace}.{e.Id}",
+                QueryId = e.Id,
                 QueryLineNumber = e.Line,
                 QueryVsProjectName = _fileProjectName,
                 MapNamespace = MapNamespace
@@ -88,11 +88,8 @@ namespace VSIXProject5.Parsers
         {
             var nodes = _xmlDocument.DocumentNode.Descendants();
             var lineNode = nodes.Where(e=>e.Name != "#text").FirstOrDefault(e => e.Line == lineNumber);
-            if (string.IsNullOrEmpty(MapNamespace))
-            {
-                return lineNode?.Id;
-            }
-            return lineNode == null?null:$"{MapNamespace}.{lineNode.Id}";
+
+            return lineNode?.Id;
         }
 
         public List<int> GetStatmentElementsLineNumber()
@@ -121,7 +118,8 @@ namespace VSIXProject5.Parsers
         private string GetDocumentMapNamespace()
         {
             var fileRootNode = GetMapDocumentRootNode();
-            return fileRootNode.Attributes.FirstOrDefault(e => e.Name == "namespace")?.Value;
+            var names = fileRootNode.Attributes.FirstOrDefault(e => e.Name == "namespace")?.Value;
+            return names;
         }
 
         private HtmlNode GetMapDocumentRootNode()
