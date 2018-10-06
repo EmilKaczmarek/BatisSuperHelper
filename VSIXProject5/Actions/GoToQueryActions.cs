@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using VSIXProject5.Actions.Abstracts;
 using VSIXProject5.Actions.Shared;
+using VSIXProject5.HelpersAndExtensions;
 using VSIXProject5.HelpersAndExtensions.VisualStudio;
 using VSIXProject5.Indexers;
 using VSIXProject5.Indexers.Models;
@@ -53,7 +54,8 @@ namespace VSIXProject5.Actions
 
             if (snapshot.GetContentTypeName() == "XML")
             {
-                var statmentsKeys = Indexer.Instance.GetCodeKeysByQueryId(queryName);
+                var statmentsKeys = Indexer.Instance.GetCodeKeysByFullQueryName(queryName);
+
                 statments = statmentsKeys.Select(Indexer.Instance.GetCodeStatments).SelectMany(x => x).Cast<BaseIndexerValue>().ToList();
 
                 if(statments.Count == 1)
@@ -70,11 +72,17 @@ namespace VSIXProject5.Actions
                 }
             }
             else
-            { 
-                var keys = Indexer.Instance.GetXmlKeysByQueryId(queryName);
+            {
+                var namespaceQueryPair = MapNamespaceHelper.DetermineMapNamespaceQueryPairFromCodeInput(queryName);
+
+                List<IndexerKey> keys = namespaceQueryPair == null ? 
+                    Indexer.Instance.GetXmlKeysByQueryId(queryName) : 
+                    Indexer.Instance.GetXmlKeysByQueryIdAndNamespace(namespaceQueryPair.Item2, namespaceQueryPair.Item1);
+
                 var testCode = Indexer.Instance.GetCodeStatmentsDictonary();
                 var testXml = Indexer.Instance.GetXmlStatmentsDictonary();
-                if (keys.Any())
+
+                if (keys.Count() == 1)
                 {
                     var statment = Indexer.Instance.GetXmlStatmentOrNull(keys.First());
                     DocumentNavigationInstance.instance.OpenDocumentAndHighlightLine(statment.QueryFilePath, statment.QueryLineNumber);

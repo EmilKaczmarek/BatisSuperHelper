@@ -86,6 +86,7 @@
     <Compile Include="EventHandlers\WorkspaceEvents.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="HelpersAndExtensions\IBatisHelper.cs" />
+    <Compile Include="HelpersAndExtensions\MapNamespaceHelper.cs" />
     <Compile Include="HelpersAndExtensions\Roslyn\ArgumentSyntaxExtension.cs" />
     <Compile Include="HelpersAndExtensions\Roslyn\RoslynSolutionExtension.cs" />
     <Compile Include="HelpersAndExtensions\VisualStudio\ProjectItemHelper.cs" />

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using VSIXProject5.HelpersAndExtensions;
 using VSIXProject5.Indexers.Models;
 namespace VSIXProject5.Indexers
 {
@@ -50,13 +51,39 @@ namespace VSIXProject5.Indexers
         {
             return xmlStatments;
         }
-        public List<IndexerKey> GetCodeKeysByQueryId(string queryId)
+        public List<IndexerKey> GetCodeKeysByFullQueryName(string queryName)
         {
-            return codeStatments.Keys.Where(e => e.StatmentName.Equals(queryId)).ToList();
+            var parts = MapNamespaceHelper.DetermineMapNamespaceQueryPairFromCodeInput(queryName);
+
+            if (parts == null)
+            {
+                return GetCodeKeysByQueryNameIgnoreNamespace(queryName);
+            }
+
+            var sameNameQueries = codeStatments.Keys.Where(e => e.StatmentName.Contains(parts.Item2));
+            var queriesFiltered = sameNameQueries.Where(e => e.StatmentName.Contains(parts.Item1));
+
+            return queriesFiltered.Any() ? queriesFiltered.ToList() : sameNameQueries.ToList();
+        }
+        public List<IndexerKey> GetCodeKeysByQueryNameIgnoreNamespace(string queryName)
+        {
+            return codeStatments.Keys.Where(e => e.StatmentName.Contains(queryName)).ToList();
         }
         public List<IndexerKey> GetXmlKeysByQueryId(string queryId)
         {
+            var wtf = xmlStatments.Keys.Where(e => e.StatmentName.Equals(queryId)).ToList();
+            var wtf2 = xmlStatments.Keys.Where(e => e.StatmentName.Contains(queryId)).ToList();
+            var wtf3 = xmlStatments.Keys.Select(e => e.StatmentName).ToList();
             return xmlStatments.Keys.Where(e => e.StatmentName.Equals(queryId)).ToList();
+        }
+        public List<IndexerKey> GetXmlKeysByQueryIdAndNamespace(string queryId, string mapNamespace)
+        {
+            var keys = xmlStatments.Keys.Where(e => e.StatmentName.Equals(queryId)).ToList();
+            var test = keys.Select(e => xmlStatments[e]).ToList();
+            Predicate<IndexerKey> valuePredictate = (key) => xmlStatments[key].MapNamespace?.Equals(mapNamespace) == false;
+            keys.RemoveAll(valuePredictate);
+
+            return keys;
         }
         public List<CSharpIndexerResult> GetCodeStatmentOrNull(IndexerKey key)
         {
