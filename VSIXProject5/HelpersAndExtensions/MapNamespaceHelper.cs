@@ -10,6 +10,9 @@ namespace VSIXProject5.HelpersAndExtensions
     {
         public static Tuple<string,string> DetermineMapNamespaceQueryPairFromCodeInput(string queryWithNamespace)
         {
+            if (queryWithNamespace == null)
+                return null;
+
             var splited = queryWithNamespace.Split('.');
             if(splited.Count() < 2)
             {
