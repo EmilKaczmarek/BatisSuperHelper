@@ -98,6 +98,23 @@ namespace VSIXProject5.Parsers
             return statementChildNodes.Where(e => e.Name != "#text").Select(e => e.Line).ToList();
         }
 
+        public bool HasSelectedLineValidQuery(int lineNumber)
+        {
+            var nodes = _xmlDocument.DocumentNode.Descendants();
+            var line = nodes.FirstOrDefault(e => e.Line == lineNumber);
+            if(line == null)
+            {
+                var filteredNodes = nodes.Where(e => e.Name != "#text");
+                var nearest = filteredNodes.Select(x=>x.Line)
+                    .Aggregate((current, next) => Math.Abs(current - lineNumber) < Math.Abs(next - lineNumber) ? 
+                    current : 
+                    next
+                    );
+                line = nodes.FirstOrDefault(e => e.Line == nearest);
+            }
+            return line?.Name != null && IBatisConstants.StatementNames.Contains(line.Name);
+        }
+
         private IEnumerable<HtmlNode> GetChildNodesOfParentByXPath(string xPath)
         {
             var statementRootNode = _xmlDocument.DocumentNode.SelectSingleNode(xPath);

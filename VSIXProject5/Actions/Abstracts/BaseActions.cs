@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using VSIXProject5.Actions.Shared;
 using VSIXProject5.Helpers;
 using VSIXProject5.Indexers;
 using VSIXProject5.Parsers;
@@ -39,6 +40,9 @@ namespace VSIXProject5.Actions.Abstracts
         public virtual void BeforeQuery(object sender, EventArgs e)
         {
             OleMenuCommand menuCommand = sender as OleMenuCommand;
+            menuCommand.Visible = false;
+            menuCommand.Enabled = false;
+
             _textManager.GetActiveView(1, null, out IVsTextView textView);
             textView.GetCaretPos(out int selectionLineNum, out int selectionCol);
             //Get carret position
@@ -71,7 +75,9 @@ namespace VSIXProject5.Actions.Abstracts
                 {
                     nodesAtLine = returnNode.DescendantNodesAndSelf();
                 }
-                menuCommand.Visible = helper.IsAnySyntaxNodeContainIBatisNamespace(nodesAtLine);
+                var validLine = helper.IsAnySyntaxNodeContainIBatisNamespace(nodesAtLine);
+                menuCommand.Visible = validLine;
+                menuCommand.Enabled = validLine;
                 menuCommand.Text = "Go to Query";
             }
             else if (caretPosition.Snapshot.ContentType.TypeName == "XML")
@@ -83,10 +89,12 @@ namespace VSIXProject5.Actions.Abstracts
                     XmlParser parser = XmlParser.WithStringReader(new StringReader(text));
 
                     bool isIBatisQueryXmlFile = parser.XmlNamespace == @"http://ibatis.apache.org/mapping";
+                    bool isLineSupported = parser.HasSelectedLineValidQuery(selectionLineNum + 1);
 
-                    if (isIBatisQueryXmlFile)
+                    if (isIBatisQueryXmlFile && isLineSupported)
                     {
                         menuCommand.Visible = true;
+                        menuCommand.Enabled = true;
                         menuCommand.Text = "Go to Query execution";
                     }
                 }
