@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using HtmlAgilityPack;
 using VSIXProject5.Constants;
 using VSIXProject5.Helpers;
+using VSIXProject5.HelpersAndExtensions;
 using VSIXProject5.Indexers.Models;
 
 namespace VSIXProject5.Parsers
@@ -18,10 +19,14 @@ namespace VSIXProject5.Parsers
         private Lazy<string> _mapNamespace => new Lazy<string>(GetDocumentMapNamespace);
         public string MapNamespace =>_mapNamespace.Value;
 
+        private Lazy<bool> _useStatementNamespaces => new Lazy<bool>(IsFileUsingStatementNamespaces);
+        public bool IsUsingStatementNamespaces => _useStatementNamespaces.Value;
+
         private HtmlDocument _xmlDocument;
         private string _filePath;
         private string _fileName;
         private string _fileProjectName;
+
 
         private XmlParser()
         {
@@ -77,11 +82,11 @@ namespace VSIXProject5.Parsers
             {
                 QueryFileName = _fileName,
                 QueryFilePath = _filePath,
-                QueryId = e.Id,
+                QueryId = IsUsingStatementNamespaces ? MapNamespaceHelper.CreateFullQueryString(MapNamespace, e.Id) : e.Id,
                 QueryLineNumber = e.Line,
                 QueryVsProjectName = _fileProjectName,
                 MapNamespace = MapNamespace
-            }).ToList();
+        }).ToList();
         }
 
         public string GetQueryAtLineOrNull(int lineNumber)
@@ -96,6 +101,23 @@ namespace VSIXProject5.Parsers
         {
             var statementChildNodes = GetChildNodesOfParentByXPath(IBatisConstants.StatementsRootElementXPath);
             return statementChildNodes.Where(e => e.Name != "#text").Select(e => e.Line).ToList();
+        }
+
+        public bool HasSelectedLineValidQuery(int lineNumber)
+        {
+            var nodes = _xmlDocument.DocumentNode.Descendants();
+            var line = nodes.FirstOrDefault(e => e.Line == lineNumber);
+            if(line == null)
+            {
+                var filteredNodes = nodes.Where(e => e.Name != "#text");
+                var nearest = filteredNodes.Select(x=>x.Line)
+                    .Aggregate((current, next) => Math.Abs(current - lineNumber) < Math.Abs(next - lineNumber) ? 
+                    current : 
+                    next
+                    );
+                line = nodes.FirstOrDefault(e => e.Line == nearest);
+            }
+            return line?.Name != null && IBatisConstants.StatementNames.Contains(line.Name);
         }
 
         private IEnumerable<HtmlNode> GetChildNodesOfParentByXPath(string xPath)
@@ -125,6 +147,18 @@ namespace VSIXProject5.Parsers
         private HtmlNode GetMapDocumentRootNode()
         {
             return _xmlDocument.DocumentNode.SelectSingleNode(IBatisConstants.MapFileRootElementXPath);
+        }
+
+        private bool IsFileUsingStatementNamespaces()
+        {
+            var useStatmentNamespaceNodes = GetChildNodesOfParentByXPath(IBatisConstants.SettingRootElementXPath)?.FirstOrDefault(e => e.Name != "#text");
+            
+            if (useStatmentNamespaceNodes != null)
+            {
+                return useStatmentNamespaceNodes.GetAttributeValue(IBatisConstants.UseStatmentNameSpaceSettingAttributeName, false);
+            }
+         
+            return false;
         }
     }
 }
