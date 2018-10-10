@@ -94,7 +94,7 @@ namespace VSIXProject5.Parsers
             var nodes = _xmlDocument.DocumentNode.Descendants();
             var lineNode = nodes.Where(e=>e.Name != "#text").FirstOrDefault(e => e.Line == lineNumber);
 
-            return lineNode?.Id;
+            return IsUsingStatementNamespaces? MapNamespaceHelper.CreateFullQueryString(MapNamespace, lineNode?.Id):lineNode?.Id;
         }
 
         public List<int> GetStatmentElementsLineNumber()
