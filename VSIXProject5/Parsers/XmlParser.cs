@@ -92,7 +92,7 @@ namespace VSIXProject5.Parsers
         public string GetQueryAtLineOrNull(int lineNumber)
         {
             var nodes = _xmlDocument.DocumentNode.Descendants();
-            var lineNode = nodes.Where(e=>e.Name != "#text").FirstOrDefault(e => e.Line == lineNumber);
+            var lineNode = GetFirstStatmentNodeForLineOrNull(nodes, lineNumber);
 
             return IsUsingStatementNamespaces? MapNamespaceHelper.CreateFullQueryString(MapNamespace, lineNode?.Id):lineNode?.Id;
         }
@@ -106,18 +106,26 @@ namespace VSIXProject5.Parsers
         public bool HasSelectedLineValidQuery(int lineNumber)
         {
             var nodes = _xmlDocument.DocumentNode.Descendants();
-            var line = nodes.FirstOrDefault(e => e.Line == lineNumber);
-            if(line == null)
+            var line = GetFirstStatmentNodeForLineOrNull(nodes, lineNumber);
+
+            return line?.Name != null && IBatisConstants.StatementNames.Contains(line.Name);          
+        }
+
+        private HtmlNode GetFirstStatmentNodeForLineOrNull(IEnumerable<HtmlNode> nodes, int lineNumber)
+        {
+            nodes = nodes.Where(e => e.NodeType != HtmlNodeType.Text);
+            var line = nodes.FirstOrDefault(e => e.Line == lineNumber) ?? nodes.FirstOrDefault(e => e.Line == nodes.Select(x => x.Line).DetermineClosestInt(lineNumber));
+
+            while (line != null)
             {
-                var filteredNodes = nodes.Where(e => e.Name != "#text");
-                var nearest = filteredNodes.Select(x=>x.Line)
-                    .Aggregate((current, next) => Math.Abs(current - lineNumber) < Math.Abs(next - lineNumber) ? 
-                    current : 
-                    next
-                    );
-                line = nodes.FirstOrDefault(e => e.Line == nearest);
+                if (IBatisConstants.StatementNames.Contains(line.Name))
+                {
+                    return line;
+                }
+                line = line.ParentNode;
             }
-            return line?.Name != null && IBatisConstants.StatementNames.Contains(line.Name);
+
+            return null;
         }
 
         private IEnumerable<HtmlNode> GetChildNodesOfParentByXPath(string xPath)

@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VSIXProject5.HelpersAndExtensions;
 using VSIXProject5.Parsers;
 
 namespace VSIXProject5.Actions.Shared
@@ -17,25 +18,10 @@ namespace VSIXProject5.Actions.Shared
             {
                 XmlParser parser = XmlParser.WithStringReader(stringReader);
 
-                var elementLocation = DetermineClosestLineWithAttributeByLineNumber(selectedLineNumber, parser.GetStatmentElementsLineNumber());
+                var elementLocation = parser.GetStatmentElementsLineNumber().DetermineClosestInt(selectedLineNumber+1);
 
                 return parser.GetQueryAtLineOrNull(elementLocation);
             }
-        }
-        private int DetermineClosestLineWithAttributeByLineNumber(int selectionLineNum, List<int> elementsLineNumbers)
-        {
-            int lineNumber = selectionLineNum + 1;//Missmatch between visual studio lines numeration and text lines numeration
-            int? elementLocation = elementsLineNumbers.Cast<int?>().FirstOrDefault(x => x == lineNumber);
-
-            if (elementLocation == null)
-            {
-                elementsLineNumbers.Add(lineNumber);
-                elementsLineNumbers.Sort();
-                int indexOfLineNumber = elementsLineNumbers.IndexOf(lineNumber);
-                elementLocation = elementsLineNumbers[indexOfLineNumber == 0 ? 0 : indexOfLineNumber - 1];
-            }
-
-            return elementLocation.Value;
         }
     }
 }
