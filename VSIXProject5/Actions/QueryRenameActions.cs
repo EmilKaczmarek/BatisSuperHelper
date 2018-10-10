@@ -68,7 +68,7 @@ namespace VSIXProject5.Actions
                 return;
             }
 
-            var codeKeys = Indexer.Instance.GetCodeKeysByFullQueryName(queryName);
+            var codeKeys = Indexer.Instance.GetCodeKeysByQueryId(queryName);
             var xmlKeys = Indexer.Instance.GetXmlKeysByQueryId(queryName);
 
             foreach (var xmlQuery in xmlKeys)
