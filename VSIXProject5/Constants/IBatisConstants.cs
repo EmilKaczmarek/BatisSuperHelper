@@ -33,5 +33,8 @@ namespace VSIXProject5.Constants
 
         public const string MapFileRootElementName = "sqlMap";
         public const string MapFileRootElementXPath = "/sqlmap[1]";
+
+        public const string SettingRootElementXPath = "/sqlmap[1]/settings[1]";
+        public const string UseStatmentNameSpaceSettingAttributeName = "usestatementnamespaces";
     }
 }
