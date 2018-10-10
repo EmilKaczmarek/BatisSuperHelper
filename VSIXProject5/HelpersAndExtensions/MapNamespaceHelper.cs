@@ -25,7 +25,7 @@ namespace VSIXProject5.HelpersAndExtensions
 
         public static string CreateFullQueryString(string mapNamespace, string queryName)
         {
-            return string.IsNullOrEmpty(mapNamespace)?queryName:$"{mapNamespace}.{queryName}";
+            return queryName == null? null : (string.IsNullOrEmpty(mapNamespace)?queryName:$"{mapNamespace}.{queryName}");
         }
     }
 }
