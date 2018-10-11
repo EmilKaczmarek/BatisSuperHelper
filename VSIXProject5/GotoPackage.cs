@@ -203,21 +203,15 @@ namespace VSIXProject5
 
         internal void HandleSolutionEvent(EventConstats.VS.SolutionLoad eventNumber)
         {
-            Debug.WriteLine(eventNumber);
             switch (eventNumber)
             {
                 case EventConstats.VS.SolutionLoad.SolutionLoadComplete:
-                    Debug.WriteLine("Solution loaded event Start");
                     var projectItemHelper = new ProjectItemHelper();
                     var projectItems = projectItemHelper.GetProjectItemsFromSolutionProjects(EnvDTE.Solution.Projects);
-                    Debug.WriteLine($"Found {projectItems.Count} items.\n {string.Join("\n", projectItems.Select(e => e.Name).ToList())}");
                     XmlIndexer xmlIndexer = new XmlIndexer();
                     var xmlFiles = DocumentHelper.GetXmlFiles(projectItems);
-                    Debug.Write(xmlFiles);
-                    Debug.WriteLine($"Xml Files: {xmlFiles.Count}.\n {string.Join("\n", xmlFiles.Select(e=>e.FilePath))}");
                     var xmlIndexerResult = xmlIndexer.BuildIndexerAsync(xmlFiles);
                     Indexer.Instance.Build(xmlIndexerResult);
-                    Debug.WriteLine("Solution loaded event Start");
                     break;
                 case EventConstats.VS.SolutionLoad.SolutionOnClose:
                     Indexer.Instance.ClearAll();
