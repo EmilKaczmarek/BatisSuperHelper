@@ -85,10 +85,9 @@ namespace VSIXProject5.Indexers
 
                 if (firstInvocationOfNodeAncestors == null)
                     continue;
-                
-                var nameIdentifiers = firstInvocationOfNodeAncestors.Expression.DescendantNodes().OfType<IdentifierNameSyntax>();
 
-                Debug.WriteLine(string.Join("\n", nameIdentifiers.Select(e =>e.Identifier.ValueText)));
+                var allowedTypes = new List<Type> { typeof(IdentifierNameSyntax), typeof(GenericNameSyntax) };
+                var nameIdentifiers = firstInvocationOfNodeAncestors.Expression.DescendantNodes().Where(e=>allowedTypes.Contains(e.GetType())).Cast<SimpleNameSyntax>();
 
                 if (nameIdentifiers.Any(e => IBatisConstants.MethodNames.Contains(e.Identifier.ValueText)))
                 {
