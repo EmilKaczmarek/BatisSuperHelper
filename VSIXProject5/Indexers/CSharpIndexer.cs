@@ -85,20 +85,27 @@ namespace VSIXProject5.Indexers
 
                 if (firstInvocationOfNodeAncestors == null)
                     continue;
-
+                
                 var nameIdentifiers = firstInvocationOfNodeAncestors.Expression.DescendantNodes().OfType<IdentifierNameSyntax>();
+
+                Debug.WriteLine(string.Join("\n", nameIdentifiers.Select(e =>e.Identifier.ValueText)));
+
                 if (nameIdentifiers.Any(e => IBatisConstants.MethodNames.Contains(e.Identifier.ValueText)))
                 {
                     Location loc = Location.Create(synTree, node.Span);
-                    result.Add(new CSharpIndexerResult
+                    var constantValueFromExpression = semModel.GetConstantValue(node.Arguments.FirstOrDefault().Expression);
+                    if(constantValueFromExpression.HasValue)
                     {
-                        QueryFileName = Path.GetFileName(document.FilePath),
-                        QueryId = semModel.GetConstantValue(node.Arguments.FirstOrDefault().Expression).Value.ToString(),
-                        QueryLineNumber = loc.GetLineSpan().StartLinePosition.Line + 1,
-                        QueryVsProjectName = document.Project.Name,
-                        QueryFilePath = document.FilePath,
-                        DocumentId = document.Id,
-                    });
+                        result.Add(new CSharpIndexerResult
+                        {
+                            QueryFileName = Path.GetFileName(document.FilePath),
+                            QueryId = constantValueFromExpression.Value.ToString(),
+                            QueryLineNumber = loc.GetLineSpan().StartLinePosition.Line + 1,
+                            QueryVsProjectName = document.Project.Name,
+                            QueryFilePath = document.FilePath,
+                            DocumentId = document.Id,
+                        });
+                    }
                 }
             }
 

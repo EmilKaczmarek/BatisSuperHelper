@@ -266,9 +266,7 @@ namespace VSIXProject5.Indexers
             var statmentsToRemove = xmlStatments.Values.Where(e => e.QueryFilePath.Equals(filePath, StringComparison.CurrentCultureIgnoreCase));
             foreach (var statment in statmentsToRemove.ToList())
             {
-                xmlStatments.Remove(new IndexerKey { StatmentName = statment.QueryId, VsProjectName = statment.QueryVsProjectName });
-                Debug.WriteLine($"Removed: {statment.QueryId}, at: {statment.QueryVsProjectName}");
-            }
+                xmlStatments.Remove(new IndexerKey { StatmentName = statment.QueryId, VsProjectName = statment.QueryVsProjectName });            }
         }
 
         public void RemoveStatmentsForFile(string fileName, bool codeStatments)
