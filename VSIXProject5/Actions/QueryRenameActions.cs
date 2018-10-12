@@ -11,6 +11,7 @@ using System.Linq;
 using VSIXProject5.Actions.Abstracts;
 using VSIXProject5.Actions.Shared;
 using VSIXProject5.Helpers;
+using VSIXProject5.HelpersAndExtensions;
 using VSIXProject5.HelpersAndExtensions.VisualStudio;
 using VSIXProject5.Indexers;
 using VSIXProject5.VSIntegration;
@@ -81,11 +82,18 @@ namespace VSIXProject5.Actions
                 {
                     projectItem.Open();
                 }
-                var projectItemSelection = projectItem.Document.Selection as EnvDTE.TextSelection;
+                var projectItemSelection = projectItem.Document.Selection as TextSelection;
                 projectItemSelection.StartOfDocument();
 
-                var findResult = projectItemSelection.FindPattern(xmlQuery.StatmentName, (int)(vsFindOptions.vsFindOptionsMatchWholeWord));
-                var replaceResult = projectItemSelection.ReplacePattern(xmlQuery.StatmentName, returnViewModel.QueryText, (int)(vsFindOptions.vsFindOptionsMatchWholeWord));
+                var querySearchReplaceValue = MapNamespaceHelper.GetQueryWithoutNamespace(query);
+                var queryWithoutNamespace = MapNamespaceHelper.GetQueryWithoutNamespace(returnViewModel.QueryText);
+
+                var findResult = projectItemSelection.FindPattern(querySearchReplaceValue, (int)(vsFindOptions.vsFindOptionsMatchWholeWord));
+                var replaceResult = projectItemSelection.ReplacePattern(
+                    querySearchReplaceValue, 
+                    queryWithoutNamespace,
+                    (int)(vsFindOptions.vsFindOptionsMatchWholeWord)
+                    );
                 Indexer.Instance.RenameXmlQuery(xmlQuery, returnViewModel.QueryText);
             }
             foreach (var codeKey in codeKeys) { 

@@ -31,6 +31,7 @@ using VSIXProject5.EventHandlers;
 using VSIXProject5.Events;
 using VSIXProject5.Helpers;
 using VSIXProject5.Indexers;
+using VSIXProject5.Loggers;
 using VSIXProject5.Parsers;
 using VSIXProject5.VSIntegration.Navigation;
 using static VSIXProject5.Events.VSSolutionEventsHandler;
@@ -122,6 +123,8 @@ namespace VSIXProject5
             //Prepare package events
             Workspace = componentModel.GetService<VisualStudioWorkspace>();
             Workspace.WorkspaceChanged += WorkspaceEvents.WorkspaceChanged;
+            //Initialize logger
+            OutputWindowLogger.Init(base.GetService(typeof(SVsOutputWindow)) as SVsOutputWindow);
 
             _solution = base.GetService(typeof(SVsSolution)) as IVsSolution;
             _solutionEventsHandler = new SolutionEventsHandler(

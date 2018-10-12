@@ -15,6 +15,7 @@ using VSIXProject5.Constants;
 using VSIXProject5.Helpers;
 using VSIXProject5.HelpersAndExtensions.Roslyn;
 using VSIXProject5.Indexers.Models;
+using VSIXProject5.Loggers;
 using VSIXProject5.Models;
 
 namespace VSIXProject5.Indexers
@@ -35,12 +36,15 @@ namespace VSIXProject5.Indexers
         public async Task<List<CSharpIndexerResult>> BuildIndexerAsync(List<Document> documents)
         {
             var result = new List<CSharpIndexerResult>();
-
+            Stopwatch sw = new Stopwatch();
+            OutputWindowLogger.WriteLn("Building Queries db from code started.");
+            sw.Start();
             foreach (var document in documents)
             { 
                 result.AddRange(await BuildFromDocumentAsync(document));
             }
-
+            sw.Stop();
+            OutputWindowLogger.WriteLn($"Building Queries db from code ended in {sw.ElapsedMilliseconds} ms. Found {result.Count} queries.");
             return result;
         }
 
@@ -85,9 +89,12 @@ namespace VSIXProject5.Indexers
 
                 if (firstInvocationOfNodeAncestors == null)
                     continue;
-
+             
                 var allowedTypes = new List<Type> { typeof(IdentifierNameSyntax), typeof(GenericNameSyntax) };
                 var nameIdentifiers = firstInvocationOfNodeAncestors.Expression.DescendantNodes().Where(e=>allowedTypes.Contains(e.GetType())).Cast<SimpleNameSyntax>();
+
+                //var logMessage = $"{document.Name} Found: {string.Join("->", nameIdentifiers.Select(e => e.Identifier.ValueText))}";
+                //OutputWindowLogger.WriteLn(logMessage);
 
                 if (nameIdentifiers.Any(e => IBatisConstants.MethodNames.Contains(e.Identifier.ValueText)))
                 {
