@@ -17,7 +17,7 @@ namespace VSIXProject5.HelpersAndExtensions
             var splited = queryWithNamespace.Split('.');
             if(splited.Count() < 2)
             {
-                return Tuple.Create(String.Empty, queryWithNamespace);
+                return Tuple.Create<string,string>(null, queryWithNamespace);
             }
 
             var query = splited.Last();

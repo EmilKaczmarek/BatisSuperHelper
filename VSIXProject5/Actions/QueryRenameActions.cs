@@ -55,10 +55,16 @@ namespace VSIXProject5.Actions
                 return;
             }
 
+            var codeKeys = Indexer.Instance.GetCodeKeysByQueryId(queryName);
+            var xmlKeys = Indexer.Instance.GetXmlKeysByQueryId(queryName);
+
+            var namespaceQueryPair = MapNamespaceHelper.DetermineMapNamespaceQueryPairFromCodeInput(queryName);
+
             RenameModalWindowControl window = new RenameModalWindowControl(
                 new RenameViewModel
                 {
-                    QueryText = queryName,
+                    QueryText = namespaceQueryPair.Item2,
+                    Namespace = string.IsNullOrEmpty(namespaceQueryPair.Item1)?null:namespaceQueryPair.Item1,
                 });
 
             window.ShowModal();
@@ -67,10 +73,7 @@ namespace VSIXProject5.Actions
             if (returnViewModel.WasInputCanceled || returnViewModel.QueryText == queryName)
             {
                 return;
-            }
-
-            var codeKeys = Indexer.Instance.GetCodeKeysByQueryId(queryName);
-            var xmlKeys = Indexer.Instance.GetXmlKeysByQueryId(queryName);
+            }           
 
             foreach (var xmlQuery in xmlKeys)
             {

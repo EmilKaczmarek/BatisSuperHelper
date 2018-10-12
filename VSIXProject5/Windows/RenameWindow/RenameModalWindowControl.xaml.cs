@@ -37,7 +37,6 @@
         {
             var text = this.QueryTextBox.Text;
             _renameViewModel.WasInputCanceled = false;
-            //Rename Logic
             this.Close();
         }
 
@@ -61,6 +60,8 @@
                         RenameButton_Click(sender, null);
                         break;
                     }
+                default:
+                    break;
             }
         }
     }
