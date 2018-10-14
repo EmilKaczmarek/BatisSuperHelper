@@ -12,11 +12,13 @@ using System.Collections.Generic;
 using System.Linq;
 using VSIXProject5.Actions.Abstracts;
 using VSIXProject5.Actions.Shared;
+using VSIXProject5.HelpersAndExtensions;
 using VSIXProject5.HelpersAndExtensions.VisualStudio;
 using VSIXProject5.Indexers;
 using VSIXProject5.Indexers.Models;
 using VSIXProject5.VSIntegration;
 using VSIXProject5.VSIntegration.Navigation;
+using VSIXProject5.Windows.ResultWindow.ViewModel;
 
 namespace VSIXProject5.Actions
 {
@@ -46,7 +48,7 @@ namespace VSIXProject5.Actions
             var wpfTextView = _editorAdaptersFactory.GetWpfTextView(textView);
             ITextSnapshot snapshot = wpfTextView.Caret.Position.BufferPosition.Snapshot;
 
-            List<BaseIndexerValue> statments = null;
+            List<ResultWindowViewModel> windowViewModels = new List<ResultWindowViewModel>();
             ILineOperation lineOperation = snapshot.IsCSharpType() ? new CodeLineOperations() : (ILineOperation)(new XmlLineOperations());
 
             var queryName = lineOperation.GetQueryNameAtLine(snapshot, selectionLineNum);
@@ -54,42 +56,55 @@ namespace VSIXProject5.Actions
             if (snapshot.GetContentTypeName() == "XML")
             {
                 var statmentsKeys = Indexer.Instance.GetCodeKeysByQueryId(queryName);
-                statments = statmentsKeys.Select(Indexer.Instance.GetCodeStatments).SelectMany(x => x).Cast<BaseIndexerValue>().ToList();
+                var statments = statmentsKeys.Select(Indexer.Instance.GetCodeStatments).SelectMany(x => x);
 
-                if(statments.Count == 1)
-                {
-                    DocumentNavigationInstance.instance.OpenDocumentAndHighlightLine(statments.First().QueryFilePath, statments.First().QueryLineNumber);
-                }
-                else if (!statments.Any())
+                if (!statments.Any())
                 {
                     _statusBar.ShowText($"No occurence of query named: {queryName} find in Code.");
                 }
-                else
+                if (statments.Count() == 1)
                 {
+                    DocumentNavigationInstance.instance.OpenDocumentAndHighlightLine(statments.First().QueryFilePath, statments.First().QueryLineNumber);
+                }
+                if(statments.Count() > 1)
+                {
+                    windowViewModels = statments.Select(x => new ResultWindowViewModel
+                    {
+                        File = x.QueryFileName,
+                        Line = x.QueryLineNumber,
+                        Query = x.QueryId,
+                        FilePath = x.QueryFilePath,
+                        Namespace = MapNamespaceHelper.DetermineMapNamespaceQueryPairFromCodeInput(x.QueryId).Item1,
+                    }).ToList();
                     _statusBar.ShowText($"Multiple occurence of same statment({queryName}) found.");
                 }
             }
             else
             { 
                 var keys = Indexer.Instance.GetXmlKeysByQueryId(queryName);
-                var testCode = Indexer.Instance.GetCodeStatmentsDictonary();
-                var testXml = Indexer.Instance.GetXmlStatmentsDictonary();
                 if (keys.Any())
                 {
                     var statment = Indexer.Instance.GetXmlStatmentOrNull(keys.First());
+                    windowViewModels = keys.Select(Indexer.Instance.GetXmlStatmentOrNull).Select(x => new ResultWindowViewModel
+                    {
+                        File = x.QueryFileName,
+                        FilePath = x.QueryFilePath,
+                        Line = x.QueryLineNumber,
+                        Namespace = x.MapNamespace,
+                        Query = x.QueryId,
+                    }).ToList();
                     DocumentNavigationInstance.instance.OpenDocumentAndHighlightLine(statment.QueryFilePath, statment.QueryLineNumber);
                 }
                 else
                 {
-                    statments = keys.Select(Indexer.Instance.GetXmlStatment).Cast<BaseIndexerValue>().ToList();
                     _statusBar.ShowText($"No occurence of query named: {queryName} found in SqlMaps.");
                 }
             }
 
-            if(statments != null && statments.Count > 1)
+            if(windowViewModels != null && windowViewModels.Count > 1)
             {
                 var windowContent = (ResultWindowControl)_resultWindow.Content;
-                windowContent.ShowResults(statments);
+                windowContent.ShowResults(windowViewModels);
                 IVsWindowFrame windowFrame = (IVsWindowFrame)_resultWindow.Frame;
                 ErrorHandler.ThrowOnFailure(windowFrame.Show());
             }
