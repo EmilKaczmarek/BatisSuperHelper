@@ -195,7 +195,7 @@ namespace VSIXProject5
                     Microsoft.CodeAnalysis.Document roslynDocument = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
                     if (roslynDocument == null)
                     {
-                        Debug.WriteLine($"Document code model: {caretPosition.Snapshot.ContentType.DisplayName}");
+                        OutputWindowLogger.WriteLn($"Unable to get c# file to process. Name {caretPosition.Snapshot.ContentType.DisplayName}");
                         return;
                     }
                     var csIndexer = new CSharpIndexer().BuildFromDocumentAsync(roslynDocument).Result;

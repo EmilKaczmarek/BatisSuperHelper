@@ -263,10 +263,11 @@ namespace VSIXProject5.Indexers
         }
         public void RemoveXmlStatmentsForFile(string filePath)
         {
-            var statmentsToRemove = xmlStatments.Values.Where(e => e.QueryFilePath.Equals(filePath, StringComparison.CurrentCultureIgnoreCase));
+            var statmentsToRemove = xmlStatments.Where(e => e.Value.QueryFilePath.Equals(filePath, StringComparison.CurrentCultureIgnoreCase));
             foreach (var statment in statmentsToRemove.ToList())
             {
-                xmlStatments.Remove(new IndexerKey { StatmentName = statment.QueryId, VsProjectName = statment.QueryVsProjectName });            }
+                xmlStatments.Remove(statment.Key);
+            }
         }
 
         public void RemoveStatmentsForFile(string fileName, bool codeStatments)
