@@ -142,14 +142,19 @@ namespace VSIXProject5.Parsers
         private string GetDocumentXmlNamespace()
         {
             var fileRootNode = GetMapDocumentRootNode();
-            return fileRootNode.Attributes.FirstOrDefault(e => e.Name == "xmlns").Value;
+            if (fileRootNode == null)
+                return null;
+
+            return fileRootNode.Attributes.FirstOrDefault(e => e.Name == "xmlns")?.Value;
         }
 
         private string GetDocumentMapNamespace()
         {
             var fileRootNode = GetMapDocumentRootNode();
-            var names = fileRootNode.Attributes.FirstOrDefault(e => e.Name == "namespace")?.Value;
-            return names;
+            if (fileRootNode == null)
+                return null;
+
+            return fileRootNode.Attributes.FirstOrDefault(e => e.Name == "namespace")?.Value;
         }
 
         private HtmlNode GetMapDocumentRootNode()

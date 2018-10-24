@@ -122,5 +122,12 @@ namespace VSIXProject5.Helpers
             }
             return null;
         }
+
+        public ArgumentSyntax GetProperArgumentNodeInNodes(IEnumerable<SyntaxNode> nodes)
+        {
+            var syntaxArguments = GetArgumentListSyntaxFromSyntaxNodesWhereArgumentsAreNotEmpty(nodes);
+            var singleArgumentListSyntax = GetProperArgumentSyntaxNode(syntaxArguments);
+            return GetArgumentSyntaxOfStringType(singleArgumentListSyntax);
+        }
     }
 }
