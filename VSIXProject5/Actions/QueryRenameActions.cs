@@ -78,48 +78,45 @@ namespace VSIXProject5.Actions
             foreach (var xmlQuery in xmlKeys)
             {
                 var query = Indexer.Instance.GetXmlStatment(xmlQuery);
-
                 var projectItem = _envDTE.Solution.FindProjectItem(query.QueryFileName);
+
                 var isProjectItemOpened = projectItem.IsOpen;
                 if (!isProjectItemOpened)
                 {
                     projectItem.Open();
                 }
-                var projectItemSelection = projectItem.Document.Selection as TextSelection;
-                projectItemSelection.StartOfDocument();
 
-                var querySearchReplaceValue = MapNamespaceHelper.GetQueryWithoutNamespace(query);
-                var queryWithoutNamespace = MapNamespaceHelper.GetQueryWithoutNamespace(returnViewModel.QueryText);
+                var textSelection = projectItem.Document.Selection as TextSelection;
+                textSelection.GotoLine(query.QueryLineNumber, true);
 
-                var findResult = projectItemSelection.FindPattern(querySearchReplaceValue, (int)(vsFindOptions.vsFindOptionsMatchWholeWord));
-                var replaceResult = projectItemSelection.ReplacePattern(
-                    querySearchReplaceValue, 
-                    queryWithoutNamespace,
-                    (int)(vsFindOptions.vsFindOptionsMatchWholeWord)
-                    );
+                var line = textSelection.GetText();
+                line = line.Replace(MapNamespaceHelper.GetQueryWithoutNamespace(query), MapNamespaceHelper.GetQueryWithoutNamespace(returnViewModel.QueryText));
+
+                textSelection.Insert(line, (int)vsInsertFlags.vsInsertFlagsContainNewText);
+                projectItem.Document.Save();      
+
                 Indexer.Instance.RenameXmlQuery(xmlQuery, returnViewModel.QueryText);
             }
             foreach (var codeKey in codeKeys) { 
                 var codeQueries = Indexer.Instance.GetCodeStatments(codeKey);
-                var group = codeQueries.GroupBy(x => x.DocumentId, x => x);
-                foreach(var file in group)
+                foreach(var file in codeQueries.GroupBy(x => x.DocumentId, x => x))
                 {
                     var doc = _workspace.CurrentSolution.GetDocument(file.Key);
                     SemanticModel semModel = doc.GetSemanticModelAsync().Result;
+                    NodeHelpers helper = new NodeHelpers(semModel);
+                    doc.TryGetSyntaxTree(out SyntaxTree synTree);
+                    var root = (CompilationUnitSyntax)synTree.GetRoot();
+                    var newArgumentSyntax = SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(returnViewModel.QueryText)));
+
                     foreach (var query in file)
-                    {
-                        NodeHelpers helper = new NodeHelpers(semModel);
-                        SyntaxTree synTree = null;
-                        doc.TryGetSyntaxTree(out synTree);
-                        var span = synTree.GetText().Lines[query.QueryLineNumber - 1].Span;
-                        var root = (CompilationUnitSyntax)synTree.GetRoot();
+                    {                    
+                        var span = synTree.GetText().Lines[query.QueryLineNumber - 1].Span;                     
                         var nodes = root.DescendantNodesAndSelf(span);
-                        var syntaxArguments = helper.GetArgumentListSyntaxFromSyntaxNodesWhereArgumentsAreNotEmpty(nodes);
-                        var singleArgumentListSyntax = helper.GetProperArgumentSyntaxNode(syntaxArguments);
-                        var queryArgument = helper.GetArgumentSyntaxOfStringType(singleArgumentListSyntax);
-                        var newArgumentSyntax = SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(returnViewModel.QueryText)));
-                        var newRoot = root.ReplaceNode(queryArgument, newArgumentSyntax);
+                        var existingQueryArgumentSyntax = helper.GetProperArgumentNodeInNodes(nodes);
+                       
+                        var newRoot = root.ReplaceNode(existingQueryArgumentSyntax, newArgumentSyntax);
                         root = newRoot;
+
                         doc = doc.WithText(newRoot.GetText());
                         var sucess = _workspace.TryApplyChanges(doc.Project.Solution);
                     }
