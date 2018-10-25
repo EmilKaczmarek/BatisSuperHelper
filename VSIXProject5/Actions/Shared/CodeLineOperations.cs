@@ -34,10 +34,7 @@ namespace VSIXProject5.Actions.Shared
             }
             //In case we don't have cursor around 'return', SyntaxNodes taken from line
             //should have needed ArgumentLineSyntax
-            else
-            {
-                return helper.GetQueryStringFromSyntaxNodes(nodesAtLine);
-            }
+            return helper.GetQueryStringFromSyntaxNodes(nodesAtLine);
         }
     }
 }

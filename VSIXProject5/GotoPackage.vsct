@@ -84,7 +84,7 @@
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
         <Icon guid="guidImages3" id="bmpPic1" />
         <Strings>
-          <ButtonText>ResultWindow</ButtonText>
+          <ButtonText>Find Query Results</ButtonText>
         </Strings>
       </Button>
       <Button guid="guidGotoPackageCmdSet" id="cmdidRenameModalWindowCommand" priority="0x0100" type="Button">
