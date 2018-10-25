@@ -63,6 +63,19 @@
 
         private void listView_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
+            NavigateToSelected(sender);
+        }
+
+        private void listView_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if(e.Key == System.Windows.Input.Key.Enter)
+            {
+                NavigateToSelected(sender);
+            }
+        }
+
+        private void NavigateToSelected(object sender)
+        {
             var selectedItem = (sender as ListView).SelectedItem as ResultWindowViewModel;
             DocumentNavigationInstance.instance.OpenDocumentAndHighlightLine(selectedItem.FilePath, selectedItem.Line);
         }
