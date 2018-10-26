@@ -91,8 +91,6 @@ namespace VSIXProject5
         private uint _solutionEventsCookie;
         private EnvDTE80.Events2 _envDteEvents;
         private EnvDTE.ProjectItemsEvents _envDteProjectItemsEvents;
-        private TextDocumentKeyPressEvents _textDocumentKeyPressEvents;
-        private System.Windows.Forms.Timer _timer;
         //Public fields
         public DTE2 EnvDTE;
         public IVsTextManager TextManager;
@@ -140,70 +138,13 @@ namespace VSIXProject5
                 _envDteProjectItemsEvents.ItemAdded += projectItemEvents.ItemAdded;
                 _envDteProjectItemsEvents.ItemRemoved += projectItemEvents.ItemRemoved;
                 _envDteProjectItemsEvents.ItemRenamed += projectItemEvents.ItemRenamed;
-                //Init text change
-                _textDocumentKeyPressEvents = _envDteEvents.TextDocumentKeyPressEvents;
-                _textDocumentKeyPressEvents.AfterKeyPress += TextDocumentKeyPressEvents_AfterKeyPress;
             }
-            _timer = new System.Windows.Forms.Timer
-            {
-                Interval = 1000,
-            };
-            _timer.Tick += _timer_Tick;
-            //Initialize commands
+
             Goto.Initialize(this);
             VSIXProject5.Windows.RenameWindow.RenameModalWindowCommand.Initialize(this);
             RenameCommand.Initialize(this);
         }
-
-        private EnvDTE.TextDocument _editedDocument;
-        private void TextDocumentKeyPressEvents_AfterKeyPress(string Keypress, TextSelection Selection, bool InStatementCompletion)
-        {
-            _timer.Stop();
-            _timer.Start();
-            var StartPointParent = Selection.Parent.Parent;
-            _editedDocument = StartPointParent != null ? (EnvDTE.TextDocument)Selection.Parent.Parent.Object("TextDocument") : (TextDocument)EnvDTE.ActiveDocument.Object("TextDocument");
-            //Use task with delay, if next comes up, cancel task.
-        }
-
-        private void _timer_Tick(object sender, EventArgs e)
-        {
-            _timer.Stop();
-            
-            if (_editedDocument != null)//Edited Document should never be null.
-            {
-                string docLanguage = _editedDocument.Language;
-                if (docLanguage == "XML")
-                {
-                    string documentText = _editedDocument.GetText();
-
-                    XmlParser parser = XmlParser.WithStringReaderAndFileInfo(new StringReader(documentText), _editedDocument.Parent.FullName, EnvDTE.ActiveDocument.ProjectItem.Name);
-
-                    bool isIBatisQueryXmlFile = parser.XmlNamespace == IBatisConstants.SqlMapNamespace;
-                    if (isIBatisQueryXmlFile)
-                    {
-                        var newStatments = parser.GetMapFileStatments();
-                        Indexer.Instance.UpdateXmlStatmentForFile(newStatments);
-                    }
-                }
-                else if (docLanguage == "CSharp")
-                {
-                    //TODO: Check if file has any iBatis usings?
-                    TextManager.GetActiveView(1, null, out IVsTextView textView);
-
-                    var componentService = EditorAdaptersFactory.GetWpfTextView(textView);
-                    SnapshotPoint caretPosition = componentService.Caret.Position.BufferPosition;
-                    Microsoft.CodeAnalysis.Document roslynDocument = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
-                    if (roslynDocument == null)
-                    {
-                        OutputWindowLogger.WriteLn($"Unable to get c# file to process. Name {caretPosition.Snapshot.ContentType.DisplayName}");
-                        return;
-                    }
-                    var csIndexer = new CSharpIndexer().BuildFromDocumentAsync(roslynDocument).Result;
-                    Indexer.Instance.UpdateCodeStatmentForFile(csIndexer);
-                }
-            }
-        }
-
+      
         internal void HandleSolutionEvent(EventConstats.VS.SolutionLoad eventNumber)
         {
             switch (eventNumber)
