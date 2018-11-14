@@ -4,20 +4,23 @@ using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.LanguageServices;
 using Microsoft.VisualStudio.Shell;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VSIXProject5.Constants;
 using VSIXProject5.Helpers;
 using VSIXProject5.HelpersAndExtensions.Roslyn;
 using VSIXProject5.Indexers.Models;
+using VSIXProject5.Loggers;
 using VSIXProject5.Models;
 
 namespace VSIXProject5.Indexers
 {
-    public class CSharpIndexer
+    public class CSharpIndexer: BaseIndexer
     {
         private readonly Workspace _workspace;
         public CSharpIndexer()
@@ -33,14 +36,15 @@ namespace VSIXProject5.Indexers
         public async Task<List<CSharpIndexerResult>> BuildIndexerAsync(List<Document> documents)
         {
             var result = new List<CSharpIndexerResult>();
-
+            Stopwatch sw = new Stopwatch();
+            OutputWindowLogger.WriteLn("Building Queries db from code started.");
+            sw.Start();
             foreach (var document in documents)
-            {
-                Debug.WriteLine($"Adding {document.FilePath}");
+            { 
                 result.AddRange(await BuildFromDocumentAsync(document));
-                Debug.WriteLine($"Added {document.FilePath}");
             }
-
+            sw.Stop();
+            OutputWindowLogger.WriteLn($"Building Queries db from code ended in {sw.ElapsedMilliseconds} ms. Found {result.Count} queries.");
             return result;
         }
 
@@ -69,39 +73,39 @@ namespace VSIXProject5.Indexers
 
         private List<CSharpIndexerResult> Build(SemanticModel semModel, Document document)
         {
-            var helper = new NodeHelpers(semModel);
             var result = new List<CSharpIndexerResult>();
             SyntaxTree synTree = null;
             document.TryGetSyntaxTree(out synTree);
             var treeRoot = (CompilationUnitSyntax)synTree.GetRoot();
 
-            //if (!HasBatisUsing(treeRoot))
-            //{
-            //    return new List<CSharpIndexerResult>();
-            //}
-          
             var nodes = treeRoot.DescendantNodesAndSelf();
             var argumentNodes = nodes
                 .OfType<ArgumentListSyntax>()
-                .Where(x => x.Arguments.Any())
-                .Select(x => x)
-                .ToList();
-            foreach (var argumentNode in argumentNodes)
+                .Where(x => x.Arguments.Any());
+
+            foreach (var node in argumentNodes)
             {
-                if (argumentNode is ArgumentListSyntax)
+                var firstInvocationOfNodeAncestors = node.Ancestors().OfType<InvocationExpressionSyntax>().FirstOrDefault();
+
+                if (firstInvocationOfNodeAncestors == null)
+                    continue;
+             
+                var allowedTypes = new List<Type> { typeof(IdentifierNameSyntax), typeof(GenericNameSyntax) };
+                var nameIdentifiers = firstInvocationOfNodeAncestors.Expression.DescendantNodes().Where(e=>allowedTypes.Contains(e.GetType())).Cast<SimpleNameSyntax>();
+
+                //var logMessage = $"{document.Name} Found: {string.Join("->", nameIdentifiers.Select(e => e.Identifier.ValueText))}";
+                //OutputWindowLogger.WriteLn(logMessage);
+
+                if (nameIdentifiers.Any(e => IBatisConstants.MethodNames.Contains(e.Identifier.ValueText)))
                 {
-                    var nodeAncestors = argumentNode.Ancestors().ToList();
-                    if (nodeAncestors.Any(x =>
-                         semModel.GetSymbolInfo(x).Symbol != null &&
-                         semModel.GetSymbolInfo(x).Symbol.ContainingNamespace.ToDisplayString().Contains("Batis")
-                    ))
+                    Location loc = Location.Create(synTree, node.Span);
+                    var constantValueFromExpression = semModel.GetConstantValue(node.Arguments.FirstOrDefault().Expression);
+                    if(constantValueFromExpression.HasValue)
                     {
-                        Location loc = Location.Create(synTree, argumentNode.Span);
-                        IndexerKey key = IndexerKey.ConvertToKey(argumentNode.Arguments.FirstOrDefault().ToCleanString(), document.Project.Name);
                         result.Add(new CSharpIndexerResult
                         {
                             QueryFileName = Path.GetFileName(document.FilePath),
-                            QueryId = argumentNode.Arguments.FirstOrDefault().ToCleanString(),
+                            QueryId = constantValueFromExpression.Value.ToString(),
                             QueryLineNumber = loc.GetLineSpan().StartLinePosition.Line + 1,
                             QueryVsProjectName = document.Project.Name,
                             QueryFilePath = document.FilePath,
@@ -110,6 +114,7 @@ namespace VSIXProject5.Indexers
                     }
                 }
             }
+
             return result;
         }
     }

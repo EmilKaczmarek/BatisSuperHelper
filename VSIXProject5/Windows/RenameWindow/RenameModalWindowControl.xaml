@@ -8,8 +8,8 @@
              Foreground="{DynamicResource VsBrush.WindowText}"
              WindowStyle="None"
              WindowStartupLocation="CenterScreen"
-             Width="307.5" 
-             Height="129.5" ShowInTaskbar="False" HasDialogFrame="True" ResizeMode="NoResize"
+             Width="300" 
+             Height="100" ShowInTaskbar="False" HasDialogFrame="True" ResizeMode="NoResize"
              KeyDown="DialogWindow_KeyDown"
              >
     <platformUi:DialogWindow.Resources>
@@ -32,10 +32,11 @@
             </Style.Triggers>
         </Style>
     </platformUi:DialogWindow.Resources>
-    <Grid Background="{DynamicResource VsBrush.Window}" Height="130" VerticalAlignment="Top">
-        <TextBox x:Name="QueryTextBox" Background="{DynamicResource VsBrush.Window}" Foreground="{DynamicResource VsBrush.WindowText}" HorizontalAlignment="Left" Height="37" Margin="10,10,0,0" TextWrapping="Wrap" Text="{Binding QueryText}" VerticalAlignment="Top" Width="280" FontSize="14"/>
-        <Button Content="Rename" HorizontalAlignment="Left" Margin="185,100,0,0" VerticalAlignment="Top" Width="50" Height="25" Grid.RowSpan="2" Click="RenameButton_Click"/>
-        <Button Content="Cancel" HorizontalAlignment="Left" Margin="240,100,0,0" VerticalAlignment="Top" Height="25" Width="50" Grid.RowSpan="2" Click="CancelButton_Click"/>
-        <CheckBox IsChecked="{Binding IsMethodRenameChecked}" x:Name="RenameMethodCheckBox"  Background="{DynamicResource VsBrush.Window}" Foreground="{DynamicResource VsBrush.WindowText}" Content="Rename method" HorizontalAlignment="Left" Margin="10,62,0,0" VerticalAlignment="Top" IsEnabled="False"/>
+    <Grid Background="{DynamicResource VsBrush.Window}" Height="100" VerticalAlignment="Top">
+        <TextBox x:Name="QueryTextBox" Background="{DynamicResource VsBrush.Window}" Foreground="{DynamicResource VsBrush.WindowText}" HorizontalAlignment="Left" Height="20" Margin="10,10,0,0" TextWrapping="Wrap" Text="{Binding QueryText}" VerticalAlignment="Top" Width="280" FontSize="14"/>
+        <Button Content="Rename" HorizontalAlignment="Left" Margin="185,65,0,0" VerticalAlignment="Top" Width="50" Height="25" Click="RenameButton_Click"/>
+        <Button Content="Cancel" HorizontalAlignment="Left" Margin="240,65,0,0" VerticalAlignment="Top" Height="25" Width="50" Click="CancelButton_Click"/>
+        <CheckBox IsChecked="{Binding IsMethodRenameChecked}" x:Name="RenameMethodCheckBox"  Background="{DynamicResource VsBrush.Window}" Foreground="{DynamicResource VsBrush.WindowText}" Content="Rename method" HorizontalAlignment="Left" Margin="10,49,0,0" VerticalAlignment="Top" IsEnabled="False"/>
+        <Label Content="{Binding Namespace, FallbackValue='No namespace'}" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" FontSize="9" Height="14" Width="280" Padding="0,1" Background="{DynamicResource VsBrush.Window}" Foreground="{DynamicResource VsBrush.WindowText}"/>
     </Grid>
 </platformUi:DialogWindow>
