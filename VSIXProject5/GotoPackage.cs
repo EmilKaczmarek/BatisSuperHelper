@@ -6,6 +6,7 @@
 
 using EnvDTE;
 using EnvDTE80;
+using HtmlAgilityPack;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
@@ -24,11 +25,14 @@ using System.Runtime.InteropServices;
 using System.Timers;
 using System.Xml;
 using System.Xml.Linq;
+using System.Xml.Schema;
 using VSIXProject5.Constants;
 using VSIXProject5.EventHandlers;
 using VSIXProject5.Events;
 using VSIXProject5.Helpers;
 using VSIXProject5.Indexers;
+using VSIXProject5.Loggers;
+using VSIXProject5.Parsers;
 using VSIXProject5.VSIntegration.Navigation;
 using static VSIXProject5.Events.VSSolutionEventsHandler;
 
@@ -87,8 +91,6 @@ namespace VSIXProject5
         private uint _solutionEventsCookie;
         private EnvDTE80.Events2 _envDteEvents;
         private EnvDTE.ProjectItemsEvents _envDteProjectItemsEvents;
-        private TextDocumentKeyPressEvents _textDocumentKeyPressEvents;
-        private System.Windows.Forms.Timer _timer;
         //Public fields
         public DTE2 EnvDTE;
         public IVsTextManager TextManager;
@@ -97,7 +99,6 @@ namespace VSIXProject5
         public ToolWindowPane ResultWindow;
         public Window SolutionExplorer;
         public VisualStudioWorkspace Workspace;
-
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
         /// where you can put all the initialization code that rely on services provided by VisualStudio.
@@ -120,6 +121,8 @@ namespace VSIXProject5
             //Prepare package events
             Workspace = componentModel.GetService<VisualStudioWorkspace>();
             Workspace.WorkspaceChanged += WorkspaceEvents.WorkspaceChanged;
+            //Initialize logger
+            OutputWindowLogger.Init(base.GetService(typeof(SVsOutputWindow)) as SVsOutputWindow);
 
             _solution = base.GetService(typeof(SVsSolution)) as IVsSolution;
             _solutionEventsHandler = new SolutionEventsHandler(
@@ -135,95 +138,27 @@ namespace VSIXProject5
                 _envDteProjectItemsEvents.ItemAdded += projectItemEvents.ItemAdded;
                 _envDteProjectItemsEvents.ItemRemoved += projectItemEvents.ItemRemoved;
                 _envDteProjectItemsEvents.ItemRenamed += projectItemEvents.ItemRenamed;
-                //Init text change
-                _textDocumentKeyPressEvents = _envDteEvents.TextDocumentKeyPressEvents;
-                _textDocumentKeyPressEvents.AfterKeyPress += TextDocumentKeyPressEvents_AfterKeyPress;
             }
-            _timer = new System.Windows.Forms.Timer
-            {
-                Interval = 1000,
-            };
-            _timer.Tick += _timer_Tick;
-            //Initialize commands
+
             Goto.Initialize(this);
             VSIXProject5.Windows.RenameWindow.RenameModalWindowCommand.Initialize(this);
             RenameCommand.Initialize(this);
         }
-
-        private EnvDTE.TextDocument _editedDocument;
-        private void TextDocumentKeyPressEvents_AfterKeyPress(string Keypress, TextSelection Selection, bool InStatementCompletion)
-        {
-            _timer.Stop();
-            _timer.Start();
-            var StartPointParent = Selection.Parent.Parent;
-            _editedDocument = StartPointParent != null ? (EnvDTE.TextDocument)Selection.Parent.Parent.Object("TextDocument") : (TextDocument)EnvDTE.ActiveDocument.Object("TextDocument");
-        }
-
-        private void _timer_Tick(object sender, EventArgs e)
-        {
-            _timer.Stop();
-            if (_editedDocument != null)//Edited Document should never be null.
-            {
-                string docLanguage = _editedDocument.Language;
-                if (docLanguage == "XML")
-                {
-                    string documentText = _editedDocument.GetText();
-                    XDocument xDoc = null;
-                    try
-                    {
-                        xDoc = XDocument.Parse(documentText);
-                    }
-                    catch (Exception ex)
-                    {
-                        return;
-                    }
-                    bool isIBatisQueryXmlFile = XDocHelper.GetXDocumentNamespace(xDoc) == IBatisConstants.SqlMapNamespace;
-                    if (isIBatisQueryXmlFile)
-                    {
-                        var newStatments = new XmlIndexer().BuildFromXDocString(documentText, _editedDocument.Parent.FullName);
-                        Indexer.UpdateXmlStatmentForFile(newStatments);
-                    }
-                }
-                else if (docLanguage == "CSharp")
-                {
-                    //TODO: Check if file has any iBatis usings?
-                    TextManager.GetActiveView(1, null, out IVsTextView textView);
-
-                    var componentService = EditorAdaptersFactory.GetWpfTextView(textView);
-                    SnapshotPoint caretPosition = componentService.Caret.Position.BufferPosition;
-                    Microsoft.CodeAnalysis.Document roslynDocument = caretPosition.Snapshot.GetOpenDocumentInCurrentContextWithChanges();
-                    if (roslynDocument == null)
-                    {
-                        Debug.WriteLine($"Document code model: {caretPosition.Snapshot.ContentType.DisplayName}");
-                        return;
-                    }
-                    var csIndexer = new CSharpIndexer().BuildFromDocumentAsync(roslynDocument).Result;
-                    Indexer.UpdateCodeStatmentForFile(csIndexer);
-                }
-            }
-        }
-
+      
         internal void HandleSolutionEvent(EventConstats.VS.SolutionLoad eventNumber)
         {
-            Debug.WriteLine(eventNumber);
             switch (eventNumber)
             {
                 case EventConstats.VS.SolutionLoad.SolutionLoadComplete:
-                    Debug.WriteLine("Solution loaded event Start");
                     var projectItemHelper = new ProjectItemHelper();
                     var projectItems = projectItemHelper.GetProjectItemsFromSolutionProjects(EnvDTE.Solution.Projects);
-                    Debug.WriteLine($"Found {projectItems.Count} items.\n {string.Join("\n", projectItems.Select(e => e.Name).ToList())}");
                     XmlIndexer xmlIndexer = new XmlIndexer();
                     var xmlFiles = DocumentHelper.GetXmlFiles(projectItems);
-                    Debug.Write(xmlFiles);
-                    Debug.WriteLine($"Xml Files: {xmlFiles.Count}.\n {string.Join("\n", xmlFiles.Select(e=>e.FilePath))}");
-                    var xmlIndexerResult = xmlIndexer.BuildIndexer(xmlFiles);
-                    Indexer.Build(xmlIndexerResult);
-                    IndexersProcessStatus.XmlIndexerFinished = true;
-                    Debug.WriteLine("Solution loaded event Start");
+                    var xmlIndexerResult = xmlIndexer.BuildIndexerAsync(xmlFiles);
+                    Indexer.Instance.Build(xmlIndexerResult);
                     break;
                 case EventConstats.VS.SolutionLoad.SolutionOnClose:
-                    Indexer.ClearAll();
+                    Indexer.Instance.ClearAll();
                     break;
                 default:
                     break;

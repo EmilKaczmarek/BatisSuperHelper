@@ -3,20 +3,130 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:platformUi="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.14.0"
+             xmlns:shell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.14.0"
              Background="{DynamicResource VsBrush.Window}"
              Foreground="{DynamicResource VsBrush.WindowText}"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="300"
+             d:DesignHeight="300"
              Name="MyToolWindow">
-    <Grid Margin="0,0,0,153">
-        <DataGrid x:Name="dataGrid" Grid.ColumnSpan="2" Margin="0,2,0,-154" ColumnWidth="Auto" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" SelectionMode="Single" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="None" Background="{DynamicResource VsBrush.RawBackground}" RowBackground="{DynamicResource VsBrush.RawBackground}">
-            <DataGrid.RowStyle>
-                <Style TargetType="{x:Type DataGridRow}">
-                    <Style.Resources>
-                        <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="{DynamicResource VsColor.GridHeadingTextKey}"/>
-                    </Style.Resources>
+    <Grid>
+        <ListView Grid.Column="1" FontFamily="Segoe UI" Style="{x:Null}" x:Name="listView" BorderThickness="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="{DynamicResource VsBrush.Window}" Foreground="{DynamicResource VsBrush.WindowText}" SizeChanged="listView_SizeChanged" Loaded="listView_Loaded" MouseDoubleClick="listView_MouseDoubleClick" KeyDown="listView_KeyDown" >
+            <ListView.Resources>
+                <Style x:Key="GridViewColumnHeaderStyle" TargetType="{x:Type GridViewColumnHeader}">
+                    <Setter Property="Foreground" Value="{DynamicResource VsBrush.WindowText}"/>
+                    <Setter Property="Background" Value="{DynamicResource VsBrush.Window}"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="HorizontalAlignment" Value="Stretch" />
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                    <Setter Property="Template" >
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type GridViewColumnHeader}">
+                                <Border Background="Transparent" BorderBrush="{DynamicResource {x:Static shell:VsBrushes.ComboBoxBorderKey}}" BorderThickness="0,0,1,1">
+                                    <TextBlock FontFamily="Segoe UI" Text="{TemplateBinding Content}" Background="{DynamicResource VsBrush.Window}" HorizontalAlignment="Stretch" />
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type GridViewColumnHeader}">
+                                        <Border BorderBrush="{DynamicResource {x:Static shell:VsBrushes.ComboBoxBorderKey}}" BorderThickness="0,0,1,1">
+                                            <TextBlock FontFamily="Segoe UI" Text="{TemplateBinding Content}" Background="{DynamicResource {x:Static shell:VsBrushes.ToolWindowButtonHoverActiveKey}}" HorizontalAlignment="Stretch" />
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                    </Style.Triggers>
                 </Style>
-            </DataGrid.RowStyle>
-        </DataGrid>
+                <Style x:Key="ListViewItemStyle" TargetType="{x:Type ListViewItem}">
+                    <Setter Property="Foreground" Value="{DynamicResource VsBrush.WindowText}"/>
+                    <Setter Property="Background" Value="{DynamicResource VsBrush.Window}"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="HorizontalAlignment" Value="Stretch" />
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                    <Setter Property="Margin" Value="-6,0"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                <Border Padding="{TemplateBinding Padding}"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        SnapsToDevicePixels="true"
+                                        Margin="-4,0">
+                                    <GridViewRowPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Resources>
+                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent" />
+                        <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="Transparent" />
+                    </Style.Resources>
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource {x:Static platformUi:EnvironmentColors.TitleBarActiveGradientBrushKey}}" />
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                        <Border Padding="{TemplateBinding Padding}"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        SnapsToDevicePixels="true"
+                                        Margin="-3,0">
+                                            <GridViewRowPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </ListView.Resources>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem" BasedOn="{StaticResource ListViewItemStyle}"/>
+            </ListView.ItemContainerStyle>
+            <ListView.View>
+                <GridView>
+                    <GridView.ColumnHeaderContainerStyle>
+                        <Style TargetType="GridViewColumnHeader">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type GridViewColumnHeader}">
+                                        <TextBlock Text="" Padding="5">
+                                            <TextBlock.Background>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                    <GradientStop Offset="0.0" Color="Transparent" />
+                                                    <GradientStop Offset="1.0" Color="Transparent" />
+                                                </LinearGradientBrush>
+                                            </TextBlock.Background>
+                                        </TextBlock>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </GridView.ColumnHeaderContainerStyle>
+                    <GridViewColumn Header="Namespace" Width="100" DisplayMemberBinding="{Binding Namespace}" HeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}" />
+                    <GridViewColumn Header="Query" Width="250" DisplayMemberBinding="{Binding Query}" HeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}"/>
+                    <GridViewColumn Header="Line" Width="50" DisplayMemberBinding="{Binding Line}" HeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}"/>
+                    <GridViewColumn Header="File" Width="100" DisplayMemberBinding="{Binding File}" HeaderContainerStyle="{StaticResource GridViewColumnHeaderStyle}"/>
+                   
+                </GridView>
+            </ListView.View>
+        </ListView>
     </Grid>
 </UserControl>
