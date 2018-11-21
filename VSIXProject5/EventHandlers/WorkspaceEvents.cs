@@ -11,18 +11,31 @@ using VSIXProject5.Indexers;
 namespace VSIXProject5.Events
 {
     public class WorkspaceEvents
-    {   
+    {
+        private static bool _indexingBySolution;
+        private static object _lock; 
 
-        private static async Task BuildIndexerWithCSharpResults(Solution solution)
+        public static async Task BuildIndexerWithCSharpResults(Solution solution)
         {
             var solutionFiles = solution.Projects.SelectMany(x => x.Documents).ToList();
             CSharpIndexer csIndexer = new CSharpIndexer();
             var codeIndexerResult = await csIndexer.BuildIndexerAsync(solutionFiles);
             Indexer.Instance.Build(codeIndexerResult);
         }
+
+        public static async Task BuildIndexerUsingProjectWithCSharpResults(Project project)
+        {
+            var solutionFiles = project.Documents.ToList();
+            CSharpIndexer csIndexer = new CSharpIndexer();
+            var codeIndexerResult = await csIndexer.BuildIndexerAsync(solutionFiles);
+            Indexer.Instance.Build(codeIndexerResult);
+        }
+
         private static async Task DocumentsAddedAction(IEnumerable<Document> addedDocuments)
         {
             CSharpIndexer csIndexer = new CSharpIndexer();
+            if (addedDocuments == null)
+                return;
 
             foreach (var document in addedDocuments)
             {
@@ -37,13 +50,18 @@ namespace VSIXProject5.Events
                 Indexer.Instance.RemoveCodeStatmentsForDocumentId(documentId);
             }
         }
+
+        private static List<ProjectId> _projectsAlreadyAdded = new List<ProjectId>();
+
         public static async void WorkspaceChanged(object sender, WorkspaceChangeEventArgs e)
         {
             var workspace = sender as VisualStudioWorkspace;
             switch (e.Kind)
             {
                 case WorkspaceChangeKind.SolutionAdded:
-                    await BuildIndexerWithCSharpResults(e.NewSolution);
+                    var solution = e.NewSolution.Projects.Any() ? e.NewSolution : workspace.CurrentSolution;
+                    _projectsAlreadyAdded = new List<ProjectId>(solution.ProjectIds);
+                    await BuildIndexerWithCSharpResults(e.NewSolution.Projects.Any()? e.NewSolution : workspace.CurrentSolution);                  
                     break;
                 case WorkspaceChangeKind.SolutionChanged:
                     break;
@@ -54,6 +72,24 @@ namespace VSIXProject5.Events
                 case WorkspaceChangeKind.SolutionReloaded:
                     break;
                 case WorkspaceChangeKind.ProjectAdded:
+                    if (!_projectsAlreadyAdded.Any())
+                    {
+                        _projectsAlreadyAdded = new List<ProjectId>(e.NewSolution.ProjectIds);                       
+                        Loggers.OutputWindowLogger.WriteLn($"Adding {string.Join(",", e.NewSolution.Projects.Select(x=>x.Name))} to indexer");
+                        await BuildIndexerWithCSharpResults(e.NewSolution);
+                    }
+                    else
+                    {
+                        foreach (var project in e.NewSolution.Projects)
+                        {
+                            if (!_projectsAlreadyAdded.Contains(project.Id))
+                            {
+                                _projectsAlreadyAdded.Add(project.Id);
+                                Loggers.OutputWindowLogger.WriteLn($"Adding {project.Name} to indexer");
+                                await BuildIndexerUsingProjectWithCSharpResults(project);
+                            }
+                        }
+                    }
                     break;
                 case WorkspaceChangeKind.ProjectRemoved:
                     break;

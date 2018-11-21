@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using VSIXProject5.HelpersAndExtensions.Roslyn;
 
 namespace VSIXProject5.Helpers
 {
@@ -108,6 +109,7 @@ namespace VSIXProject5.Helpers
         /// Get text presentation of Query argument value
         /// </summary>
         /// <param name="SyntaxNodes"></param>
+        [Obsolete("Old logic for expression analysis. Use overload instead", false)]
         public String GetQueryStringFromSyntaxNodes(IEnumerable<SyntaxNode> SyntaxNodes)
         {
             if (IsAnySyntaxNodeContainIBatisNamespace(SyntaxNodes))
@@ -119,6 +121,25 @@ namespace VSIXProject5.Helpers
                 var constantValue = _semanticModel.GetConstantValue(queryArgument.Expression).Value;
                 
                 return constantValue != null?constantValue.ToString(): queryArgument.ToString().Replace("\"", "").Trim();//TODO: Use scripting to handle even more crazy cases.
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Get text presentation of Query argument expression if possible
+        /// </summary>
+        /// <param name="SyntaxNodes"></param>
+        /// <param name="allDocumentNodes"></param>
+        public String GetQueryStringFromSyntaxNodes(IEnumerable<SyntaxNode> SyntaxNodes, IEnumerable<SyntaxNode> allDocumentNodes)
+        {
+            if (IsAnySyntaxNodeContainIBatisNamespace(SyntaxNodes))
+            {
+                var syntaxArguments = GetArgumentListSyntaxFromSyntaxNodesWhereArgumentsAreNotEmpty(SyntaxNodes);
+                var singleArgumentListSyntax = GetProperArgumentSyntaxNode(syntaxArguments);
+
+                var queryArgument = GetArgumentSyntaxOfStringType(singleArgumentListSyntax);
+
+                return new ExpressionResolver().GetStringValueOfExpression(queryArgument.Expression, allDocumentNodes, _semanticModel);
             }
             return null;
         }
