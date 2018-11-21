@@ -43,14 +43,8 @@ namespace VSIXProject5.Indexers
             {
                 if (!Regex.IsMatch(document.FilePath, @"(\\service|\\TemporaryGeneratedFile_.*|\\assemblyinfo|\\assemblyattributes|\.(g\.i|g|designer|generated|assemblyattributes))\.(cs|vb)$"))
                 {
-                    //var watch = Stopwatch.StartNew();
                     result.AddRange(await BuildFromDocumentAsync(document));
-                    //OutputWindowLogger.WriteLn($"Completed {document.Name} in {watch.ElapsedMilliseconds}ms");
-                }
-                else
-                {
-                    //OutputWindowLogger.WriteLn($"Ignored {document.Name}");
-                }             
+                }          
             }
             sw.Stop();
             OutputWindowLogger.WriteLn($"Building Queries db from code ended in {sw.ElapsedMilliseconds} ms. Found {result.Count} queries. In {documents.Count} documents.");
