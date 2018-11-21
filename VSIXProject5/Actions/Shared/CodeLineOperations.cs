@@ -29,12 +29,12 @@ namespace VSIXProject5.Actions.Shared
             //In this case we need to Descendant Node to find ArgumentList
             if (returnNode != null)
             {
-                var ReturnNodeDescendanted = returnNode.DescendantNodesAndSelf();
-                return helper.GetQueryStringFromSyntaxNodes(ReturnNodeDescendanted);
+                var returnNodeDescendanted = returnNode.DescendantNodesAndSelf();
+                return helper.GetQueryStringFromSyntaxNodes(returnNodeDescendanted, root.DescendantNodesAndSelf());
             }
             //In case we don't have cursor around 'return', SyntaxNodes taken from line
             //should have needed ArgumentLineSyntax
-            return helper.GetQueryStringFromSyntaxNodes(nodesAtLine);
+            return helper.GetQueryStringFromSyntaxNodes(nodesAtLine, root.DescendantNodesAndSelf());
         }
     }
 }

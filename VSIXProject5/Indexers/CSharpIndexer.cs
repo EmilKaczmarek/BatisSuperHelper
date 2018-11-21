@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using VSIXProject5.Constants;
 using VSIXProject5.Helpers;
@@ -37,14 +38,22 @@ namespace VSIXProject5.Indexers
         {
             var result = new List<CSharpIndexerResult>();
             Stopwatch sw = new Stopwatch();
-            OutputWindowLogger.WriteLn("Building Queries db from code started.");
             sw.Start();
             foreach (var document in documents)
-            { 
-                result.AddRange(await BuildFromDocumentAsync(document));
+            {
+                if (!Regex.IsMatch(document.FilePath, @"(\\service|\\TemporaryGeneratedFile_.*|\\assemblyinfo|\\assemblyattributes|\.(g\.i|g|designer|generated|assemblyattributes))\.(cs|vb)$"))
+                {
+                    //var watch = Stopwatch.StartNew();
+                    result.AddRange(await BuildFromDocumentAsync(document));
+                    //OutputWindowLogger.WriteLn($"Completed {document.Name} in {watch.ElapsedMilliseconds}ms");
+                }
+                else
+                {
+                    //OutputWindowLogger.WriteLn($"Ignored {document.Name}");
+                }             
             }
             sw.Stop();
-            OutputWindowLogger.WriteLn($"Building Queries db from code ended in {sw.ElapsedMilliseconds} ms. Found {result.Count} queries.");
+            OutputWindowLogger.WriteLn($"Building Queries db from code ended in {sw.ElapsedMilliseconds} ms. Found {result.Count} queries. In {documents.Count} documents.");
             return result;
         }
 
@@ -99,8 +108,21 @@ namespace VSIXProject5.Indexers
                 if (nameIdentifiers.Any(e => IBatisConstants.MethodNames.Contains(e.Identifier.ValueText)))
                 {
                     Location loc = Location.Create(synTree, node.Span);
+                    //var queryName = new ExpressionResolver().GetStringValueOfExpression(node.Arguments.FirstOrDefault().Expression, nodes, semModel);                  
+                    //if (queryName != "")
+                    //{
+                    //    result.Add(new CSharpIndexerResult
+                    //    {
+                    //        QueryFileName = Path.GetFileName(document.FilePath),
+                    //        QueryId = queryName,
+                    //        QueryLineNumber = loc.GetLineSpan().StartLinePosition.Line + 1,
+                    //        QueryVsProjectName = document.Project.Name,
+                    //        QueryFilePath = document.FilePath,
+                    //        DocumentId = document.Id,
+                    //    });
+                    //}
                     var constantValueFromExpression = semModel.GetConstantValue(node.Arguments.FirstOrDefault().Expression);
-                    if(constantValueFromExpression.HasValue)
+                    if (constantValueFromExpression.HasValue)
                     {
                         result.Add(new CSharpIndexerResult
                         {
