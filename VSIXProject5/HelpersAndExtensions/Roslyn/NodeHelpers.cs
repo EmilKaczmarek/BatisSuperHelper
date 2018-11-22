@@ -144,6 +144,22 @@ namespace VSIXProject5.Helpers
             return null;
         }
 
+        public SyntaxKind GetExpressionKindForBatisMethodArgument(IEnumerable<SyntaxNode> SyntaxNodes)
+        {
+            if (IsAnySyntaxNodeContainIBatisNamespace(SyntaxNodes))
+            {
+                var syntaxArguments = GetArgumentListSyntaxFromSyntaxNodesWhereArgumentsAreNotEmpty(SyntaxNodes);
+                var singleArgumentListSyntax = GetProperArgumentSyntaxNode(syntaxArguments);
+
+                var queryArgument = GetArgumentSyntaxOfStringType(singleArgumentListSyntax);
+
+                var queryArgumentExpression = queryArgument.Expression;
+
+                return queryArgumentExpression != null ? queryArgumentExpression.Kind() : SyntaxKind.None;
+            }
+            return SyntaxKind.None;
+        }
+
         public ArgumentSyntax GetProperArgumentNodeInNodes(IEnumerable<SyntaxNode> nodes)
         {
             var syntaxArguments = GetArgumentListSyntaxFromSyntaxNodesWhereArgumentsAreNotEmpty(nodes);
