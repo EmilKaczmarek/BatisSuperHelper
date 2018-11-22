@@ -28,7 +28,7 @@ namespace VSIXProject5.Actions
         private DTE2 _envDTE;
         private Workspace _workspace;
 
-        public QueryRenameActions(GotoPackage package) : base(package.TextManager, package.EditorAdaptersFactory, new StatusBarIntegration(package.IStatusBar))
+        public QueryRenameActions(GotoAsyncPackage package) : base(package.TextManager, package.EditorAdaptersFactory, new StatusBarIntegration(package.IStatusBar))
         {
             base.package = package;
             _textManager = package.TextManager;

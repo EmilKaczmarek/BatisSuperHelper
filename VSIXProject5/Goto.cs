@@ -48,7 +48,7 @@ namespace VSIXProject5
             
             this.package = package;
  
-            _commandActions = new GoToQueryActions(this.package as GotoPackage);
+            _commandActions = new GoToQueryActions(this.package as GotoAsyncPackage);
 
             if (ServiceProvider.GetService(typeof(IMenuCommandService)) is OleMenuCommandService commandService)
             {

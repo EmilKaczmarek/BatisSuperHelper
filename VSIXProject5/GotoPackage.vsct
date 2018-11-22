@@ -39,7 +39,7 @@
       <Group guid="guidCommand1PackageCmdSet" id="MyMenuGroup" priority="0x0600">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN" />
       </Group>
-      <Group guid="guidGotoPackageCmdSet1" id="MyMenuGroup" priority="0x0600">
+      <Group guid="guidGotoAsyncPackageCmdSet1" id="MyMenuGroup" priority="0x0600">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS" />
       </Group>
     </Groups>
@@ -66,35 +66,35 @@
           <ButtonText>Go To Query</ButtonText>
         </Strings>
       </Button>
-      <Button guid="guidGotoPackageCmdSet" id="cmdidTestWindowCommand" priority="0x0100" type="Button">
+      <Button guid="guidGotoAsyncPackageCmdSet" id="cmdidTestWindowCommand" priority="0x0100" type="Button">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
         <Icon guid="guidImages1" id="bmpPic1" />
         <Strings>
           <ButtonText>TestWindow</ButtonText>
         </Strings>
       </Button>
-      <Button guid="guidGotoPackageCmdSet" id="cmdidBatisSHelperTestConsoleCommand" priority="0x0100" type="Button">
+      <Button guid="guidGotoAsyncPackageCmdSet" id="cmdidBatisSHelperTestConsoleCommand" priority="0x0100" type="Button">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
         <Icon guid="guidImages2" id="bmpPic1" />
         <Strings>
           <ButtonText>BatisSHelperTestConsole</ButtonText>
         </Strings>
       </Button>
-      <Button guid="guidGotoPackageCmdSet" id="cmdidResultWindowCommand" priority="0x0100" type="Button">
+      <Button guid="guidGotoAsyncPackageCmdSet" id="cmdidResultWindowCommand" priority="0x0100" type="Button">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
         <Icon guid="guidImages3" id="bmpPic1" />
         <Strings>
           <ButtonText>Find Query Results</ButtonText>
         </Strings>
       </Button>
-      <Button guid="guidGotoPackageCmdSet" id="cmdidRenameModalWindowCommand" priority="0x0100" type="Button">
+      <Button guid="guidGotoAsyncPackageCmdSet" id="cmdidRenameModalWindowCommand" priority="0x0100" type="Button">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
         <Icon guid="guidImages4" id="bmpPic1" />
         <Strings>
           <ButtonText>RenameModalWindow</ButtonText>
         </Strings>
       </Button>
-      <Button guid="guidGotoPackageCmdSet1" id="cmdidRenameCommand" priority="0x0100" type="Button">
+      <Button guid="guidGotoAsyncPackageCmdSet1" id="cmdidRenameCommand" priority="0x0100" type="Button">
         <Parent guid="guidCommand1PackageCmdSet" id="MyMenuGroup" />
         <Icon guid="guidImages5" id="bmpPic1" />
         <Strings>
@@ -143,7 +143,7 @@
       <IDSymbol name="bmpPicStrikethrough" value="6" />
     </GuidSymbol>
   
-    <GuidSymbol value="{16d16112-fe5d-40b1-9e67-9ae342523f8b}" name="guidGotoPackageCmdSet">
+    <GuidSymbol value="{16d16112-fe5d-40b1-9e67-9ae342523f8b}" name="guidGotoAsyncPackageCmdSet">
       <IDSymbol value="256" name="cmdidTestWindowCommand" />
       <IDSymbol value="257" name="cmdidBatisSHelperTestConsoleCommand" />
       <IDSymbol value="258" name="cmdidResultWindowCommand" />
@@ -186,7 +186,7 @@
       <IDSymbol name="bmpPicStrikethrough" value="6" />
     </GuidSymbol>
   
-    <GuidSymbol value="{5c26ab2a-b2b0-47f6-9eb7-6534d0b372f2}" name="guidGotoPackageCmdSet1">
+    <GuidSymbol value="{5c26ab2a-b2b0-47f6-9eb7-6534d0b372f2}" name="guidGotoAsyncPackageCmdSet1">
       <IDSymbol value="4128" name="MyMenuGroup" />
       <IDSymbol value="256" name="cmdidRenameCommand" />
     </GuidSymbol>

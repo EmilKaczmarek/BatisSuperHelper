@@ -21,7 +21,7 @@ namespace VSIXProject5.VSIntegration.DocumentChanges.Actions
             textView.TextBuffer.Properties.TryGetProperty(typeof(ITextDocument), out textDoc);
             using (var stringReader = new StringReader(snapshot.GetText()))
             {
-                var project = (Goto.Instance.package as GotoPackage).EnvDTE.Solution.FindProjectItem(textDoc.FilePath).ContainingProject.Name;
+                var project = (Goto.Instance.package as GotoAsyncPackage).EnvDTE.Solution.FindProjectItem(textDoc.FilePath).ContainingProject.Name;
                 XmlParser parser = XmlParser.WithStringReaderAndFileInfo(stringReader, textDoc.FilePath, project);
                 if (parser.XmlNamespace == IBatisConstants.SqlMapNamespace)
                 {
