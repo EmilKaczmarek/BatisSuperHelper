@@ -23,8 +23,7 @@ namespace VSIXProject5.Actions.Abstracts
 {
     public abstract class BaseActions
     {
-        public GotoPackage package { get; set; }
-
+        internal GotoAsyncPackage package { get; set; }
         public abstract void MenuItemCallback(object sender, EventArgs e);
 
         private IVsTextManager _textManager;

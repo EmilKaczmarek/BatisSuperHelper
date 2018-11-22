@@ -30,7 +30,7 @@ namespace VSIXProject5.Actions
         private ToolWindowPane _resultWindow;
         private DTE2 _envDTE;
   
-        public GoToQueryActions(GotoPackage package) : base(package.TextManager, package.EditorAdaptersFactory, new StatusBarIntegration(package.IStatusBar))
+        public GoToQueryActions(GotoAsyncPackage package) : base(package.TextManager, package.EditorAdaptersFactory, new StatusBarIntegration(package.IStatusBar))
         {
             base.package = package;
             _textManager = package.TextManager;
