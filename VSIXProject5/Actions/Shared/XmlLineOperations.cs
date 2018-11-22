@@ -12,16 +12,27 @@ namespace VSIXProject5.Actions.Shared
 {
     public class XmlLineOperations : ILineOperation
     {
-        public string GetQueryNameAtLine(ITextSnapshot snapshot, int selectedLineNumber)
+        private ITextSnapshot _textSnapshot;
+        private int _selectedLineNumber;
+
+        public XmlLineOperations(ITextSnapshot snapshot, int selectedLineNumber)
         {
-            using (var stringReader = new StringReader(snapshot.GetText()))
+            _textSnapshot = snapshot;
+            _selectedLineNumber = selectedLineNumber;
+        }
+
+        public string GetQueryNameAtLine()
+        {
+            using (var stringReader = new StringReader(_textSnapshot.GetText()))
             {
                 XmlParser parser = XmlParser.WithStringReader(stringReader);
 
-                var elementLocation = parser.GetStatmentElementsLineNumber().DetermineClosestInt(selectedLineNumber+1);
+                var elementLocation = parser.GetStatmentElementsLineNumber().DetermineClosestInt(_selectedLineNumber + 1);
 
                 return parser.GetQueryAtLineOrNull(elementLocation);
             }
         }
+
+        public bool CanRenameQueryAtLine() => true;
     }
 }

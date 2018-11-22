@@ -9,6 +9,7 @@ namespace VSIXProject5.Actions.Shared
 {
     public interface ILineOperation
     {
-        string GetQueryNameAtLine(ITextSnapshot snapshot, int selectionLineNumber);
+        string GetQueryNameAtLine();
+        bool CanRenameQueryAtLine();
     }
 }

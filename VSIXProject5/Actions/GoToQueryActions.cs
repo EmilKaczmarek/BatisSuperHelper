@@ -49,9 +49,11 @@ namespace VSIXProject5.Actions
             ITextSnapshot snapshot = wpfTextView.Caret.Position.BufferPosition.Snapshot;
 
             List<ResultWindowViewModel> windowViewModels = new List<ResultWindowViewModel>();
-            ILineOperation lineOperation = snapshot.IsCSharpType() ? new CodeLineOperations() : (ILineOperation)(new XmlLineOperations());
+            ILineOperation lineOperation = snapshot.IsCSharpType()
+                 ? new CodeLineOperations(snapshot, selectionLineNum)
+                 : (ILineOperation)(new XmlLineOperations(snapshot, selectionLineNum));
 
-            var queryName = lineOperation.GetQueryNameAtLine(snapshot, selectionLineNum);
+            var queryName = lineOperation.GetQueryNameAtLine();
 
             if (snapshot.GetContentTypeName() == "XML")
             {

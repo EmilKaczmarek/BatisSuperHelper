@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.VisualStudio.Editor;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
@@ -38,6 +39,24 @@ namespace VSIXProject5.Actions
             _workspace = package.Workspace;
         }
 
+        public override void BeforeQuery(object sender, EventArgs e)
+        {
+            base.BeforeQuery(sender, e);
+
+            IVsTextView textView = null;
+            _textManager.GetActiveView(1, null, out textView);
+            textView.GetCaretPos(out int selectionLineNum, out int selectionCol);
+            var wpfTextView = _editorAdaptersFactory.GetWpfTextView(textView);
+
+            ITextSnapshot snapshot = wpfTextView.Caret.Position.BufferPosition.Snapshot;
+            ILineOperation lineOperation = snapshot.IsCSharpType()
+                ? new CodeLineOperations(snapshot, selectionLineNum)
+                : (ILineOperation)(new XmlLineOperations(snapshot, selectionLineNum));
+
+            OleMenuCommand menuCommand = sender as OleMenuCommand;
+            menuCommand.Enabled = lineOperation.CanRenameQueryAtLine();
+        }
+
         public override void MenuItemCallback(object sender, EventArgs e)
         {
             IVsTextView textView = null;
@@ -46,9 +65,11 @@ namespace VSIXProject5.Actions
             var wpfTextView = _editorAdaptersFactory.GetWpfTextView(textView);
 
             ITextSnapshot snapshot = wpfTextView.Caret.Position.BufferPosition.Snapshot;
-            ILineOperation lineOperation = snapshot.IsCSharpType() ? new CodeLineOperations() : (ILineOperation)(new XmlLineOperations());
+            ILineOperation lineOperation = snapshot.IsCSharpType() 
+                ? new CodeLineOperations(snapshot, selectionLineNum) 
+                : (ILineOperation)(new XmlLineOperations(snapshot, selectionLineNum));
 
-            string queryName = lineOperation.GetQueryNameAtLine(snapshot, selectionLineNum);
+            string queryName = lineOperation.GetQueryNameAtLine();
 
             if (queryName == null)
             {
