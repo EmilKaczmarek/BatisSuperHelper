@@ -20,7 +20,6 @@ namespace VSIXProject5.Indexers
         {
             var result = new List<XmlIndexerResult>();
             Stopwatch sw = new Stopwatch();
-            OutputWindowLogger.WriteLn("Building Queries db from xml started.");
             sw.Start();
             foreach (var xmlSolutionDocument in solutionXmlDocuments)
             {

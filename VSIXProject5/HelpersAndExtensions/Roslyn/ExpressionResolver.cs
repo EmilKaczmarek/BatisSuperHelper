@@ -50,7 +50,7 @@ namespace VSIXProject5.HelpersAndExtensions.Roslyn
                         }
                         else
                         {
-                            var initializerValue = variableDeclaration.Initializer.Value;
+                            var initializerValue = variableDeclaration.Initializer?.Value;
                             return GetStringValueOfExpression(initializerValue, nodes, semanticModel);
                         }
                         break;
@@ -124,23 +124,7 @@ namespace VSIXProject5.HelpersAndExtensions.Roslyn
                 if (content is InterpolationSyntax)
                 {
                     var expression = (content as InterpolationSyntax).Expression;
-                    if (expression is IdentifierNameSyntax)
-                    {
-                        var test = expression as IdentifierNameSyntax;
-                        var descendantTest = test.DescendantNodesAndSelf();
-                        var variableDeclaration = nodes.OfType<VariableDeclarationSyntax>().SelectMany(e => e.Variables.Where(x => x.Identifier.Text == test.Identifier.Text)).FirstOrDefault();
-                        var initializerValue = variableDeclaration.Initializer.Value;
-                        if (initializerValue is LiteralExpressionSyntax || initializerValue.Kind() == SyntaxKind.StringLiteralExpression)
-                        {
-                            var token = (initializerValue as LiteralExpressionSyntax).Token;
-                            var tokenValue = token.Value;
-                            sb.Append(tokenValue);
-                        }
-                    }
-                    else
-                    {
-                        sb.Append(GetStringValueOfExpression(expression, nodes, semanticModel));
-                    }
+                    sb.Append(GetStringValueOfExpression(expression, nodes, semanticModel));
                 }
                 if (content is InterpolatedStringTextSyntax)
                 {

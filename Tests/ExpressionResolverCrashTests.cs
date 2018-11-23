@@ -18,6 +18,7 @@ namespace GoToQueryUnitTests
         private string _codeTemplateP2;
         private string _codeTemplateP3;
         private string _codeTemplateP4;
+        private string _codeTemplateP5;
 
         [AssemblyInitialize]
         public static void InitializeReferencedAssemblies(TestContext context)
@@ -44,7 +45,7 @@ namespace GoToQueryUnitTests
                     {
                         static void Main(string[] args)
                         {                            
-                            var variable = TestMethod(";
+                            var nonDuplicateVariable = TestMethod(";
 
             _codeTemplateP2 = @","""");
                         ";
@@ -55,16 +56,21 @@ namespace GoToQueryUnitTests
                         {
                             return one + two;
                         }";
-
             _codeTemplateP4 = @"
+
+                        public static string TestInReturn()
+                        {
+                            return UnknowMethod(";
+            _codeTemplateP5 = @");
+                        }
                     }
                 }";
         }
-        private string GenerateDocumentCodeFromTemplateUsingVariables(string insideMethodExpressionCode, string insideClassCode, string outsideClassCode)
+        private string GenerateDocumentCodeFromTemplateUsingVariables(string insideMethodExpressionCode, string insideClassCode, string outsideClassCode, string inReturnUnknowMethodExpression)
         {
-            return $"{_codeTemplateP1}{insideMethodExpressionCode}{_codeTemplateP2}{insideClassCode}{_codeTemplateP3}{outsideClassCode}{_codeTemplateP4}";
+            return $"{_codeTemplateP1}{insideMethodExpressionCode}{_codeTemplateP2}{insideClassCode}{_codeTemplateP3}{outsideClassCode}{_codeTemplateP4}{inReturnUnknowMethodExpression}{_codeTemplateP5}";
         }
-        private void PrepareAnalyzeModel(string documentCode, out SemanticModel semanticModel, out IEnumerable<SyntaxNode> nodes, out ArgumentSyntax nodeToTest)
+        private void PrepareAnalyzeModel(string documentCode, out SemanticModel semanticModel,out IEnumerable<SyntaxNode> nodes, out ArgumentSyntax nodeToTest, bool inReturn = false)
         {
             SyntaxTree tree = CSharpSyntaxTree.ParseText(documentCode);
 
@@ -80,18 +86,18 @@ namespace GoToQueryUnitTests
             nodes = treeRoot.DescendantNodesAndSelf();
 
             var sourceText = treeRoot.GetText();
-            var line = sourceText.Lines[11];
+            var line = sourceText.Lines[inReturn?21:11];
             var span = line.Span;
             var nodesAtLine = treeRoot.DescendantNodes(span);
 
             nodeToTest = nodesAtLine.OfType<ArgumentSyntax>().FirstOrDefault();
 
         }
-        private string Execute(string insideCode, string insideClassCode, string outsideClassCode)
+        private string Execute(string insideCode, string insideClassCode, string outsideClassCode, string inReturnUnknowMethodExpression = "", bool inReturn = false)
         {
-            var code = GenerateDocumentCodeFromTemplateUsingVariables(insideCode, insideClassCode, outsideClassCode);
+            var code = GenerateDocumentCodeFromTemplateUsingVariables(insideCode, insideClassCode, outsideClassCode, inReturnUnknowMethodExpression);
             Trace.WriteLine(code);
-            PrepareAnalyzeModel(code, out var semanticModel, out var nodes, out var nodeToTest);
+            PrepareAnalyzeModel(code, out var semanticModel, out var nodes, out var nodeToTest, inReturn);
             return new ExpressionResolver().GetStringValueOfExpression(nodeToTest?.Expression, nodes, semanticModel);
         }
 
@@ -326,6 +332,17 @@ namespace GoToQueryUnitTests
             string outsideClassCode = @"";
             var result = Execute(insideMethodCode, insideClassCode, outsideClassCode);
             Assert.AreEqual("", result);
+        }
+
+        [TestMethod, TestCategory("Null Handling")]
+        public void NullWhenCallingPropertyIsUnassigned()
+        {
+            string insideMethodCode = @"";
+            string insideClassCode = @"";
+            string outsideClassCode = @"private readonly string variable;";
+            string inReturnUnknowMethodExpression = @"$""{variable}.test""";
+            var result = Execute(insideMethodCode, insideClassCode, outsideClassCode, inReturnUnknowMethodExpression, true);
+            Assert.AreEqual(".test", result);
         }
     }
 }
