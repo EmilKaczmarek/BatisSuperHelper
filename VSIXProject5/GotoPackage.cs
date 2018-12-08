@@ -34,6 +34,7 @@ using VSIXProject5.Helpers;
 using VSIXProject5.Indexers;
 using VSIXProject5.Loggers;
 using VSIXProject5.Parsers;
+using VSIXProject5.Storage;
 using VSIXProject5.VSIntegration.Navigation;
 using VSIXProject5.Windows.RenameWindow;
 using static VSIXProject5.Events.VSSolutionEventsHandler;
@@ -150,10 +151,11 @@ namespace VSIXProject5
                     XmlIndexer xmlIndexer = new XmlIndexer();
                     var xmlFiles = DocumentHelper.GetXmlFiles(projectItems);
                     var xmlIndexerResult = xmlIndexer.BuildIndexerAsync(xmlFiles);
-                    Indexer.Instance.Build(xmlIndexerResult);
+                    PackageStorage.XmlQueries.AddMultipleWithoutKey(xmlIndexerResult);
                     break;
                 case EventConstats.VS.SolutionLoad.SolutionOnClose:
-                    Indexer.Instance.ClearAll();
+                    PackageStorage.CodeQueries.Clear();
+                    PackageStorage.XmlQueries.Clear();
                     break;
                 default:
                     break;

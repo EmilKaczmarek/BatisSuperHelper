@@ -9,6 +9,7 @@ using Microsoft.VisualStudio.Text.Editor;
 using VSIXProject5.Constants;
 using VSIXProject5.Indexers;
 using VSIXProject5.Parsers;
+using VSIXProject5.Storage;
 
 namespace VSIXProject5.VSIntegration.DocumentChanges.Actions
 {
@@ -22,11 +23,11 @@ namespace VSIXProject5.VSIntegration.DocumentChanges.Actions
             using (var stringReader = new StringReader(snapshot.GetText()))
             {
                 var project = (Goto.Instance.package as GotoAsyncPackage).EnvDTE.Solution.FindProjectItem(textDoc.FilePath).ContainingProject.Name;
-                XmlParser parser = XmlParser.WithStringReaderAndFileInfo(stringReader, textDoc.FilePath, project);
+                XmlParser parser = new XmlParser().WithStringReader(stringReader).WithFileInfo(textDoc.FilePath, project).Load();
                 if (parser.XmlNamespace == IBatisConstants.SqlMapNamespace)
                 {
                     var newStatments = parser.GetMapFileStatments();
-                    Indexer.Instance.UpdateXmlStatmentForFile(newStatments);
+                    PackageStorage.XmlQueries.UpdateStatmentForFileWihoutKey(newStatments);
                 }
             }
         }

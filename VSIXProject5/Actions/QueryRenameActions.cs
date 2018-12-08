@@ -15,6 +15,7 @@ using VSIXProject5.Helpers;
 using VSIXProject5.HelpersAndExtensions;
 using VSIXProject5.HelpersAndExtensions.VisualStudio;
 using VSIXProject5.Indexers;
+using VSIXProject5.Storage;
 using VSIXProject5.VSIntegration;
 using VSIXProject5.Windows.RenameWindow;
 using VSIXProject5.Windows.RenameWindow.ViewModel;
@@ -76,8 +77,8 @@ namespace VSIXProject5.Actions
                 return;
             }
 
-            var codeKeys = Indexer.Instance.GetCodeKeysByQueryId(queryName);
-            var xmlKeys = Indexer.Instance.GetXmlKeysByQueryId(queryName);
+            var codeKeys = PackageStorage.CodeQueries.GetKeysByQueryId(queryName);
+            var xmlKeys = PackageStorage.XmlQueries.GetKeysByQueryId(queryName);
 
             var namespaceQueryPair = MapNamespaceHelper.DetermineMapNamespaceQueryPairFromCodeInput(queryName);
 
@@ -98,7 +99,7 @@ namespace VSIXProject5.Actions
 
             foreach (var xmlQuery in xmlKeys)
             {
-                var query = Indexer.Instance.GetXmlStatment(xmlQuery);
+                var query = PackageStorage.XmlQueries.GetValue(xmlQuery);
                 var projectItem = _envDTE.Solution.FindProjectItem(query.QueryFileName);
 
                 var isProjectItemOpened = projectItem.IsOpen;
@@ -116,10 +117,10 @@ namespace VSIXProject5.Actions
                 textSelection.Insert(line, (int)vsInsertFlags.vsInsertFlagsContainNewText);
                 projectItem.Document.Save();      
 
-                Indexer.Instance.RenameXmlQuery(xmlQuery, returnViewModel.QueryText);
+                PackageStorage.XmlQueries.RenameQuery(xmlQuery, returnViewModel.QueryText);
             }
             foreach (var codeKey in codeKeys) { 
-                var codeQueries = Indexer.Instance.GetCodeStatments(codeKey);
+                var codeQueries = PackageStorage.CodeQueries.GetValue(codeKey);
                 foreach(var file in codeQueries.GroupBy(x => x.DocumentId, x => x))
                 {
                     var doc = _workspace.CurrentSolution.GetDocument(file.Key);
@@ -142,7 +143,7 @@ namespace VSIXProject5.Actions
                         var sucess = _workspace.TryApplyChanges(doc.Project.Solution);
                     }
                 }
-                Indexer.Instance.RenameCodeQueries(codeKey, returnViewModel.QueryText);
+                PackageStorage.CodeQueries.RenameQuery(codeKey, returnViewModel.QueryText);
             }
         }
     }

@@ -14,7 +14,7 @@ using VSIXProject5.Parsers;
 
 namespace VSIXProject5.Indexers
 {
-    public class XmlIndexer:BaseIndexer
+    public class XmlIndexer
     {
         public List<XmlIndexerResult> BuildIndexerAsync(List<XmlFileInfo> solutionXmlDocuments)
         {
@@ -23,7 +23,7 @@ namespace VSIXProject5.Indexers
             sw.Start();
             foreach (var xmlSolutionDocument in solutionXmlDocuments)
             {
-                XmlParser parser = XmlParser.WithFilePathAndFileInfo(xmlSolutionDocument.FilePath, xmlSolutionDocument.ProjectName);
+                XmlParser parser = new XmlParser().WithFileInfo(xmlSolutionDocument.FilePath, xmlSolutionDocument.ProjectName).Load();
 
                 bool isIBatisQueryXmlFile = parser.XmlNamespace == @"http://ibatis.apache.org/mapping";
                 if (isIBatisQueryXmlFile)
@@ -35,5 +35,18 @@ namespace VSIXProject5.Indexers
             OutputWindowLogger.WriteLn($"Building Queries db from xml ended in {sw.ElapsedMilliseconds} ms. Found {result.Count} queries.");
             return result;
         }
+
+        public List<XmlIndexerResult> ParseSingleFile(XmlFileInfo xmlDocument)
+        {
+            XmlParser parser = new XmlParser().WithFileInfo(xmlDocument.FilePath, xmlDocument.ProjectName).Load();
+
+            bool isIBatisQueryXmlFile = parser.XmlNamespace == @"http://ibatis.apache.org/mapping";
+            if (isIBatisQueryXmlFile)
+            {
+                return parser.GetMapFileStatments();
+            }
+            return new List<XmlIndexerResult>();
+        }
+
     }
 }

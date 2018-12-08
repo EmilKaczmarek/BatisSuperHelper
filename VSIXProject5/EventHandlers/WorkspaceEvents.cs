@@ -7,28 +7,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using VSIXProject5.Indexers;
+using VSIXProject5.Storage;
 
 namespace VSIXProject5.Events
 {
     public class WorkspaceEvents
     {
         private static bool _indexingBySolution;
-        private static object _lock; 
 
         public static async Task BuildIndexerWithCSharpResults(Solution solution)
         {
             var solutionFiles = solution.Projects.SelectMany(x => x.Documents).ToList();
-            CSharpIndexer csIndexer = new CSharpIndexer();
-            var codeIndexerResult = await csIndexer.BuildIndexerAsync(solutionFiles);
-            Indexer.Instance.Build(codeIndexerResult);
+            await PackageStorage.AnalyzeAndStoreAsync(solutionFiles);
         }
 
         public static async Task BuildIndexerUsingProjectWithCSharpResults(Project project)
         {
             var solutionFiles = project.Documents.ToList();
-            CSharpIndexer csIndexer = new CSharpIndexer();
-            var codeIndexerResult = await csIndexer.BuildIndexerAsync(solutionFiles);
-            Indexer.Instance.Build(codeIndexerResult);
+            await PackageStorage.AnalyzeAndStoreAsync(solutionFiles);
         }
 
         private static async Task DocumentsAddedAction(IEnumerable<Document> addedDocuments)
@@ -40,14 +36,14 @@ namespace VSIXProject5.Events
             foreach (var document in addedDocuments)
             {
                 var documentIndexerResult = await csIndexer.BuildFromDocumentAsync(document);
-                Indexer.Instance.Build(documentIndexerResult);
+                PackageStorage.CodeQueries.AddWithoutKey(documentIndexerResult);
             }
         }
         private static async Task DocumentRemovedAction(IEnumerable<DocumentId> removedDocumentsIds)
         {
             foreach(var documentId in removedDocumentsIds)
             {
-                Indexer.Instance.RemoveCodeStatmentsForDocumentId(documentId);
+                PackageStorage.CodeQueries.RemoveStatmentsByDefinedObject(documentId);
             }
         }
 

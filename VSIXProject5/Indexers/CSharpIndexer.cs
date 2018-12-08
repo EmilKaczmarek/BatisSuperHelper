@@ -21,29 +21,30 @@ using VSIXProject5.Models;
 
 namespace VSIXProject5.Indexers
 {
-    public class CSharpIndexer: BaseIndexer
+    public class CSharpIndexer
     {
         private readonly Workspace _workspace;
+
         public CSharpIndexer()
         {
-            //var componentModel = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
-            //_workspace = componentModel.GetService<VisualStudioWorkspace>();
+
         }
+
         public CSharpIndexer(Workspace workspace)
         {
             _workspace = workspace;
         }
 
-        public async Task<List<CSharpIndexerResult>> BuildIndexerAsync(List<Document> documents)
+        public async Task<List<List<CSharpIndexerResult>>> BuildIndexerAsync(List<Document> documents)
         {
-            var result = new List<CSharpIndexerResult>();
+            var result = new List<List<CSharpIndexerResult>>();
             Stopwatch sw = new Stopwatch();
             sw.Start();
             foreach (var document in documents)
             {
                 if (!Regex.IsMatch(document.FilePath, @"(\\service|\\TemporaryGeneratedFile_.*|\\assemblyinfo|\\assemblyattributes|\.(g\.i|g|designer|generated|assemblyattributes))\.(cs|vb)$"))
                 {
-                    result.AddRange(await BuildFromDocumentAsync(document));
+                    result.Add(await BuildFromDocumentAsync(document));
                 }          
             }
             sw.Stop();
@@ -96,32 +97,16 @@ namespace VSIXProject5.Indexers
                 var allowedTypes = new List<Type> { typeof(IdentifierNameSyntax), typeof(GenericNameSyntax) };
                 var nameIdentifiers = firstInvocationOfNodeAncestors.Expression.DescendantNodes().Where(e=>allowedTypes.Contains(e.GetType())).Cast<SimpleNameSyntax>();
 
-                //var logMessage = $"{document.Name} Found: {string.Join("->", nameIdentifiers.Select(e => e.Identifier.ValueText))}";
-                //OutputWindowLogger.WriteLn(logMessage);
-
                 if (nameIdentifiers.Any(e => IBatisConstants.MethodNames.Contains(e.Identifier.ValueText)))
                 {
                     Location loc = Location.Create(synTree, node.Span);
-                    //var queryName = new ExpressionResolver().GetStringValueOfExpression(node.Arguments.FirstOrDefault().Expression, nodes, semModel);                  
-                    //if (queryName != "")
-                    //{
-                    //    result.Add(new CSharpIndexerResult
-                    //    {
-                    //        QueryFileName = Path.GetFileName(document.FilePath),
-                    //        QueryId = queryName,
-                    //        QueryLineNumber = loc.GetLineSpan().StartLinePosition.Line + 1,
-                    //        QueryVsProjectName = document.Project.Name,
-                    //        QueryFilePath = document.FilePath,
-                    //        DocumentId = document.Id,
-                    //    });
-                    //}
-                    var constantValueFromExpression = semModel.GetConstantValue(node.Arguments.FirstOrDefault().Expression);
-                    if (constantValueFromExpression.HasValue)
+                    var queryName = new ExpressionResolver().GetStringValueOfExpression(node.Arguments.FirstOrDefault().Expression, nodes, semModel);
+                    if (queryName != "")
                     {
                         result.Add(new CSharpIndexerResult
                         {
                             QueryFileName = Path.GetFileName(document.FilePath),
-                            QueryId = constantValueFromExpression.Value.ToString(),
+                            QueryId = queryName,
                             QueryLineNumber = loc.GetLineSpan().StartLinePosition.Line + 1,
                             QueryVsProjectName = document.Project.Name,
                             QueryFilePath = document.FilePath,

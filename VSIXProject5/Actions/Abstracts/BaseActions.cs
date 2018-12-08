@@ -85,7 +85,7 @@ namespace VSIXProject5.Actions.Abstracts
                 if (!XmlStringLine.IsIgnored(lineText))
                 {
                     string text = caretPosition.Snapshot.GetText();
-                    XmlParser parser = XmlParser.WithStringReader(new StringReader(text));
+                    XmlParser parser = new XmlParser().WithStringReader(new StringReader(text)).Load();
 
                     bool isIBatisQueryXmlFile = parser.XmlNamespace == @"http://ibatis.apache.org/mapping";
                     bool isLineSupported = parser.HasSelectedLineValidQuery(selectionLineNum + 1);
