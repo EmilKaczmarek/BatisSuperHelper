@@ -25,7 +25,7 @@ namespace VSIXProject5.Actions.Shared
         {
             using (var stringReader = new StringReader(_textSnapshot.GetText()))
             {
-                XmlParser parser = XmlParser.WithStringReader(stringReader);
+                XmlParser parser = new XmlParser().WithStringReader(stringReader).Load();
 
                 var elementLocation = parser.GetStatmentElementsLineNumber().DetermineClosestInt(_selectedLineNumber + 1);
 

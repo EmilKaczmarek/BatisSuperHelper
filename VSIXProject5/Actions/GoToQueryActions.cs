@@ -16,6 +16,7 @@ using VSIXProject5.HelpersAndExtensions;
 using VSIXProject5.HelpersAndExtensions.VisualStudio;
 using VSIXProject5.Indexers;
 using VSIXProject5.Indexers.Models;
+using VSIXProject5.Storage;
 using VSIXProject5.VSIntegration;
 using VSIXProject5.VSIntegration.Navigation;
 using VSIXProject5.Windows.ResultWindow.ViewModel;
@@ -57,8 +58,8 @@ namespace VSIXProject5.Actions
 
             if (snapshot.GetContentTypeName() == "XML")
             {
-                var statmentsKeys = Indexer.Instance.GetCodeKeysByQueryId(queryName);
-                var statments = statmentsKeys.Select(Indexer.Instance.GetCodeStatments).SelectMany(x => x);
+                var statmentsKeys = PackageStorage.CodeQueries.GetKeysByQueryId(queryName);
+                var statments = statmentsKeys.Select(PackageStorage.CodeQueries.GetValue).SelectMany(x => x);
 
                 if (!statments.Any())
                 {
@@ -83,11 +84,11 @@ namespace VSIXProject5.Actions
             }
             else
             { 
-                var keys = Indexer.Instance.GetXmlKeysByQueryId(queryName);
+                var keys = PackageStorage.XmlQueries.GetKeysByQueryId(queryName);
                 if (keys.Any())
                 {
-                    var statment = Indexer.Instance.GetXmlStatmentOrNull(keys.First());
-                    windowViewModels = keys.Select(Indexer.Instance.GetXmlStatmentOrNull).Select(x => new ResultWindowViewModel
+                    var statment = PackageStorage.XmlQueries.GetValueOrNull(keys.First());
+                    windowViewModels = keys.Select(PackageStorage.XmlQueries.GetValueOrNull).Select(x => new ResultWindowViewModel
                     {
                         File = x.QueryFileName,
                         FilePath = x.QueryFilePath,

@@ -6,7 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using VSIXProject5.Indexers;
+using VSIXProject5.Models;
 using VSIXProject5.Parsers;
+using VSIXProject5.Storage;
 
 namespace VSIXProject5.EventHandlers
 {
@@ -14,13 +16,15 @@ namespace VSIXProject5.EventHandlers
     {
         public void ItemRenamed(ProjectItem ProjectItem, string OldName)
         {
-            Indexer.Instance.RenameStatmentsFile(OldName, ProjectItem.Name);
+            PackageStorage.CodeQueries.RenameStatmentsForFile(OldName, ProjectItem.Name);
+            PackageStorage.XmlQueries.RenameStatmentsForFile(OldName, ProjectItem.Name);
         }
 
         public void ItemRemoved(ProjectItem ProjectItem)
         {
             string fileName = ProjectItem.Name;
-            Indexer.Instance.RemoveStatmentsForFile(fileName, false);
+            PackageStorage.XmlQueries.RemoveStatmentsForFilePath(fileName);
+            PackageStorage.CodeQueries.RemoveStatmentsForFilePath(fileName);
         }
 
         public void ItemAdded(ProjectItem ProjectItem)
@@ -28,8 +32,11 @@ namespace VSIXProject5.EventHandlers
             string projectItemExtension = Path.GetExtension(ProjectItem.Name);
             if (projectItemExtension == ".xml")
             {
-                XmlParser parser = XmlParser.WithFilePathAndFileInfo(ProjectItem.FileNames[0], ProjectItem.ContainingProject.Name);
-                Indexer.Instance.Build(parser.GetMapFileStatments());
+                PackageStorage.AnalyzeAndStoreSingle(new XmlFileInfo
+                {
+                    FilePath = ProjectItem.FileNames[0],
+                    ProjectName =  ProjectItem.ContainingProject.Name
+                });
             }
         }
     }

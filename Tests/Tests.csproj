@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="ExpressionResolverCrashTests.cs" />
     <Compile Include="ExpressionResolverGeneralTests.cs" />
+    <Compile Include="GenericStorageTests.cs" />
     <Compile Include="IndexerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
