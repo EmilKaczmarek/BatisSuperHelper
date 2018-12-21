@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace VSIXProject5.Indexers.Models
 {
-    public class XmlIndexerResult : BaseIndexerValue
+    public class XmlIndexerResult
     {
-        public string MapNamespace { get; set; }
-        public string FullyQualifiedQuery { get; set; }
-        public bool UsesStatementNamespaces { get; set; }
+        public List<XmlQuery> Queries { get; set; }
+        //Configuration placeholder
     }
 }

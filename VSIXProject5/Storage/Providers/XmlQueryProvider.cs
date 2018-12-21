@@ -9,16 +9,16 @@ using VSIXProject5.Storage.Interfaces;
 
 namespace VSIXProject5.Storage.Domain
 {
-    public class XmlQueryProvider : IProvider<IndexerKey, XmlIndexerResult>
+    public class XmlQueryProvider : IProvider<IndexerKey, XmlQuery>
     {
-        private Dictionary<IndexerKey, XmlIndexerResult> xmlStatments = new Dictionary<IndexerKey, XmlIndexerResult>();
+        private Dictionary<IndexerKey, XmlQuery> xmlStatments = new Dictionary<IndexerKey, XmlQuery>();
 
-        public XmlIndexerResult GetValue(IndexerKey key)
+        public XmlQuery GetValue(IndexerKey key)
         {
             return xmlStatments[key];
         }
 
-        public XmlIndexerResult GetValueOrNull(IndexerKey key)
+        public XmlQuery GetValueOrNull(IndexerKey key)
         {
             if (xmlStatments.ContainsKey(key))
             {
@@ -27,7 +27,7 @@ namespace VSIXProject5.Storage.Domain
             return null;
         }
 
-        public void Add(IndexerKey key, XmlIndexerResult value)
+        public void Add(IndexerKey key, XmlQuery value)
         {          
             if (!xmlStatments.ContainsKey(key))
             {
@@ -35,7 +35,7 @@ namespace VSIXProject5.Storage.Domain
             }
         }
 
-        public void AddWithoutKey(XmlIndexerResult value)
+        public void AddWithoutKey(XmlQuery value)
         {
             IndexerKey key = new IndexerKey
             {
@@ -46,18 +46,18 @@ namespace VSIXProject5.Storage.Domain
             Add(key, value);
         }
 
-        public void AddMultipleWithoutKey(List<XmlIndexerResult> values)
+        public void AddMultipleWithoutKey(List<XmlQuery> values)
         {
             if (!values.Any())
                 return;
 
             foreach (var value in values)
             {
-                AddWithoutKey(value as XmlIndexerResult);
+                AddWithoutKey(value as XmlQuery);
             }
         }
 
-        public void AddMultiple(List<KeyValuePair<IndexerKey, XmlIndexerResult>> keyValuePairs)
+        public void AddMultiple(List<KeyValuePair<IndexerKey, XmlQuery>> keyValuePairs)
         {
             foreach (var keyValuePair in keyValuePairs)
             {
@@ -65,7 +65,7 @@ namespace VSIXProject5.Storage.Domain
             }
         }
 
-        public List<XmlIndexerResult> GetAllStatmentsByFileName(string fileName)
+        public List<XmlQuery> GetAllStatmentsByFileName(string fileName)
         {
             return xmlStatments.Values.Where(x => x.QueryFileName.Equals(fileName, StringComparison.CurrentCultureIgnoreCase)).ToList();
         }
@@ -75,7 +75,7 @@ namespace VSIXProject5.Storage.Domain
             return xmlStatments.Keys.Where(e => e.StatmentName.Equals(queryId)).ToList();
         }
 
-        public void RemoveStatmentByValue(XmlIndexerResult value)
+        public void RemoveStatmentByValue(XmlQuery value)
         {
             xmlStatments.Remove(new IndexerKey { StatmentName = value.QueryId, VsProjectName = value.QueryFileName });
         }
@@ -94,7 +94,7 @@ namespace VSIXProject5.Storage.Domain
             RemoveStatmentsForFilePath(obj as string);
         }
 
-        public void UpdateStatmentsForFile(List<KeyValuePair<IndexerKey, XmlIndexerResult>> keyValuePairs)
+        public void UpdateStatmentsForFile(List<KeyValuePair<IndexerKey, XmlQuery>> keyValuePairs)
         {
             if (!keyValuePairs.Any())
                 return;
@@ -102,7 +102,7 @@ namespace VSIXProject5.Storage.Domain
             AddMultiple(keyValuePairs);
         }
 
-        public void UpdateStatmentForFileWihoutKey(List<XmlIndexerResult> results)
+        public void UpdateStatmentForFileWihoutKey(List<XmlQuery> results)
         {
             if (!results.Any())
                 return;

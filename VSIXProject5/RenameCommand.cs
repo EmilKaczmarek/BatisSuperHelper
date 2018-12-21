@@ -17,8 +17,7 @@ using System.Xml.Linq;
 using System.Xml;
 using VSIXProject5.Constants;
 using VSIXProject5.Helpers;
-using VSIXProject5.Actions;
-using VSIXProject5.Actions.Abstracts;
+using VSIXProject5.Actions2;
 
 namespace VSIXProject5
 {
@@ -58,15 +57,15 @@ namespace VSIXProject5
 
             this.package = package;
 
-            _commandActions = new QueryRenameActions(this.package as GotoAsyncPackage);
+            //_commandActions = new QueryRenameActions(this.package as GotoAsyncPackage);
 
-            OleMenuCommandService commandService = this.ServiceProvider.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-            if (commandService != null)
-            {
-                var menuCommandID = new CommandID(CommandSet, CommandId);
-                var menuItem = new OleMenuCommand(_commandActions.MenuItemCallback,_commandActions.Change, _commandActions.BeforeQuery, menuCommandID);
-                commandService.AddCommand(menuItem);
-            }
+            //OleMenuCommandService commandService = this.ServiceProvider.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
+            //if (commandService != null)
+            //{
+            //    var menuCommandID = new CommandID(CommandSet, CommandId);
+            //    var menuItem = new OleMenuCommand(_commandActions.MenuItemCallback,_commandActions.Change, _commandActions.BeforeQuery, menuCommandID);
+            //    commandService.AddCommand(menuItem);
+            //}
         }
 
         /// <summary>

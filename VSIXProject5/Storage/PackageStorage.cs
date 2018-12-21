@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 using VSIXProject5.Indexers;
 using VSIXProject5.Indexers.Models;
 using VSIXProject5.Models;
@@ -14,11 +15,13 @@ namespace VSIXProject5.Storage
 {
     public static class PackageStorage
     {
-        public static IProvider<IndexerKey, List<CSharpIndexerResult>> CodeQueries = new CodeQueryProvider();
-        public static IProvider<IndexerKey, XmlIndexerResult> XmlQueries = new XmlQueryProvider();
+        public static IProvider<IndexerKey, List<CSharpQuery>> CodeQueries = new CodeQueryProvider();
+        public static IProvider<IndexerKey, XmlQuery> XmlQueries = new XmlQueryProvider();
 
         public static XmlIndexer XmlFileAnalyzer = new XmlIndexer();
         public static CSharpIndexer CodeFileAnalyzer = new CSharpIndexer();
+
+        public static GenericStorage<string, ExpressionResult> GenericMethods = new GenericStorage<string,ExpressionResult>();
 
         public static void AnalyzeAndStore(List<XmlFileInfo> xmlFiles)
         {
@@ -29,13 +32,15 @@ namespace VSIXProject5.Storage
         public static void AnalyzeAndStore(List<Document> documents)
         {
             var codeResults = CodeFileAnalyzer.BuildIndexerAsync(documents).Result;
-            CodeQueries.AddMultipleWithoutKey(codeResults);
+            CodeQueries.AddMultipleWithoutKey(codeResults.Select(e=>e.Queries).ToList());
+            GenericMethods.AddMultiple(codeResults.SelectMany(e => e.Generics).Select(e=> new KeyValuePair<string, ExpressionResult>(e.MethodName, e)));
         }
 
         public static async Task AnalyzeAndStoreAsync(List<Document> documents)
         {
             var codeResults = await CodeFileAnalyzer.BuildIndexerAsync(documents);
-            CodeQueries.AddMultipleWithoutKey(codeResults);
+            await GenericMethods.AddMultipleAsync(codeResults.SelectMany(e => e.Generics).Select(e => new KeyValuePair<string, ExpressionResult>(e.MethodName, e)));
+            CodeQueries.AddMultipleWithoutKey(codeResults.Select(e => e.Queries).ToList());
         }
 
         public static void AnalyzeAndStoreSingle(XmlFileInfo xmlFile)
@@ -47,13 +52,15 @@ namespace VSIXProject5.Storage
         public static void AnalyzeAndStoreSingle(Document document)
         {
             var codeResult = CodeFileAnalyzer.BuildFromDocumentAsync(document).Result;
-            CodeQueries.AddWithoutKey(codeResult);
+            CodeQueries.AddWithoutKey(codeResult.Queries);
+            GenericMethods.AddMultiple(codeResult.Generics.Select(e => new KeyValuePair<string, ExpressionResult>(e.MethodName, e)));
         }
 
         public static async Task AnalyzeAndStoreSingleAsync(Document document)
         {
             var codeResult = await CodeFileAnalyzer.BuildFromDocumentAsync(document);
-            CodeQueries.AddWithoutKey(codeResult);
+            await GenericMethods.AddMultipleAsync(codeResult.Generics.Select(e => new KeyValuePair<string, ExpressionResult>(e.MethodName, e)));
+            CodeQueries.AddWithoutKey(codeResult.Queries);
         }
     }
 }

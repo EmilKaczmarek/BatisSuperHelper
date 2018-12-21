@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using VSIXProject5.HelpersAndExtensions.Roslyn;
+using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 
 namespace VSIXProject5.Helpers
 {
@@ -76,6 +77,9 @@ namespace VSIXProject5.Helpers
         /// <returns></returns>
         public ArgumentSyntax GetArgumentSyntaxOfStringType(ArgumentListSyntax argumentList)
         {
+            if (argumentList == null)
+                return null;
+
             ISymbol stringISymbol= _semanticModel.Compilation.GetTypeByMetadataName(typeof(String).FullName);
             var arguments = argumentList.Arguments;
             foreach(var argument in arguments)
@@ -130,7 +134,7 @@ namespace VSIXProject5.Helpers
         /// </summary>
         /// <param name="SyntaxNodes"></param>
         /// <param name="allDocumentNodes"></param>
-        public String GetQueryStringFromSyntaxNodes(IEnumerable<SyntaxNode> SyntaxNodes, IEnumerable<SyntaxNode> allDocumentNodes)
+        public ExpressionResult GetQueryStringFromSyntaxNodes(IEnumerable<SyntaxNode> SyntaxNodes, IEnumerable<SyntaxNode> allDocumentNodes)
         {
             if (IsAnySyntaxNodeContainIBatisNamespace(SyntaxNodes))
             {
@@ -152,6 +156,9 @@ namespace VSIXProject5.Helpers
                 var singleArgumentListSyntax = GetProperArgumentSyntaxNode(syntaxArguments);
 
                 var queryArgument = GetArgumentSyntaxOfStringType(singleArgumentListSyntax);
+
+                if (queryArgument == null)
+                    return SyntaxKind.None;
 
                 var queryArgumentExpression = queryArgument.Expression;
 

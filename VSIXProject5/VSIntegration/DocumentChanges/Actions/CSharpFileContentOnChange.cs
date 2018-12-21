@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using VSIXProject5.Indexers;
+using VSIXProject5.Indexers.Models;
 using VSIXProject5.Loggers;
 using VSIXProject5.Storage;
 
@@ -24,7 +25,7 @@ namespace VSIXProject5.VSIntegration.DocumentChanges.Actions
                 return;
             }
             var csIndexer = new CSharpIndexer().BuildFromDocumentAsync(roslynDocument).Result;
-            PackageStorage.CodeQueries.AddWithoutKey(csIndexer);
+            PackageStorage.CodeQueries.UpdateStatmentForFileWihoutKey(new List<List<CSharpQuery>> { csIndexer.Queries });
         }
     }
 }

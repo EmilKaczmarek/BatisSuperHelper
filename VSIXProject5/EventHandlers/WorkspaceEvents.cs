@@ -35,8 +35,7 @@ namespace VSIXProject5.Events
 
             foreach (var document in addedDocuments)
             {
-                var documentIndexerResult = await csIndexer.BuildFromDocumentAsync(document);
-                PackageStorage.CodeQueries.AddWithoutKey(documentIndexerResult);
+                await PackageStorage.AnalyzeAndStoreSingleAsync(document);
             }
         }
         private static async Task DocumentRemovedAction(IEnumerable<DocumentId> removedDocumentsIds)

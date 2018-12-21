@@ -34,7 +34,7 @@ namespace VSIXProject5.HelpersAndExtensions
             return DetermineMapNamespaceQueryPairFromCodeInput(queryWithNamespace).Item2;
         }
 
-        public static string GetQueryWithoutNamespace(XmlIndexerResult xmlIndexerResult)
+        public static string GetQueryWithoutNamespace(XmlQuery xmlIndexerResult)
         {
             if(xmlIndexerResult != null && xmlIndexerResult.MapNamespace != null)
             {

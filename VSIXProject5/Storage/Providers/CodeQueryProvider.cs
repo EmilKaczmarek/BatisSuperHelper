@@ -10,11 +10,11 @@ using VSIXProject5.Storage.Interfaces;
 
 namespace VSIXProject5.Storage.Domain
 {
-    public class CodeQueryProvider : IProvider<IndexerKey, List<CSharpIndexerResult>>
+    public class CodeQueryProvider : IProvider<IndexerKey, List<CSharpQuery>>
     {
-        private Dictionary<IndexerKey, List<CSharpIndexerResult>> codeStatments = new Dictionary<IndexerKey, List<CSharpIndexerResult>>();
+        private Dictionary<IndexerKey, List<CSharpQuery>> codeStatments = new Dictionary<IndexerKey, List<CSharpQuery>>();
 
-        public void Add(IndexerKey key, List<CSharpIndexerResult> value)
+        public void Add(IndexerKey key, List<CSharpQuery> value)
         {
             if (codeStatments.ContainsKey(key))
             {
@@ -28,7 +28,7 @@ namespace VSIXProject5.Storage.Domain
             }
         }
 
-        public void AddMultiple(List<KeyValuePair<IndexerKey, List<CSharpIndexerResult>>> keyValuePairs)
+        public void AddMultiple(List<KeyValuePair<IndexerKey, List<CSharpQuery>>> keyValuePairs)
         {
             foreach (var keyValuePair in keyValuePairs)
             {
@@ -36,7 +36,7 @@ namespace VSIXProject5.Storage.Domain
             }
         }
 
-        public void AddMultipleWithoutKey(List<List<CSharpIndexerResult>> values)
+        public void AddMultipleWithoutKey(List<List<CSharpQuery>> values)
         {
             foreach (var value in values)
             {
@@ -44,7 +44,7 @@ namespace VSIXProject5.Storage.Domain
             }
         }
 
-        private void AddSingleWithoutKey(CSharpIndexerResult value)
+        private void AddSingleWithoutKey(CSharpQuery value)
         {
             IndexerKey key = new IndexerKey
             {
@@ -59,7 +59,7 @@ namespace VSIXProject5.Storage.Domain
             }
             else
             {
-                var codeStamentsForKey = new List<CSharpIndexerResult>
+                var codeStamentsForKey = new List<CSharpQuery>
                 {
                     value,
                 };
@@ -67,7 +67,7 @@ namespace VSIXProject5.Storage.Domain
             }
         }
 
-        public void AddWithoutKey(List<CSharpIndexerResult> value)
+        public void AddWithoutKey(List<CSharpQuery> value)
         {
             if (!value.Any())
                 return;
@@ -78,7 +78,7 @@ namespace VSIXProject5.Storage.Domain
             }
         }
 
-        public List<List<CSharpIndexerResult>> GetAllStatmentsByFileName(string fileName)
+        public List<List<CSharpQuery>> GetAllStatmentsByFileName(string fileName)
         {
             return codeStatments.Values
                .Select(e => e.Where(x => x.QueryFileName.Equals(fileName, StringComparison.CurrentCultureIgnoreCase)).ToList())
@@ -86,12 +86,12 @@ namespace VSIXProject5.Storage.Domain
                .ToList();
         }
 
-        public List<CSharpIndexerResult> GetValue(IndexerKey key)
+        public List<CSharpQuery> GetValue(IndexerKey key)
         {
             return codeStatments[key];
         }
 
-        public List<CSharpIndexerResult> GetValueOrNull(IndexerKey key)
+        public List<CSharpQuery> GetValueOrNull(IndexerKey key)
         {
             if (codeStatments.ContainsKey(key))
             {
@@ -100,7 +100,7 @@ namespace VSIXProject5.Storage.Domain
             return null;
         }
 
-        public List<List<CSharpIndexerResult>> GetWhere(Func<List<CSharpIndexerResult>, bool> predictable)
+        public List<List<CSharpQuery>> GetWhere(Func<List<CSharpQuery>, bool> predictable)
         {
             return codeStatments.Values.Where(predictable).ToList();
         }
@@ -112,7 +112,7 @@ namespace VSIXProject5.Storage.Domain
                 .ToList();
         }
 
-        public void RemoveStatmentByValue(List<CSharpIndexerResult> value)
+        public void RemoveStatmentByValue(List<CSharpQuery> value)
         {
             IndexerKey key = new IndexerKey
             {
@@ -197,7 +197,7 @@ namespace VSIXProject5.Storage.Domain
             }
         }
 
-        public void UpdateStatmentsForFile(List<KeyValuePair<IndexerKey, List<CSharpIndexerResult>>> keyValuePairs)
+        public void UpdateStatmentsForFile(List<KeyValuePair<IndexerKey, List<CSharpQuery>>> keyValuePairs)
         {
             if (!keyValuePairs.Any() && !keyValuePairs.SelectMany(e => e.Value).Any())
                 return;
@@ -205,7 +205,7 @@ namespace VSIXProject5.Storage.Domain
             AddMultiple(keyValuePairs);
         }
 
-        public void UpdateStatmentForFileWihoutKey(List<List<CSharpIndexerResult>> values)
+        public void UpdateStatmentForFileWihoutKey(List<List<CSharpQuery>> values)
         {
             if (!values.Any() && !values.SelectMany(e=>e).Any())
                 return;
