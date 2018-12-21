@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using VSIXProject5.Constants;
 using VSIXProject5.Helpers;
 using VSIXProject5.HelpersAndExtensions.Roslyn;
+using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 using VSIXProject5.Indexers.Models;
 using VSIXProject5.Loggers;
 using VSIXProject5.Models;
@@ -35,24 +36,24 @@ namespace VSIXProject5.Indexers
             _workspace = workspace;
         }
 
-        public async Task<List<List<CSharpIndexerResult>>> BuildIndexerAsync(List<Document> documents)
+        public async Task<List<CSharpIndexerResult>> BuildIndexerAsync(List<Document> documents)
         {
-            var result = new List<List<CSharpIndexerResult>>();
+            var results = new List<CSharpIndexerResult>();
             Stopwatch sw = new Stopwatch();
             sw.Start();
             foreach (var document in documents)
             {
                 if (!Regex.IsMatch(document.FilePath, @"(\\service|\\TemporaryGeneratedFile_.*|\\assemblyinfo|\\assemblyattributes|\.(g\.i|g|designer|generated|assemblyattributes))\.(cs|vb)$"))
                 {
-                    result.Add(await BuildFromDocumentAsync(document));
+                    results.Add(await BuildFromDocumentAsync(document));
                 }          
             }
             sw.Stop();
-            OutputWindowLogger.WriteLn($"Building Queries db from code ended in {sw.ElapsedMilliseconds} ms. Found {result.Count} queries. In {documents.Count} documents.");
-            return result;
+            OutputWindowLogger.WriteLn($"Building Queries db from code ended in {sw.ElapsedMilliseconds} ms. Found {results.Count} queries. In {documents.Count} documents.");
+            return results;
         }
 
-        public async Task<List<CSharpIndexerResult>> BuildFromDocumentAsync(Document document)
+        public async Task<CSharpIndexerResult> BuildFromDocumentAsync(Document document)
         {
             SemanticModel semModel = await document.GetSemanticModelAsync();
             return Build(semModel, document);
@@ -75,9 +76,10 @@ namespace VSIXProject5.Indexers
             return false;
         }
 
-        private List<CSharpIndexerResult> Build(SemanticModel semModel, Document document)
+        private CSharpIndexerResult Build(SemanticModel semModel, Document document)
         {
-            var result = new List<CSharpIndexerResult>();
+            var queryResults = new List<CSharpQuery>();
+            var genericResults = new List<ExpressionResult>();
             SyntaxTree synTree = null;
             document.TryGetSyntaxTree(out synTree);
             var treeRoot = (CompilationUnitSyntax)synTree.GetRoot();
@@ -100,23 +102,31 @@ namespace VSIXProject5.Indexers
                 if (nameIdentifiers.Any(e => IBatisConstants.MethodNames.Contains(e.Identifier.ValueText)))
                 {
                     Location loc = Location.Create(synTree, node.Span);
-                    var queryName = new ExpressionResolver().GetStringValueOfExpression(node.Arguments.FirstOrDefault().Expression, nodes, semModel);
-                    if (queryName != "")
+                    var expressionResult = new ExpressionResolver().GetStringValueOfExpression(node.Arguments.FirstOrDefault().Expression, nodes, semModel);
+                    if (expressionResult.IsSolved)
                     {
-                        result.Add(new CSharpIndexerResult
+                        queryResults.Add(new CSharpQuery
                         {
                             QueryFileName = Path.GetFileName(document.FilePath),
-                            QueryId = queryName,
+                            QueryId = expressionResult.TextResult,
                             QueryLineNumber = loc.GetLineSpan().StartLinePosition.Line + 1,
                             QueryVsProjectName = document.Project.Name,
                             QueryFilePath = document.FilePath,
                             DocumentId = document.Id,
                         });
                     }
+                    else
+                    {  
+                        genericResults.Add(expressionResult);
+                    }
                 }
             }
 
-            return result;
+            return new CSharpIndexerResult
+            {
+                Queries = queryResults,
+                Generics = genericResults,
+            };
         }
     }
 }

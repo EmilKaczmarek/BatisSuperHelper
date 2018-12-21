@@ -60,10 +60,10 @@ namespace VSIXProject5.Parsers
             return this;
         }
 
-        public List<XmlIndexerResult> GetMapFileStatments()
+        public List<XmlQuery> GetMapFileStatments()
         {
             var statementChildNodes = GetChildNodesOfParentByXPath(IBatisConstants.StatementsRootElementXPath);
-            return statementChildNodes.Where(e => IBatisHelper.IsIBatisStatment(e.Name)).Select(e => new XmlIndexerResult
+            return statementChildNodes.Where(e => IBatisHelper.IsIBatisStatment(e.Name)).Select(e => new XmlQuery
             {
                 QueryFileName = _fileName,
                 QueryFilePath = _filePath,
@@ -71,7 +71,7 @@ namespace VSIXProject5.Parsers
                 QueryLineNumber = e.Line,
                 QueryVsProjectName = _fileProjectName,
                 MapNamespace = MapNamespace
-        }).ToList();
+            }).ToList();
         }
 
         public string GetQueryAtLineOrNull(int lineNumber)

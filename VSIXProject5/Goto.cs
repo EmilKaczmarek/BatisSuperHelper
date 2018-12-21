@@ -7,7 +7,7 @@
 using Microsoft.VisualStudio.Shell;
 using System;
 using System.ComponentModel.Design;
-using VSIXProject5.Actions;
+using VSIXProject5.Actions2;
 
 namespace VSIXProject5
 {
@@ -31,7 +31,7 @@ namespace VSIXProject5
         /// </summary>
         public readonly Package package;
 
-        private GoToQueryActions _commandActions;
+        private GoToQueryActions2 _commandActions;
         private OleMenuCommand menuItem;
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace VSIXProject5
             
             this.package = package;
  
-            _commandActions = new GoToQueryActions(this.package as GotoAsyncPackage);
+            _commandActions = new GoToQueryActions2(this.package as GotoAsyncPackage);
 
             if (ServiceProvider.GetService(typeof(IMenuCommandService)) is OleMenuCommandService commandService)
             {

@@ -6,20 +6,65 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 
 namespace VSIXProject5.HelpersAndExtensions.Roslyn
 {
     public class ExpressionResolver
     {
+        private int _maxCallStackNum;
+        public ExpressionResolver()
+        {
+            _maxCallStackNum = 1000;
+        }
+        public ExpressionResolver(int maxCallStack)
+        {
+            _maxCallStackNum = maxCallStack;
+        }
         private int _callStackNum = 1;
-        public string GetStringValueOfExpression(ExpressionSyntax expressionSyntax, IEnumerable<SyntaxNode> nodes, SemanticModel semanticModel)
+
+        private string ResolveToClassAndMethodNames(SyntaxNode node)
+        {
+            var analyzeNode = node as SyntaxNode;
+            string className;
+            string methodName;
+            while (!analyzeNode.IsKind(SyntaxKind.MethodDeclaration))
+            {
+                analyzeNode = analyzeNode.Parent;            
+            }
+
+            var methodDeclaration = analyzeNode as MethodDeclarationSyntax;
+            if (methodDeclaration.Modifiers.Any(e => e.Text == "public"))
+            {
+                methodName = methodDeclaration.Identifier.Text;
+                return methodName;
+
+                var classDeclaration = analyzeNode.Parent as ClassDeclarationSyntax;
+                className = classDeclaration.Identifier.Text; 
+            }
+            return null;
+        }
+
+        public ExpressionResult GetStringValueOfExpression(ExpressionSyntax expressionSyntax, IEnumerable<SyntaxNode> nodes, SemanticModel semanticModel)
         {
             _callStackNum++;
-            if (_callStackNum >= 1003)
-                return "";
+            if (_callStackNum >= _maxCallStackNum)
+                return new ExpressionResult
+                {
+                    IsSolved = false,
+                    UnresolvableReason = "Call stack extended",
+                    CallsNeeded = _callStackNum,
+                    TextResult = "",
+                };
 
             if (expressionSyntax == null)
-                return "";
+                return new ExpressionResult
+                {
+                    IsSolved = false,
+                    UnresolvableReason = "Provided expression is null",
+                    CallsNeeded = _callStackNum,
+                    TextResult = "",
+                }; 
 
             var argumentExpressionKind = expressionSyntax.Kind();
             switch (argumentExpressionKind)
@@ -60,13 +105,68 @@ namespace VSIXProject5.HelpersAndExtensions.Roslyn
                         var binaryExpressionNode = expressionSyntax as BinaryExpressionSyntax;
                         var leftExpression = binaryExpressionNode.Left;
                         var rightExpression = binaryExpressionNode.Right;
-                        return GetStringValueOfExpression(leftExpression, nodes, semanticModel) + GetStringValueOfExpression(rightExpression, nodes, semanticModel);
+                        var leftExpressionValue = GetStringValueOfExpression(leftExpression, nodes, semanticModel);
+                        var rightExpressionValue = GetStringValueOfExpression(rightExpression, nodes, semanticModel);
+                        if (leftExpressionValue.IsSolved && rightExpressionValue.IsSolved)
+                        {
+                            return new ExpressionResult
+                            {
+                                IsSolved = true,
+                                CallsNeeded = _callStackNum,
+                                CanBeUsedAsQuery = false,
+                                ExpressionText = expressionSyntax.ToString(),
+                                TextResult = leftExpressionValue.TextResult + rightExpressionValue.TextResult,
+                            };
+                        }
+                        var result = new ExpressionResult
+                        {
+                            IsSolved = false,
+                            CallsNeeded = _callStackNum,
+                            ExpressionText = expressionSyntax.ToString(),      
+                        };
+
+                        if (!leftExpressionValue.IsSolved)
+                        {
+                            result.TextResult += leftExpressionValue.TextResult;
+                            result.CanBeUsedAsQuery = leftExpressionValue.CanBeUsedAsQuery;
+                            result.UnresolvableReason = leftExpressionValue.UnresolvableReason;
+                            result.UnresolvedPart = leftExpressionValue.UnresolvedPart;
+                            result.UnresolvedValue = leftExpressionValue.UnresolvedValue;
+                            result.UnresolvedFormat = "{0}" + rightExpressionValue.TextResult;
+                            result.MethodName = ResolveToClassAndMethodNames(expressionSyntax);
+                        }
+
+                        if (!rightExpressionValue.IsSolved)
+                        {
+                            result.TextResult += rightExpressionValue.TextResult;
+                            result.CanBeUsedAsQuery = rightExpressionValue.CanBeUsedAsQuery;
+                            result.UnresolvableReason = rightExpressionValue.UnresolvableReason;
+                            result.UnresolvedPart = rightExpressionValue.UnresolvedPart;
+                            result.UnresolvedValue = rightExpressionValue.UnresolvedValue;
+                            result.UnresolvedFormat = leftExpressionValue.TextResult + "{0}";
+                            result.MethodName = ResolveToClassAndMethodNames(expressionSyntax);
+                        }
+                        if (!rightExpressionValue.IsSolved && !leftExpressionValue.IsSolved)
+                        {
+                            result.CanBeUsedAsQuery = false;
+                            result.UnresolvableReason = $"{leftExpressionValue.UnresolvableReason}{rightExpressionValue.UnresolvableReason}";
+                            result.MethodName = ResolveToClassAndMethodNames(expressionSyntax);
+                        }
+
+                        return result;
                     }
                 case SyntaxKind.StringLiteralExpression:
                     {
                         var token = (expressionSyntax as LiteralExpressionSyntax).Token;
                         var tokenValue = token.Value;
-                        return token.ValueText;
+                        return new ExpressionResult
+                        {
+                            CallsNeeded = _callStackNum,
+                            CanBeUsedAsQuery = false,
+                            ExpressionText = expressionSyntax.ToString(),
+                            IsSolved = true,
+                            TextResult = token.ValueText,
+                        };
                     }
                 case SyntaxKind.InvocationExpression:
                     {
@@ -74,7 +174,14 @@ namespace VSIXProject5.HelpersAndExtensions.Roslyn
                         var optionalConst = semanticModel.GetConstantValue(expressionSyntax);
                         if (optionalConst.HasValue)
                         {
-                            return optionalConst.Value.ToString();
+                            return new ExpressionResult
+                            {
+                                CallsNeeded = _callStackNum,
+                                CanBeUsedAsQuery = false,
+                                ExpressionText = expressionSyntax.ToString(),
+                                IsSolved = true,
+                                TextResult = optionalConst.Value.ToString(),
+                            };
                         }
                         var nextInvocationExpression = invocationExpression.Expression;
                         if (nextInvocationExpression is MemberAccessExpressionSyntax)
@@ -90,11 +197,36 @@ namespace VSIXProject5.HelpersAndExtensions.Roslyn
                                     format = (invocationExpression.ArgumentList.Arguments[0].Expression as LiteralExpressionSyntax).Token.ValueText;
                                 }
                                 List<string> parameters = new List<string>();
+                                List<ExpressionResult> expressionResolverResults = new List<ExpressionResult>();
                                 foreach (var parameter in invocationExpression.ArgumentList.Arguments.Skip(1))
                                 {
-                                    parameters.Add(GetStringValueOfExpression(parameter.Expression, nodes, semanticModel));
+                                    expressionResolverResults.Add(GetStringValueOfExpression(parameter.Expression, nodes, semanticModel));
                                 }
-                                return string.Format(format, parameters.ToArray());
+
+                                if (expressionResolverResults.Any(e => !e.IsSolved && e.CanBeUsedAsQuery))
+                                {
+                                    return new ExpressionResult
+                                    {
+                                        CallsNeeded = _callStackNum,
+                                        CanBeUsedAsQuery = !(expressionResolverResults.Count(e => !e.IsSolved && e.CanBeUsedAsQuery) > 1),//Atm, only allow for 1 variable
+                                        ExpressionText = expressionSyntax.ToString(),
+                                        IsSolved = false,
+                                        TextResult = string.Format(format, expressionResolverResults.Select(e => e.TextResult).ToArray()),
+                                        UnresolvableReason = expressionResolverResults.First(e => !e.IsSolved).TextResult,
+                                        UnresolvedPart = expressionResolverResults.First(e => !e.IsSolved).UnresolvedPart,
+                                        UnresolvedValue = expressionResolverResults.First(e => !e.IsSolved).UnresolvedValue,
+                                        UnresolvedFormat = string.Join("", expressionResolverResults.Select(e => e.IsSolved ? e.TextResult : "{0}")),
+                                        MethodName = ResolveToClassAndMethodNames(expressionSyntax),
+                                    };
+                                }
+                                return new ExpressionResult
+                                {
+                                    CallsNeeded = _callStackNum,
+                                    CanBeUsedAsQuery = false,
+                                    ExpressionText = expressionSyntax.ToString(),
+                                    IsSolved = true,
+                                    TextResult = string.Format(format, expressionResolverResults.Select(e => e.TextResult).ToArray()),
+                                };
                             }
                         }
                         break;
@@ -106,33 +238,81 @@ namespace VSIXProject5.HelpersAndExtensions.Roslyn
                         {
                             var typeOfExpression = simpleMemberAccessExpression.Expression as TypeOfExpressionSyntax;
                             var testType = typeOfExpression.GetType();
-                            return (typeOfExpression.Type as IdentifierNameSyntax).Identifier.ValueText;
+                            return new ExpressionResult
+                            {
+                                IsSolved = false,
+                                UnresolvableReason = "Non compile-time variable used - typeof(T).Name",
+                                CanBeUsedAsQuery = true,
+                                CallsNeeded = _callStackNum,
+                                ExpressionText = expressionSyntax.ToString(),
+                                TextResult = (typeOfExpression.Type as IdentifierNameSyntax).Identifier.ValueText,
+                                UnresolvedPart = UnresolvedPartType.ClassName,
+                                UnresolvedValue = (typeOfExpression.Type as IdentifierNameSyntax).Identifier.ValueText,
+                                MethodName = ResolveToClassAndMethodNames(expressionSyntax),
+                            };
                         }
                         break;
                     }
                 default:
                     break;
             }
-            return "";
+            return new ExpressionResult
+            {
+                IsSolved = false,
+                UnresolvableReason = "Not supported SyntaxKind",
+                CallsNeeded = _callStackNum,
+                TextResult = "",
+                MethodName = ResolveToClassAndMethodNames(expressionSyntax),
+            };
         }
 
-        public string GetStringValueFromInterpolation(IEnumerable<SyntaxNode> nodes, InterpolatedStringExpressionSyntax interpolatedNode, SemanticModel semanticModel)
+        public ExpressionResult GetStringValueFromInterpolation(IEnumerable<SyntaxNode> nodes, InterpolatedStringExpressionSyntax interpolatedNode, SemanticModel semanticModel)
         {
-            StringBuilder sb = new StringBuilder();
+            List<ExpressionResult> expressionResolverResults = new List<ExpressionResult>();
             foreach (var content in interpolatedNode.Contents)
             {
                 if (content is InterpolationSyntax)
                 {
                     var expression = (content as InterpolationSyntax).Expression;
-                    sb.Append(GetStringValueOfExpression(expression, nodes, semanticModel));
+                    expressionResolverResults.Add(GetStringValueOfExpression(expression, nodes, semanticModel));
+
                 }
                 if (content is InterpolatedStringTextSyntax)
                 {
-                    sb.Append((content as InterpolatedStringTextSyntax).TextToken.Text);
+                    expressionResolverResults.Add(new ExpressionResult
+                    {
+                        IsSolved = true,
+                        CallsNeeded = _callStackNum,
+                        CanBeUsedAsQuery = false,
+                        ExpressionText = interpolatedNode.ToString(),
+                        TextResult = (content as InterpolatedStringTextSyntax).TextToken.Text,
+                    });
                 }
             }
-
-            return sb.ToString();
+            if (expressionResolverResults.Any(e => !e.IsSolved && e.CanBeUsedAsQuery))
+            {
+                return new ExpressionResult
+                {
+                    CallsNeeded = _callStackNum,
+                    CanBeUsedAsQuery = !(expressionResolverResults.Count(e => !e.IsSolved && e.CanBeUsedAsQuery) > 1),//Atm, only allow for 1 variable
+                    ExpressionText = interpolatedNode.ToString(),
+                    IsSolved = false,
+                    TextResult = string.Join("", expressionResolverResults.Select(e => e.TextResult)),
+                    UnresolvableReason = expressionResolverResults.First(e => !e.IsSolved).TextResult,
+                    UnresolvedPart = expressionResolverResults.First(e => !e.IsSolved).UnresolvedPart,
+                    UnresolvedValue = expressionResolverResults.First(e => !e.IsSolved).UnresolvedValue,
+                    UnresolvedFormat = string.Join("", expressionResolverResults.Select(e => e.IsSolved ? e.TextResult : "{0}")),
+                    MethodName = ResolveToClassAndMethodNames(interpolatedNode),
+                };
+            }
+            return new ExpressionResult
+            {
+                CallsNeeded = _callStackNum,
+                CanBeUsedAsQuery = false,
+                ExpressionText = string.Join("", expressionResolverResults.Select(e => e.TextResult)),
+                IsSolved = true,
+                TextResult = string.Join("", expressionResolverResults.Select(e => e.TextResult)),
+            };
         }
     }
 }

@@ -16,9 +16,9 @@ namespace VSIXProject5.Indexers
 {
     public class XmlIndexer
     {
-        public List<XmlIndexerResult> BuildIndexerAsync(List<XmlFileInfo> solutionXmlDocuments)
+        public List<XmlQuery> BuildIndexerAsync(List<XmlFileInfo> solutionXmlDocuments)
         {
-            var result = new List<XmlIndexerResult>();
+            var result = new List<XmlQuery>();
             Stopwatch sw = new Stopwatch();
             sw.Start();
             foreach (var xmlSolutionDocument in solutionXmlDocuments)
@@ -36,7 +36,7 @@ namespace VSIXProject5.Indexers
             return result;
         }
 
-        public List<XmlIndexerResult> ParseSingleFile(XmlFileInfo xmlDocument)
+        public List<XmlQuery> ParseSingleFile(XmlFileInfo xmlDocument)
         {
             XmlParser parser = new XmlParser().WithFileInfo(xmlDocument.FilePath, xmlDocument.ProjectName).Load();
 
@@ -45,7 +45,7 @@ namespace VSIXProject5.Indexers
             {
                 return parser.GetMapFileStatments();
             }
-            return new List<XmlIndexerResult>();
+            return new List<XmlQuery>();
         }
 
     }
