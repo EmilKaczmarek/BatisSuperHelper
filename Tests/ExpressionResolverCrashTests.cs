@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using VSIXProject5.HelpersAndExtensions.Roslyn;
+using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver;
 using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 
 namespace GoToQueryUnitTests
@@ -71,8 +72,17 @@ namespace GoToQueryUnitTests
         {
             return $"{_codeTemplateP1}{insideMethodExpressionCode}{_codeTemplateP2}{insideClassCode}{_codeTemplateP3}{outsideClassCode}{_codeTemplateP4}{inReturnUnknowMethodExpression}{_codeTemplateP5}";
         }
-        private void PrepareAnalyzeModel(string documentCode, out SemanticModel semanticModel,out IEnumerable<SyntaxNode> nodes, out ArgumentSyntax nodeToTest, bool inReturn = false)
+        private void PrepareAnalyzeModel(string documentCode, out Document document, out SemanticModel semanticModel,out IEnumerable<SyntaxNode> nodes, out ArgumentSyntax nodeToTest, bool inReturn = false)
         {
+            var projectId = ProjectId.CreateNewId();
+            var documentId = DocumentId.CreateNewId(projectId);
+            var solution = new AdhocWorkspace().CurrentSolution
+                    .AddProject(projectId, "MyProject", "MyProject", LanguageNames.CSharp)
+                    .AddMetadataReference(projectId, MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
+                    .AddDocument(documentId, "MyFile.cs", documentCode);
+
+            document = solution.GetDocument(documentId);
+
             SyntaxTree tree = CSharpSyntaxTree.ParseText(documentCode);
 
             var compilation = CSharpCompilation.Create("HelloWorld")
@@ -81,7 +91,7 @@ namespace GoToQueryUnitTests
                                             typeof(object).Assembly.Location))
                                    .AddSyntaxTrees(tree);
 
-            semanticModel = compilation.GetSemanticModel(tree);
+            semanticModel = compilation.GetSemanticModel(tree);        
 
             var treeRoot = (CompilationUnitSyntax)tree.GetRoot();
             nodes = treeRoot.DescendantNodesAndSelf();
@@ -98,8 +108,8 @@ namespace GoToQueryUnitTests
         {
             var code = GenerateDocumentCodeFromTemplateUsingVariables(insideCode, insideClassCode, outsideClassCode, inReturnUnknowMethodExpression);
             Trace.WriteLine(code);
-            PrepareAnalyzeModel(code, out var semanticModel, out var nodes, out var nodeToTest, inReturn);
-            return new ExpressionResolver(500).GetStringValueOfExpression(nodeToTest?.Expression, nodes, semanticModel);
+            PrepareAnalyzeModel(code, out var document, out var semanticModel, out var nodes, out var nodeToTest, inReturn);
+            return new ExpressionResolver(150).GetStringValueOfExpression(document, nodeToTest?.Expression, nodes, semanticModel);
         }
 
         public void TextGenerationExample()

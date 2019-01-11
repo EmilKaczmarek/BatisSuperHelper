@@ -6,7 +6,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using VSIXProject5.HelpersAndExtensions.Roslyn;
+using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver;
 using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using VSIXProject5.Storage;
 
 namespace VSIXProject5.Helpers
 {
@@ -134,7 +136,7 @@ namespace VSIXProject5.Helpers
         /// </summary>
         /// <param name="SyntaxNodes"></param>
         /// <param name="allDocumentNodes"></param>
-        public ExpressionResult GetQueryStringFromSyntaxNodes(IEnumerable<SyntaxNode> SyntaxNodes, IEnumerable<SyntaxNode> allDocumentNodes)
+        public ExpressionResult GetQueryStringFromSyntaxNodes(Document document, IEnumerable<SyntaxNode> SyntaxNodes, IEnumerable<SyntaxNode> allDocumentNodes)
         {
             if (IsAnySyntaxNodeContainIBatisNamespace(SyntaxNodes))
             {
@@ -142,8 +144,16 @@ namespace VSIXProject5.Helpers
                 var singleArgumentListSyntax = GetProperArgumentSyntaxNode(syntaxArguments);
 
                 var queryArgument = GetArgumentSyntaxOfStringType(singleArgumentListSyntax);
+                if (queryArgument == null)
+                {
+                    var allArgumentSyntaxes = SyntaxNodes.OfType<ArgumentListSyntax>();
+                    var oneArgumentSyntaxParent = allArgumentSyntaxes.First().Parent;
+                    var resolveResult = new ExpressionResolver().GetMethodName(oneArgumentSyntaxParent as InvocationExpressionSyntax);
+                    return PackageStorage.GenericMethods.GetValue(resolveResult);
+                }
+                var test = PackageStorage.GenericMethods;
 
-                return new ExpressionResolver().GetStringValueOfExpression(queryArgument.Expression, allDocumentNodes, _semanticModel);
+                return new ExpressionResolver().GetStringValueOfExpression(document, queryArgument?.Expression, allDocumentNodes, _semanticModel);
             }
             return null;
         }

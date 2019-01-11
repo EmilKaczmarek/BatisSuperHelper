@@ -29,13 +29,28 @@ namespace VSIXProject5.Actions2.FinalActions
 
         public void PrepareAndExecuteGoToQuery(string queryResult, ExpressionResult expressionResult)
         {
+            var debugPackagageStorage = PackageStorage.GenericMethods.GetByPredictate(e => e.TextResult == queryResult).ToList();
+            var debugPackagageStorage2 = PackageStorage.GenericMethods.GetByPredictate(e => MapNamespaceHelper.GetQueryWithoutNamespace(e.TextResult) == MapNamespaceHelper.GetQueryWithoutNamespace(queryResult)).ToList();
+
+
             var statmentsKeys = PackageStorage.CodeQueries.GetKeysByQueryId(queryResult);
             var statments = statmentsKeys.Select(PackageStorage.CodeQueries.GetValue).SelectMany(x => x);
-
+        
             List<ResultWindowViewModel> windowViewModels = new List<ResultWindowViewModel>();
             if (!statments.Any())
             {
                 _statusBar.ShowText($"No occurence of query named: {queryResult} find in Code.");
+            }
+            if (debugPackagageStorage2.Any())
+            {
+                windowViewModels = debugPackagageStorage2.Select(x => new ResultWindowViewModel
+                {
+                    File = x.NodeInformation.FileName,
+                    Line = x.NodeInformation.LineNumber,
+                    FilePath = x.NodeInformation.FilePath,
+                    Query = x.TextResult,
+                    Namespace = MapNamespaceHelper.DetermineMapNamespaceQueryPairFromCodeInput(expressionResult.TextResult).Item1,
+                }).ToList(); 
             }
             if (statments.Count() == 1)
             {
@@ -55,7 +70,7 @@ namespace VSIXProject5.Actions2.FinalActions
                 _statusBar.ShowText($"Multiple occurence of same statment({queryResult}) found.");
             }
 
-            if (windowViewModels != null && windowViewModels.Count > 1)
+            if (windowViewModels != null)
             {
                 var windowContent = (ResultWindowControl)_toolWindowPane.Content;
                 windowContent.ShowResults(windowViewModels);

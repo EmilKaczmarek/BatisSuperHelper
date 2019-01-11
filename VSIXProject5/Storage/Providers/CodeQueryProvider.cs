@@ -207,7 +207,7 @@ namespace VSIXProject5.Storage.Domain
 
         public void UpdateStatmentForFileWihoutKey(List<List<CSharpQuery>> values)
         {
-            if (!values.Any() && !values.SelectMany(e=>e).Any())
+            if (!values.Any() || !values.SelectMany(e=>e).Any())
                 return;
             RemoveStatmentsForFilePath(values.First().First().QueryFilePath);
             AddMultipleWithoutKey(values);

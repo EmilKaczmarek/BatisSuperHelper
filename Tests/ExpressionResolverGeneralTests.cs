@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using VSIXProject5.HelpersAndExtensions.Roslyn;
+using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver;
 
 namespace GoToQueryUnitTests
 {
@@ -19,6 +20,7 @@ namespace GoToQueryUnitTests
         private CompilationUnitSyntax _treeRoot;
         private SemanticModel _semanticModel;
         private IEnumerable<SyntaxNode> _documentNodes;
+        private Document _document;
 
         [TestInitialize]
         public void Initialize()
@@ -124,6 +126,15 @@ namespace GoToQueryUnitTests
                         public void unittest(){}
                     }
                 }";
+            var projectId = ProjectId.CreateNewId();
+            var documentId = DocumentId.CreateNewId(projectId);
+            var solution = new AdhocWorkspace().CurrentSolution
+                    .AddProject(projectId, "MyProject", "MyProject", LanguageNames.CSharp)
+                    .AddMetadataReference(projectId, MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
+                    .AddDocument(documentId, "MyFile.cs", _documentCSharpCode);
+
+            _document = solution.GetDocument(documentId);
+
             SyntaxTree tree = CSharpSyntaxTree.ParseText(_documentCSharpCode);
 
             var compilation = CSharpCompilation.Create("HelloWorld")
@@ -153,7 +164,7 @@ namespace GoToQueryUnitTests
         public void C01LiteralString()
         {
             var testNode = GetNodeFromSource(11);
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -162,7 +173,7 @@ namespace GoToQueryUnitTests
         public void C02AddExpressionWithDotAtSecoundExpression()
         {
             var testNode = GetNodeFromSource(12);
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -171,7 +182,7 @@ namespace GoToQueryUnitTests
         public void C03AddExpressionWithDotAtFirstExpression()
         {
             var testNode = GetNodeFromSource(13);
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -180,7 +191,7 @@ namespace GoToQueryUnitTests
         public void C04AddExpressionWithMultipleAddExpressionsNested()
         {
             var testNode = GetNodeFromSource(14);
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -189,7 +200,7 @@ namespace GoToQueryUnitTests
         public void C05StringIdentifier()
         {
             var testNode = GetNodeFromSource(15);
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -198,7 +209,7 @@ namespace GoToQueryUnitTests
         public void C06AddExpressionThatContainsStringIdentifiers()
         {
             var testNode = GetNodeFromSource(16);
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -207,7 +218,7 @@ namespace GoToQueryUnitTests
         public void C07InterpolationWithLeftLiteralAndRightIdentifier()
         {
             var testNode = GetNodeFromSource(17);
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -216,7 +227,7 @@ namespace GoToQueryUnitTests
         public void C08InterpolationWithLeftIdentifierAndRightLiteral()
         {
             var testNode = GetNodeFromSource(18);
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -225,7 +236,7 @@ namespace GoToQueryUnitTests
         public void C09InterpolationWithOnlyIdentifier()
         {
             var testNode = GetNodeFromSource(19);
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -234,7 +245,7 @@ namespace GoToQueryUnitTests
         public void C10InterpolationWithOnlyLiterals()
         {
             var testNode = GetNodeFromSource(20);
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -243,7 +254,7 @@ namespace GoToQueryUnitTests
         public void C11LiteralConstantNameOfExpression()
         {
             var testNode = GetNodeFromSource(21);
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -252,7 +263,7 @@ namespace GoToQueryUnitTests
         public void C12IndentifierWithInterpolation()
         {
             var testNode = GetNodeFromSource(22);
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -261,7 +272,7 @@ namespace GoToQueryUnitTests
         public void C13ConstantIdentifierWithLiteralExpression()
         {
             var testNode = GetNodeFromSource(23);
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -270,7 +281,7 @@ namespace GoToQueryUnitTests
         public void C14ConstantIdentifierWithNameOfExpression()
         {
             var testNode = GetNodeFromSource(24);
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -279,7 +290,7 @@ namespace GoToQueryUnitTests
         public void C15LiteralStringFormat()
         {
             var testNode = GetNodeFromSource(25);
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -288,7 +299,7 @@ namespace GoToQueryUnitTests
         public void C16LiteralStringFormatWithTwoLiterals()
         {
             var testNode = GetNodeFromSource(26);
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -297,7 +308,7 @@ namespace GoToQueryUnitTests
         public void C17LiteralStringFormatWithOneLiteralAndOneIdentifier()
         {
             var testNode = GetNodeFromSource(27);
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -306,7 +317,7 @@ namespace GoToQueryUnitTests
         public void C18LiteralStringFormatWithTwoIdentifiers()
         {
             var testNode = GetNodeFromSource(28);
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -316,7 +327,7 @@ namespace GoToQueryUnitTests
         {
             var testNode = GetNodeFromSource(29);
             Trace.WriteLine(testNode.GetText());
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -326,7 +337,7 @@ namespace GoToQueryUnitTests
         {
             var testNode = GetNodeFromSource(30);
             Trace.WriteLine(testNode.GetText());
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -336,7 +347,7 @@ namespace GoToQueryUnitTests
         {
             var testNode = GetNodeFromSource(31);
             Trace.WriteLine(testNode.GetText());
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -346,7 +357,7 @@ namespace GoToQueryUnitTests
         {
             var testNode = GetNodeFromSource(32);
             Trace.WriteLine(testNode.GetText());
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -356,7 +367,7 @@ namespace GoToQueryUnitTests
         {
             var testNode = GetNodeFromSource(33);
             Trace.WriteLine(testNode.GetText());
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -366,7 +377,7 @@ namespace GoToQueryUnitTests
         {
             var testNode = GetNodeFromSource(34);
             Trace.WriteLine(testNode.GetText());
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -376,7 +387,7 @@ namespace GoToQueryUnitTests
         {
             var testNode = GetNodeFromSource(35);
             Trace.WriteLine(testNode.GetText());
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -386,7 +397,7 @@ namespace GoToQueryUnitTests
         {
             var testNode = GetNodeFromSource(36);
             Trace.WriteLine(testNode.GetText());
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -396,7 +407,7 @@ namespace GoToQueryUnitTests
         {
             var testNode = GetNodeFromSource(37);
             Trace.WriteLine(testNode.GetText());
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }
@@ -406,7 +417,7 @@ namespace GoToQueryUnitTests
         {
             var testNode = GetNodeFromSource(38);
             Trace.WriteLine(testNode.GetText());
-            var result = new ExpressionResolver().GetStringValueOfExpression(testNode.Expression, _documentNodes, _semanticModel);
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.AreNotEqual("", result.TextResult);
             Assert.AreEqual("unittest", result.TextResult);
         }

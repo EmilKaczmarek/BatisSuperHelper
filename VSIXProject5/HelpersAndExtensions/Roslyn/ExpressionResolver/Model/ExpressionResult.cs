@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver.Model;
 
 namespace VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels
 {
@@ -23,7 +25,7 @@ namespace VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels
         public string UnresolvedValue { get; set; }
         public UnresolvedPartType UnresolvedPart { get; set; }
         public string UnresolvedFormat { get; set; }
-        public string MethodName { get; set; }
+        public NodeInfo NodeInformation { get; set; }
 
         public string Resolve(string arg0)
         {
@@ -33,6 +35,18 @@ namespace VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels
             }
 
             return string.Format(this.UnresolvedFormat, arg0);
+        }
+
+        public ExpressionResult WithNodeInfo(NodeInfo nodeInfo)
+        {
+            this.NodeInformation = nodeInfo;
+            return this;
+        }
+
+        public ExpressionResult WithCallStackNumber(int callStackNumber)
+        {
+            this.CallsNeeded = callStackNumber;
+            return this;
         }
     }
 }

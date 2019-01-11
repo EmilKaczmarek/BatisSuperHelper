@@ -97,12 +97,12 @@ namespace VSIXProject5.Actions2.DocumentProcessors
             if (returnNode != null)
             {
                 var returnNodeDescendanted = returnNode.DescendantNodesAndSelf();
-                var expressionResolution = _helperInstance.GetQueryStringFromSyntaxNodes(_lineNodes, _documentNodes.Value);
+                var expressionResolution = _helperInstance.GetQueryStringFromSyntaxNodes(_documentContent, _lineNodes, _documentNodes.Value);
                 return expressionResolution;
             }
             //In case we don't have cursor around 'return', SyntaxNodes taken from line
             //should have needed ArgumentLineSyntax
-            return _helperInstance.GetQueryStringFromSyntaxNodes(_lineNodes, _documentNodes.Value);
+            return _helperInstance.GetQueryStringFromSyntaxNodes(_documentContent, _lineNodes, _documentNodes.Value);
         }
 
         public IActionValidator GetValidator()
@@ -116,6 +116,13 @@ namespace VSIXProject5.Actions2.DocumentProcessors
             if (expressionResult.IsSolved)
             {
                 queryValue = expressionResult.TextResult;
+                return true;
+            }
+            if (expressionResult.CanBeUsedAsQuery)
+            {
+                queryValue = expressionResult.Resolve("SomeTable");
+                expressionResult.IsSolved = true;
+                expressionResult.TextResult = queryValue;
                 return true;
             }
             queryValue = null;

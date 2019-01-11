@@ -58,7 +58,7 @@ namespace VSIXProject5.Actions2.FinalActions
                 {
                     _statusBar.ShowText($"No occurence of query named: {expressionResult.TextResult} found in SqlMaps.");
                 }
-            }
+            }     
             else
             {
                 _statusBar.ShowText($"Can't resolve expression.");
