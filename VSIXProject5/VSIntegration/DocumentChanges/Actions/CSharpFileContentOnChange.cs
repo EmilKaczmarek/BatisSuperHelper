@@ -24,8 +24,8 @@ namespace VSIXProject5.VSIntegration.DocumentChanges.Actions
                 OutputWindowLogger.WriteLn($"Unable to get c# file to process. Name {caretPosition.Snapshot.ContentType.DisplayName}");
                 return;
             }
-            var csIndexer = new CSharpIndexer().BuildFromDocumentAsync(roslynDocument).Result;
-            PackageStorage.CodeQueries.UpdateStatmentForFileWihoutKey(new List<List<CSharpQuery>> { csIndexer.Queries });
+
+            PackageStorage.AnalyzeAndUpdateSingle(roslynDocument);
         }
     }
 }

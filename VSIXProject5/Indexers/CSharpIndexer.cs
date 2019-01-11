@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using VSIXProject5.Constants;
 using VSIXProject5.Helpers;
 using VSIXProject5.HelpersAndExtensions.Roslyn;
+using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver;
 using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 using VSIXProject5.Indexers.Models;
 using VSIXProject5.Loggers;
@@ -102,7 +103,7 @@ namespace VSIXProject5.Indexers
                 if (nameIdentifiers.Any(e => IBatisConstants.MethodNames.Contains(e.Identifier.ValueText)))
                 {
                     Location loc = Location.Create(synTree, node.Span);
-                    var expressionResult = new ExpressionResolver().GetStringValueOfExpression(node.Arguments.FirstOrDefault().Expression, nodes, semModel);
+                    var expressionResult = new ExpressionResolver().GetStringValueOfExpression(document, node.Arguments.FirstOrDefault().Expression, nodes, semModel);
                     if (expressionResult.IsSolved)
                     {
                         queryResults.Add(new CSharpQuery

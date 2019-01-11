@@ -33,13 +33,14 @@ namespace VSIXProject5.Storage
         {
             var codeResults = CodeFileAnalyzer.BuildIndexerAsync(documents).Result;
             CodeQueries.AddMultipleWithoutKey(codeResults.Select(e=>e.Queries).ToList());
-            GenericMethods.AddMultiple(codeResults.SelectMany(e => e.Generics).Select(e=> new KeyValuePair<string, ExpressionResult>(e.MethodName, e)));
+            GenericMethods.AddMultiple(codeResults.SelectMany(e => e.Generics).Select(e=> new KeyValuePair<string, ExpressionResult>(e.NodeInformation.MethodName, e)));
         }
 
         public static async Task AnalyzeAndStoreAsync(List<Document> documents)
         {
             var codeResults = await CodeFileAnalyzer.BuildIndexerAsync(documents);
-            await GenericMethods.AddMultipleAsync(codeResults.SelectMany(e => e.Generics).Select(e => new KeyValuePair<string, ExpressionResult>(e.MethodName, e)));
+            var generics = codeResults.SelectMany(e => e.Generics).Select(e => new KeyValuePair<string, ExpressionResult>(e.NodeInformation.MethodName, e));
+            await GenericMethods.AddMultipleAsync(generics);
             CodeQueries.AddMultipleWithoutKey(codeResults.Select(e => e.Queries).ToList());
         }
 
@@ -53,14 +54,24 @@ namespace VSIXProject5.Storage
         {
             var codeResult = CodeFileAnalyzer.BuildFromDocumentAsync(document).Result;
             CodeQueries.AddWithoutKey(codeResult.Queries);
-            GenericMethods.AddMultiple(codeResult.Generics.Select(e => new KeyValuePair<string, ExpressionResult>(e.MethodName, e)));
+            GenericMethods.AddMultiple(codeResult.Generics.Select(e => new KeyValuePair<string, ExpressionResult>(e.NodeInformation.MethodName, e)));
         }
 
         public static async Task AnalyzeAndStoreSingleAsync(Document document)
         {
             var codeResult = await CodeFileAnalyzer.BuildFromDocumentAsync(document);
-            await GenericMethods.AddMultipleAsync(codeResult.Generics.Select(e => new KeyValuePair<string, ExpressionResult>(e.MethodName, e)));
+            await GenericMethods.AddMultipleAsync(codeResult.Generics.Select(e => new KeyValuePair<string, ExpressionResult>(e.NodeInformation.MethodName, e)));
             CodeQueries.AddWithoutKey(codeResult.Queries);
+        }
+
+        public static void AnalyzeAndUpdateSingle(Document document)
+        {
+            var codeResult = CodeFileAnalyzer.BuildFromDocumentAsync(document).Result;
+            CodeQueries.UpdateStatmentForFileWihoutKey(new List<List<CSharpQuery>> { codeResult.Queries });
+            foreach (var generic in codeResult.Generics)
+            {
+                GenericMethods.Update(generic.NodeInformation.MethodName, generic);
+            }  
         }
     }
 }
