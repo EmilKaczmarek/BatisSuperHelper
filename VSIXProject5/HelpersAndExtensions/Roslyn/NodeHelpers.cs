@@ -7,7 +7,9 @@ using System.Diagnostics;
 using System.Linq;
 using VSIXProject5.HelpersAndExtensions.Roslyn;
 using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver;
+using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver.Model;
 using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using VSIXProject5.Loggers;
 using VSIXProject5.Storage;
 
 namespace VSIXProject5.Helpers
@@ -82,9 +84,9 @@ namespace VSIXProject5.Helpers
             if (argumentList == null)
                 return null;
 
-            ISymbol stringISymbol= _semanticModel.Compilation.GetTypeByMetadataName(typeof(String).FullName);
+            ISymbol stringISymbol = _semanticModel.Compilation.GetTypeByMetadataName(typeof(String).FullName);
             var arguments = argumentList.Arguments;
-            foreach(var argument in arguments)
+            foreach (var argument in arguments)
             {
                 var childNodes = argument.ChildNodes();
                 var firstChildNode = childNodes.First();
@@ -100,7 +102,7 @@ namespace VSIXProject5.Helpers
                 else
                 {
                     //NULL type? check maybe it's function/expression?
-                    if (typeInfo.ConvertedType.Name.Equals("Func")){
+                    if (typeInfo.ConvertedType.Name.Equals("Func")) {
                         //this is Function! now, lets test if this contains iBatis querry
                         var nodes = argument.DescendantNodes();
                         var syntaxArguments = GetArgumentListSyntaxFromSyntaxNodesWhereArgumentsAreNotEmpty(nodes);
@@ -125,8 +127,8 @@ namespace VSIXProject5.Helpers
 
                 var queryArgument = GetArgumentSyntaxOfStringType(singleArgumentListSyntax);
                 var constantValue = _semanticModel.GetConstantValue(queryArgument.Expression).Value;
-                
-                return constantValue != null?constantValue.ToString(): queryArgument.ToString().Replace("\"", "").Trim();//TODO: Use scripting to handle even more crazy cases.
+
+                return constantValue != null ? constantValue.ToString() : queryArgument.ToString().Replace("\"", "").Trim();//TODO: Use scripting to handle even more crazy cases.
             }
             return null;
         }
@@ -148,7 +150,8 @@ namespace VSIXProject5.Helpers
                 {
                     var allArgumentSyntaxes = SyntaxNodes.OfType<ArgumentListSyntax>();
                     var oneArgumentSyntaxParent = allArgumentSyntaxes.First().Parent;
-                    var resolveResult = new ExpressionResolver().GetMethodName(oneArgumentSyntaxParent as InvocationExpressionSyntax);
+                    var resolveResult = GetMethodInfoForNode(oneArgumentSyntaxParent, _semanticModel);
+
                     return PackageStorage.GenericMethods.GetValue(resolveResult);
                 }
                 var test = PackageStorage.GenericMethods;
@@ -182,6 +185,50 @@ namespace VSIXProject5.Helpers
             var syntaxArguments = GetArgumentListSyntaxFromSyntaxNodesWhereArgumentsAreNotEmpty(nodes);
             var singleArgumentListSyntax = GetProperArgumentSyntaxNode(syntaxArguments);
             return GetArgumentSyntaxOfStringType(singleArgumentListSyntax);
+        }
+
+        public MethodInfo GetMethodInfoForNode(SyntaxNode node, SemanticModel semModel)
+        {
+            var analyzedNodeSymbolInfo = semModel.GetSymbolInfo(node);
+            return new MethodInfo
+            {
+                MethodName = analyzedNodeSymbolInfo.Symbol.Name,
+                MethodClass = analyzedNodeSymbolInfo.Symbol.ContainingSymbol.Name,
+            };
+        }
+        public string GetClassNameUsedAsGenericParameter(IEnumerable<SyntaxNode> lineNodes, IEnumerable<SyntaxNode> documentNodes)
+        {
+            //Try get GenericNameSyntaxNodes in lineNodes
+            var genericNameSyntax = lineNodes.OfType<GenericNameSyntax>();
+            //There is GenericNameSyntax in line, so just get it...
+            if (genericNameSyntax.Count() == 1)
+            {
+                var singleGenericNameSyntax = genericNameSyntax.First() as GenericNameSyntax;
+                var firstArgument =  singleGenericNameSyntax.TypeArgumentList.Arguments.FirstOrDefault() as PredefinedTypeSyntax;
+                return firstArgument.Keyword.ValueText;
+            }
+            //WTF
+            if (genericNameSyntax.Count() > 1)
+            {
+                return null;
+            }
+            else
+            {
+                var identifierNames = lineNodes.OfType<IdentifierNameSyntax>();
+                if (!identifierNames.Any()) return null;
+
+                var allTypeInfos = identifierNames.Select(e => _semanticModel.GetTypeInfo(e)).ToList();
+
+                TypeInfo? genericType = allTypeInfos.FirstOrDefault(e => e.Type != null && (e.Type as INamedTypeSymbol).IsGenericType);
+                
+                if (genericType != null)
+                {
+                    return (genericType.Value.Type as INamedTypeSymbol).TypeArguments.First().Name;
+                }
+            }
+            
+
+            return "";
         }
     }
 }

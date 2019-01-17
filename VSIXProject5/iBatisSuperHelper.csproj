@@ -98,6 +98,7 @@
     <Compile Include="HelpersAndExtensions\MapNamespaceHelper.cs" />
     <Compile Include="HelpersAndExtensions\Roslyn\ArgumentSyntaxExtension.cs" />
     <Compile Include="HelpersAndExtensions\Roslyn\ExpressionResolver\ExpressionResolver.cs" />
+    <Compile Include="HelpersAndExtensions\Roslyn\ExpressionResolver\Model\MethodInfo.cs" />
     <Compile Include="HelpersAndExtensions\Roslyn\ExpressionResolver\Model\NodeInfo.cs" />
     <Compile Include="HelpersAndExtensions\Roslyn\ExpressionResolver\Model\ExpressionResult.cs" />
     <Compile Include="HelpersAndExtensions\Roslyn\ExpressionResolver\ResolveStrategy\AddStrategy.cs" />

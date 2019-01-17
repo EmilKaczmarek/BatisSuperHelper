@@ -24,7 +24,7 @@ namespace VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver.ResolveStr
                     CanBeUsedAsQuery = true,
                     ExpressionText = expressionSyntax.ToString(),
                     TextResult = (typeOfExpression.Type as IdentifierNameSyntax).Identifier.ValueText,
-                    UnresolvedPart = UnresolvedPartType.ClassName,
+                    UnresolvedPart = UnresolvedPartType.GenericClassName,
                     UnresolvedValue = (typeOfExpression.Type as IdentifierNameSyntax).Identifier.ValueText,
                 };
             }

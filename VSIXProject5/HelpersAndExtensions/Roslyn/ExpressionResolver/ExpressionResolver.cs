@@ -39,7 +39,7 @@ namespace VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver
         }
         private int _callStackNum = 1;
 
-        public string ResolveToClassAndMethodNames(SyntaxNode node)
+        public MethodInfo ResolveToClassAndMethodNames(SyntaxNode node, SemanticModel semModel)
         {
             var analyzeNode = node as SyntaxNode;
             string className;
@@ -50,22 +50,44 @@ namespace VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver
             }
 
             if (analyzeNode == null)
-                return "";
+                return null;
 
             var methodDeclaration = analyzeNode as MethodDeclarationSyntax;
             if (methodDeclaration.Modifiers.Any(e => e.Text == "public"))
             {
-                methodName = methodDeclaration.Identifier.Text;
-                return methodName;
-
                 var classDeclaration = analyzeNode.Parent as ClassDeclarationSyntax;
-                className = classDeclaration.Identifier.Text; 
+
+                return new MethodInfo
+                {
+                    MethodName = methodDeclaration.Identifier.Text,
+                    MethodClass = classDeclaration.Identifier.Text,
+                }; 
             }
             return null;
         }
-
         public string GetMethodName(ExpressionSyntax expressionSyntax)
         {
+
+            if (expressionSyntax == null)
+                return null;
+
+            if (expressionSyntax is InvocationExpressionSyntax)
+            {
+                var invocationExpression = expressionSyntax as InvocationExpressionSyntax;
+                var nextInvocationExpression = invocationExpression.Expression;
+                var nextNextInvocationExpression = nextInvocationExpression as MemberAccessExpressionSyntax;
+                var predefinedTypeExpression = nextNextInvocationExpression.Expression as PredefinedTypeSyntax;
+                var indentifierName = nextNextInvocationExpression.Name as IdentifierNameSyntax;
+                return indentifierName?.Identifier.ValueText;
+            }
+
+            return null;
+        }
+
+        public string GetMethodName(Document document, ExpressionSyntax expressionSyntax, IEnumerable<SyntaxNode> nodes, SemanticModel semanticModel)
+        {
+            var symbolInfo = semanticModel.GetSymbolInfo(expressionSyntax);
+
             if (expressionSyntax == null)
                 return null;
 
@@ -119,10 +141,12 @@ namespace VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver
 
             if (_strategies.TryGetValue(expressionSyntax.Kind(), out var strategy))
             {
+                //var allSymbolsForSpan = nodes.Select(e => semanticModel.GetSymbolInfo(e)).Where(e=>e.Symbol !=null).ToList();
+                var symbolInfo = semanticModel.GetSymbolInfo(expressionSyntax.Parent);
                 return strategy.Resolve(document, expressionSyntax, nodes, semanticModel, this)
                     .WithNodeInfo(new NodeInfo
                     {
-                        MethodName = ResolveToClassAndMethodNames(expressionSyntax),
+                        MethodInfo = ResolveToClassAndMethodNames(expressionSyntax, semanticModel),
                         FileName = Path.GetFileName(document.FilePath),
                         LineNumber = expressionSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
                         ProjectName = document.Project.Name,
@@ -141,7 +165,7 @@ namespace VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver
             }
             .WithNodeInfo(new NodeInfo
             {
-                MethodName = ResolveToClassAndMethodNames(expressionSyntax),
+                MethodInfo = ResolveToClassAndMethodNames(expressionSyntax, semanticModel),
                 FileName = Path.GetFileName(document.FilePath),
                 LineNumber = expressionSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
                 ProjectName = document.Project.Name,

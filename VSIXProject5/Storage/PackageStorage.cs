@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver.Model;
 using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 using VSIXProject5.Indexers;
 using VSIXProject5.Indexers.Models;
@@ -21,7 +22,7 @@ namespace VSIXProject5.Storage
         public static XmlIndexer XmlFileAnalyzer = new XmlIndexer();
         public static CSharpIndexer CodeFileAnalyzer = new CSharpIndexer();
 
-        public static GenericStorage<string, ExpressionResult> GenericMethods = new GenericStorage<string,ExpressionResult>();
+        public static GenericStorage<MethodInfo, ExpressionResult> GenericMethods = new GenericStorage<MethodInfo, ExpressionResult>();
 
         public static void AnalyzeAndStore(List<XmlFileInfo> xmlFiles)
         {
@@ -33,13 +34,13 @@ namespace VSIXProject5.Storage
         {
             var codeResults = CodeFileAnalyzer.BuildIndexerAsync(documents).Result;
             CodeQueries.AddMultipleWithoutKey(codeResults.Select(e=>e.Queries).ToList());
-            GenericMethods.AddMultiple(codeResults.SelectMany(e => e.Generics).Select(e=> new KeyValuePair<string, ExpressionResult>(e.NodeInformation.MethodName, e)));
+            GenericMethods.AddMultiple(codeResults.SelectMany(e => e.Generics).Select(e=> new KeyValuePair<MethodInfo, ExpressionResult>(e.NodeInformation.MethodInfo, e)));
         }
 
         public static async Task AnalyzeAndStoreAsync(List<Document> documents)
         {
             var codeResults = await CodeFileAnalyzer.BuildIndexerAsync(documents);
-            var generics = codeResults.SelectMany(e => e.Generics).Select(e => new KeyValuePair<string, ExpressionResult>(e.NodeInformation.MethodName, e));
+            var generics = codeResults.SelectMany(e => e.Generics).Select(e => new KeyValuePair<MethodInfo, ExpressionResult>(e.NodeInformation.MethodInfo, e));
             await GenericMethods.AddMultipleAsync(generics);
             CodeQueries.AddMultipleWithoutKey(codeResults.Select(e => e.Queries).ToList());
         }
@@ -54,13 +55,13 @@ namespace VSIXProject5.Storage
         {
             var codeResult = CodeFileAnalyzer.BuildFromDocumentAsync(document).Result;
             CodeQueries.AddWithoutKey(codeResult.Queries);
-            GenericMethods.AddMultiple(codeResult.Generics.Select(e => new KeyValuePair<string, ExpressionResult>(e.NodeInformation.MethodName, e)));
+            GenericMethods.AddMultiple(codeResult.Generics.Select(e => new KeyValuePair<MethodInfo, ExpressionResult>(e.NodeInformation.MethodInfo, e)));
         }
 
         public static async Task AnalyzeAndStoreSingleAsync(Document document)
         {
             var codeResult = await CodeFileAnalyzer.BuildFromDocumentAsync(document);
-            await GenericMethods.AddMultipleAsync(codeResult.Generics.Select(e => new KeyValuePair<string, ExpressionResult>(e.NodeInformation.MethodName, e)));
+            await GenericMethods.AddMultipleAsync(codeResult.Generics.Select(e => new KeyValuePair<MethodInfo, ExpressionResult>(e.NodeInformation.MethodInfo, e)));
             CodeQueries.AddWithoutKey(codeResult.Queries);
         }
 
@@ -70,7 +71,7 @@ namespace VSIXProject5.Storage
             CodeQueries.UpdateStatmentForFileWihoutKey(new List<List<CSharpQuery>> { codeResult.Queries });
             foreach (var generic in codeResult.Generics)
             {
-                GenericMethods.Update(generic.NodeInformation.MethodName, generic);
+                GenericMethods.Update(generic.NodeInformation.MethodInfo, generic);
             }  
         }
     }

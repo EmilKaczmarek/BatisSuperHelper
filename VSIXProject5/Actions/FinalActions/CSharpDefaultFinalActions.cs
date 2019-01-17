@@ -36,10 +36,11 @@ namespace VSIXProject5.Actions2.FinalActions
 
         new public void PrepareAndExecuteGoToQuery(string queryResult, ExpressionResult expressionResult)
         {
-            if (expressionResult.IsSolved)
+            if (expressionResult.IsSolved || (expressionResult.CanBeUsedAsQuery && !string.IsNullOrEmpty(queryResult)))
             {
-                List<ResultWindowViewModel> windowViewModels = new List<ResultWindowViewModel>();
-                var keys = PackageStorage.XmlQueries.GetKeysByQueryId(expressionResult.TextResult);
+                var queryText = expressionResult.IsSolved ? expressionResult.TextResult : queryResult;
+                List <ResultWindowViewModel> windowViewModels = new List<ResultWindowViewModel>();
+                var keys = PackageStorage.XmlQueries.GetKeysByQueryId(queryText);
                 if (keys.Any())
                 {
                     var statment = PackageStorage.XmlQueries.GetValueOrNull(keys.First());
@@ -56,7 +57,7 @@ namespace VSIXProject5.Actions2.FinalActions
                 }
                 else
                 {
-                    _statusBar.ShowText($"No occurence of query named: {expressionResult.TextResult} found in SqlMaps.");
+                    _statusBar.ShowText($"No occurence of query named: {queryText} found in SqlMaps.");
                 }
             }     
             else
