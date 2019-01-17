@@ -11,7 +11,7 @@ namespace VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels
     public enum UnresolvedPartType
     {
         None,
-        ClassName,
+        GenericClassName,
     }
 
     public class ExpressionResult

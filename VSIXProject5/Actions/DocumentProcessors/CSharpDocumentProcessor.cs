@@ -120,32 +120,28 @@ namespace VSIXProject5.Actions2.DocumentProcessors
             }
             if (expressionResult.CanBeUsedAsQuery)
             {
-                queryValue = expressionResult.Resolve("SomeTable");
-                expressionResult.IsSolved = true;
-                expressionResult.TextResult = queryValue;
+                bool resolveSuccessful = TryResolveExpression(expressionResult, out string result);
+                queryValue = resolveSuccessful ? result : null;
                 return true;
             }
             queryValue = null;
+
             return false;
         }
 
-        private string ResolveExpression(ExpressionResult expressionResult)
+        private bool TryResolveExpression(ExpressionResult expressionResult, out string result)
         {
+            result = null;
             switch (expressionResult.UnresolvedPart)
             {
                 case UnresolvedPartType.None:
-                    return null;
-                case UnresolvedPartType.ClassName:
-                    return expressionResult.Resolve(GetCallingClassName());
+                    return false;
+                case UnresolvedPartType.GenericClassName:
+                    result = expressionResult.Resolve(_helperInstance.GetClassNameUsedAsGenericParameter(_lineNodes, _documentNodes.Value));
+                    return !string.IsNullOrEmpty(result);
                 default:
                     throw new Exception("Unexpected Case");
             }
         }
-
-        public string GetCallingClassName()
-        {
-            return "test";
-        }
-
     }
 }
