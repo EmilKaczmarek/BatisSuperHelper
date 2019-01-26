@@ -32,13 +32,9 @@ namespace VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver.ResolveStr
                     return expressionResolverInstance.GetStringValueOfExpression(document, firstReturnStatement.Expression, nodes, semanticModel);
                 }
             }
-            else
-            {
-                var initializerValue = variableDeclaration.Initializer?.Value;
-                return expressionResolverInstance.GetStringValueOfExpression(document, initializerValue, nodes, semanticModel);
-            }
 
-            return null;
+            var initializerValue = variableDeclaration?.Initializer?.Value;
+            return expressionResolverInstance.GetStringValueOfExpression(document, initializerValue, nodes, semanticModel);
         }
     }
 }

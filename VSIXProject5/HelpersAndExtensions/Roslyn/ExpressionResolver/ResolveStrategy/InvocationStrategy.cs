@@ -68,7 +68,12 @@ namespace VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver.ResolveStr
                     };
                 }
             }
-            return null;
+            return new ExpressionResult
+            {
+                IsSolved = false,
+                UnresolvableReason = "Unknow method.",
+                TextResult = "",
+            };
         }
     }
 }

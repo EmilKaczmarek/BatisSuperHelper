@@ -28,7 +28,12 @@ namespace VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver.ResolveStr
                     UnresolvedValue = (typeOfExpression.Type as IdentifierNameSyntax).Identifier.ValueText,
                 };
             }
-            return null;
+            return new ExpressionResult
+            {
+                IsSolved = false,
+                UnresolvableReason = "Unknow method.",
+                TextResult = "",
+            };
         }
     }
 }

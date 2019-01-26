@@ -67,7 +67,8 @@ namespace VSIXProject5.Parsers
             {
                 QueryFileName = _fileName,
                 QueryFilePath = _filePath,
-                QueryId = IsUsingStatementNamespaces ? MapNamespaceHelper.CreateFullQueryString(MapNamespace, e.Id) : e.Id,
+                QueryId = e.Id,
+                FullyQualifiedQuery = IsUsingStatementNamespaces ? MapNamespaceHelper.CreateFullQueryString(MapNamespace, e.Id) : e.Id,
                 QueryLineNumber = e.Line,
                 QueryVsProjectName = _fileProjectName,
                 MapNamespace = MapNamespace

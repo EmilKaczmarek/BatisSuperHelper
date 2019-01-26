@@ -121,6 +121,7 @@
     <Compile Include="Parsers\XmlParser.cs" />
     <Compile Include="RenameCommand.cs" />
     <Compile Include="Storage\Providers\CodeQueryProvider.cs" />
+    <Compile Include="Storage\Providers\NamespaceHandlingType.cs" />
     <Compile Include="Storage\Providers\XmlQueryProvider.cs" />
     <Compile Include="Storage\Base\GenericStorage.cs" />
     <Compile Include="Storage\Base\IProvider.cs" />

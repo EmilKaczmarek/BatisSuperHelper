@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VSIXProject5.HelpersAndExtensions;
 using VSIXProject5.Indexers;
 using VSIXProject5.Indexers.Models;
 using VSIXProject5.Storage.Interfaces;
+using VSIXProject5.Storage.Providers;
 
 namespace VSIXProject5.Storage.Domain
 {
@@ -40,7 +42,8 @@ namespace VSIXProject5.Storage.Domain
             IndexerKey key = new IndexerKey
             {
                 StatmentName = value.QueryId,
-                VsProjectName = value.QueryVsProjectName
+                VsProjectName = value.QueryVsProjectName,
+                StatmentFullyQualifiedName = value.FullyQualifiedQuery
             };
 
             Add(key, value);
@@ -70,14 +73,36 @@ namespace VSIXProject5.Storage.Domain
             return xmlStatments.Values.Where(x => x.QueryFileName.Equals(fileName, StringComparison.CurrentCultureIgnoreCase)).ToList();
         }
 
-        public List<IndexerKey> GetKeysByQueryId(string queryId)
+        private List<IndexerKey> GetKeysByQueryId(string queryId)
         {
             return xmlStatments.Keys.Where(e => e.StatmentName.Equals(queryId)).ToList();
         }
 
+        private List<IndexerKey> GetKeysByFullyQualifiedName(string queryId)
+        {
+            return xmlStatments.Keys.Where(e => e.StatmentFullyQualifiedName.Equals(queryId)).ToList();
+        }
+
+        public List<IndexerKey> GetKeysByQueryId(string queryId, NamespaceHandlingType handlingType)
+        {
+            switch (handlingType)
+            {
+                case NamespaceHandlingType.IGNORE_NAMESPACE:
+                    return GetKeysByQueryId(MapNamespaceHelper.GetQueryWithoutNamespace(queryId));
+                case NamespaceHandlingType.WITH_NAMESPACE:
+                    return GetKeysByFullyQualifiedName(queryId);
+                case NamespaceHandlingType.HYBRID_NAMESPACE:
+                    var withoutNamespace = GetKeysByQueryId(MapNamespaceHelper.GetQueryWithoutNamespace(queryId));
+                    var withNamespace = GetKeysByFullyQualifiedName(queryId);
+                    return withNamespace.Concat(withoutNamespace).Distinct().ToList();
+                default:
+                    return new List<IndexerKey>();
+            }
+        }
+
         public void RemoveStatmentByValue(XmlQuery value)
         {
-            xmlStatments.Remove(new IndexerKey { StatmentName = value.QueryId, VsProjectName = value.QueryFileName });
+            xmlStatments.Remove(new IndexerKey { StatmentName = value.QueryId, VsProjectName = value.QueryFileName, StatmentFullyQualifiedName = value.FullyQualifiedQuery });
         }
 
         public void RemoveStatmentsForFilePath(string filePath)
@@ -123,7 +148,12 @@ namespace VSIXProject5.Storage.Domain
         public void RenameQuery(IndexerKey key, string newQueryId)
         {
             var statmentInfo = xmlStatments[key];
-            var newKey = new IndexerKey { StatmentName = newQueryId, VsProjectName = key.VsProjectName };
+            var newKey = new IndexerKey {
+                StatmentName = MapNamespaceHelper.GetQueryWithoutNamespace(newQueryId),
+                VsProjectName = key.VsProjectName,
+                StatmentFullyQualifiedName = newQueryId
+            };
+
             statmentInfo.QueryId = newQueryId;
             xmlStatments.Remove(key);
             xmlStatments.Add(newKey, statmentInfo);

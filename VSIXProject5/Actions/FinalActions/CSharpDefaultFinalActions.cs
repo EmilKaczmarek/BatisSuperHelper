@@ -9,6 +9,7 @@ using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 using VSIXProject5.Indexers.Models;
 using VSIXProject5.Loggers;
 using VSIXProject5.Storage;
+using VSIXProject5.Storage.Providers;
 using VSIXProject5.VSIntegration;
 using VSIXProject5.VSIntegration.Navigation;
 using VSIXProject5.Windows.ResultWindow.ViewModel;
@@ -40,7 +41,12 @@ namespace VSIXProject5.Actions2.FinalActions
             {
                 var queryText = expressionResult.IsSolved ? expressionResult.TextResult : queryResult;
                 List <ResultWindowViewModel> windowViewModels = new List<ResultWindowViewModel>();
-                var keys = PackageStorage.XmlQueries.GetKeysByQueryId(queryText);
+                NamespaceHandlingType namspaceHandlingLogic =
+                    (bool)PackageStorage.RuntimeConfiguration.GetValue("HybridNamespaceEnabled")
+                    ? NamespaceHandlingType.HYBRID_NAMESPACE
+                    : NamespaceHandlingType.WITH_NAMESPACE;
+
+                var keys = PackageStorage.XmlQueries.GetKeysByQueryId(queryText, namspaceHandlingLogic);
                 if (keys.Any())
                 {
                     var statment = PackageStorage.XmlQueries.GetValueOrNull(keys.First());
