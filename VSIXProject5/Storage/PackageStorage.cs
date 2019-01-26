@@ -24,6 +24,11 @@ namespace VSIXProject5.Storage
 
         public static GenericStorage<MethodInfo, ExpressionResult> GenericMethods = new GenericStorage<MethodInfo, ExpressionResult>();
 
+        public static GenericStorage<string, object> RuntimeConfiguration = new GenericStorage<string, object>
+        {
+            new KeyValuePair<string, object>("HybridNamespaceEnabled", true),
+        };
+
         public static void AnalyzeAndStore(List<XmlFileInfo> xmlFiles)
         {
             var xmlResults = XmlFileAnalyzer.BuildIndexerAsync(xmlFiles);

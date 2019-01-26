@@ -78,7 +78,7 @@ class C
             var nodeHelperInstance = new NodeHelpers(model);
             var genericName = nodeHelperInstance.GetClassNameUsedAsGenericParameter(lineNodes, allNodes);
 
-            Assert.AreEqual("int", genericName);
+            Assert.AreEqual("Int32", genericName);
         }
 
     }

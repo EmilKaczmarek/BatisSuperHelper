@@ -10,6 +10,7 @@ using VSIXProject5.HelpersAndExtensions;
 using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 using VSIXProject5.Indexers.Models;
 using VSIXProject5.Storage;
+using VSIXProject5.Storage.Providers;
 using VSIXProject5.VSIntegration;
 using VSIXProject5.VSIntegration.Navigation;
 using VSIXProject5.Windows.ResultWindow.ViewModel;
@@ -32,8 +33,12 @@ namespace VSIXProject5.Actions2.FinalActions
             var debugPackagageStorage = PackageStorage.GenericMethods.GetByPredictate(e => e.TextResult == queryResult).ToList();
             var debugPackagageStorage2 = PackageStorage.GenericMethods.GetByPredictate(e => MapNamespaceHelper.GetQueryWithoutNamespace(e.TextResult) == MapNamespaceHelper.GetQueryWithoutNamespace(queryResult)).ToList();
 
+            NamespaceHandlingType namspaceHandlingLogic =
+                (bool)PackageStorage.RuntimeConfiguration.GetValue("HybridNamespaceEnabled")
+                ? NamespaceHandlingType.HYBRID_NAMESPACE
+                : NamespaceHandlingType.WITH_NAMESPACE;
 
-            var statmentsKeys = PackageStorage.CodeQueries.GetKeysByQueryId(queryResult);
+            var statmentsKeys = PackageStorage.CodeQueries.GetKeysByQueryId(queryResult, namspaceHandlingLogic);
             var statments = statmentsKeys.Select(PackageStorage.CodeQueries.GetValue).SelectMany(x => x);
         
             List<ResultWindowViewModel> windowViewModels = new List<ResultWindowViewModel>();
@@ -43,14 +48,14 @@ namespace VSIXProject5.Actions2.FinalActions
             }
             if (debugPackagageStorage2.Any())
             {
-                windowViewModels = debugPackagageStorage2.Select(x => new ResultWindowViewModel
+                windowViewModels.AddRange(debugPackagageStorage2.Select(x => new ResultWindowViewModel
                 {
                     File = x.NodeInformation.FileName,
                     Line = x.NodeInformation.LineNumber,
                     FilePath = x.NodeInformation.FilePath,
                     Query = x.TextResult,
                     Namespace = MapNamespaceHelper.DetermineMapNamespaceQueryPairFromCodeInput(expressionResult.TextResult).Item1,
-                }).ToList(); 
+                })); 
             }
             if (statments.Count() == 1)
             {
@@ -58,14 +63,14 @@ namespace VSIXProject5.Actions2.FinalActions
             }
             if (statments.Count() > 1)
             {
-                windowViewModels = statments.Select(x => new ResultWindowViewModel
+                windowViewModels.AddRange(statments.Select(x => new ResultWindowViewModel
                 {
                     File = x.QueryFileName,
                     Line = x.QueryLineNumber,
                     Query = x.QueryId,
                     FilePath = x.QueryFilePath,
                     Namespace = MapNamespaceHelper.DetermineMapNamespaceQueryPairFromCodeInput(x.QueryId).Item1,
-                }).ToList();
+                }));
 
                 _statusBar.ShowText($"Multiple occurence of same statment({queryResult}) found.");
             }

@@ -138,6 +138,7 @@ namespace VSIXProject5.Helpers
         /// </summary>
         /// <param name="SyntaxNodes"></param>
         /// <param name="allDocumentNodes"></param>
+        /// <param name="document">todo: describe document parameter on GetQueryStringFromSyntaxNodes</param>
         public ExpressionResult GetQueryStringFromSyntaxNodes(Document document, IEnumerable<SyntaxNode> SyntaxNodes, IEnumerable<SyntaxNode> allDocumentNodes)
         {
             if (IsAnySyntaxNodeContainIBatisNamespace(SyntaxNodes))
@@ -154,8 +155,6 @@ namespace VSIXProject5.Helpers
 
                     return PackageStorage.GenericMethods.GetValue(resolveResult);
                 }
-                var test = PackageStorage.GenericMethods;
-
                 return new ExpressionResolver().GetStringValueOfExpression(document, queryArgument?.Expression, allDocumentNodes, _semanticModel);
             }
             return null;
@@ -205,7 +204,7 @@ namespace VSIXProject5.Helpers
             {
                 var singleGenericNameSyntax = genericNameSyntax.First() as GenericNameSyntax;
                 var firstArgument =  singleGenericNameSyntax.TypeArgumentList.Arguments.FirstOrDefault() as PredefinedTypeSyntax;
-                return firstArgument.Keyword.ValueText;
+                return firstArgument != null ? firstArgument.Keyword.ValueText : null;
             }
             //WTF
             if (genericNameSyntax.Count() > 1)
@@ -228,7 +227,7 @@ namespace VSIXProject5.Helpers
             }
             
 
-            return "";
+            return null;
         }
     }
 }

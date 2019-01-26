@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -39,7 +40,7 @@ namespace VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver
         }
         private int _callStackNum = 1;
 
-        public MethodInfo ResolveToClassAndMethodNames(SyntaxNode node, SemanticModel semModel)
+        private MethodInfo ResolveToClassAndMethodNames(SyntaxNode node, SemanticModel semModel)
         {
             var analyzeNode = node as SyntaxNode;
             string className;
@@ -63,44 +64,6 @@ namespace VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver
                     MethodClass = classDeclaration.Identifier.Text,
                 }; 
             }
-            return null;
-        }
-        public string GetMethodName(ExpressionSyntax expressionSyntax)
-        {
-
-            if (expressionSyntax == null)
-                return null;
-
-            if (expressionSyntax is InvocationExpressionSyntax)
-            {
-                var invocationExpression = expressionSyntax as InvocationExpressionSyntax;
-                var nextInvocationExpression = invocationExpression.Expression;
-                var nextNextInvocationExpression = nextInvocationExpression as MemberAccessExpressionSyntax;
-                var predefinedTypeExpression = nextNextInvocationExpression.Expression as PredefinedTypeSyntax;
-                var indentifierName = nextNextInvocationExpression.Name as IdentifierNameSyntax;
-                return indentifierName?.Identifier.ValueText;
-            }
-
-            return null;
-        }
-
-        public string GetMethodName(Document document, ExpressionSyntax expressionSyntax, IEnumerable<SyntaxNode> nodes, SemanticModel semanticModel)
-        {
-            var symbolInfo = semanticModel.GetSymbolInfo(expressionSyntax);
-
-            if (expressionSyntax == null)
-                return null;
-
-            if (expressionSyntax is InvocationExpressionSyntax)
-            {
-                var invocationExpression = expressionSyntax as InvocationExpressionSyntax;
-                var nextInvocationExpression = invocationExpression.Expression;
-                var nextNextInvocationExpression = nextInvocationExpression as MemberAccessExpressionSyntax;
-                var predefinedTypeExpression = nextNextInvocationExpression.Expression as PredefinedTypeSyntax;
-                var indentifierName = nextNextInvocationExpression.Name as IdentifierNameSyntax;
-                return indentifierName?.Identifier.ValueText;
-            }
-
             return null;
         }
 
@@ -143,6 +106,7 @@ namespace VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver
             {
                 //var allSymbolsForSpan = nodes.Select(e => semanticModel.GetSymbolInfo(e)).Where(e=>e.Symbol !=null).ToList();
                 var symbolInfo = semanticModel.GetSymbolInfo(expressionSyntax.Parent);
+
                 return strategy.Resolve(document, expressionSyntax, nodes, semanticModel, this)
                     .WithNodeInfo(new NodeInfo
                     {

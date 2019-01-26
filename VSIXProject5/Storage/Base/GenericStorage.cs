@@ -1,23 +1,44 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace VSIXProject5.Storage
 {
-    public class GenericStorage<T, T1>
+    public class GenericStorage<T, T1> : IEnumerable<KeyValuePair<T, T1>>
     {
         private ConcurrentDictionary<T, Lazy<T1>> keyValuePairs = new ConcurrentDictionary<T, Lazy<T1>>();
 
+        public IEnumerator<KeyValuePair<T, T1>> GetEnumerator()
+        {
+            return Enumerable.Empty<KeyValuePair<T, T1>>().GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return Enumerable.Empty<KeyValuePair<T, T1>>().GetEnumerator();
+        }
+
+        public void Add(KeyValuePair<T, T1> keyValuePair)
+        {
+            if (keyValuePair.Key == null)
+                return;
+            keyValuePairs.TryAdd(keyValuePair.Key, new Lazy<T1>(() => keyValuePair.Value));
+        }
+
         public bool Add(T key, T1 value)
         {
+            if (key == null)
+                return false;
             return keyValuePairs.TryAdd(key, new Lazy<T1>(() => value));
         }
 
         public async Task<bool> AddAsync(T key, T1 value)
         {
+            if (key == null)
+                return false;
             return await Task.Run(() => keyValuePairs.TryAdd(key, new Lazy<T1>(() => value)));
         }
 
@@ -56,6 +77,17 @@ namespace VSIXProject5.Storage
         public async Task<IEnumerable<T1>> GetByPredictateAsync(Func<T1, bool> predictate)
         {
             return await Task.Run(() => GetByPredictate(predictate));
+        }
+
+        public bool TryGetValue(T key, out T1 value)
+        {
+            if (keyValuePairs.TryGetValue(key, out Lazy<T1> lazyValue))
+            {
+                value = lazyValue.Value;
+                return true;
+            }
+            value = default(T1);
+            return false;
         }
 
         public T1 GetValue(T key)

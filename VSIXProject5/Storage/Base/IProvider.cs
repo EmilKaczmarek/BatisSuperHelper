@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VSIXProject5.Storage.Providers;
 
 namespace VSIXProject5.Storage.Interfaces
 {
@@ -10,7 +11,7 @@ namespace VSIXProject5.Storage.Interfaces
     {
         T1 GetValue(T key);
         T1 GetValueOrNull(T key);
-        List<T> GetKeysByQueryId(string queryId);
+        List<T> GetKeysByQueryId(string queryId, NamespaceHandlingType handlingType);
         void Add(T key, T1 value);
         void AddWithoutKey(T1 value);
         void AddMultiple(List<KeyValuePair<T, T1>> keyValuePairs);
