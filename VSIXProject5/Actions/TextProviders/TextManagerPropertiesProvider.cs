@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VSIXProject5.Actions2.TextProviders
+namespace VSIXProject5.Actions.TextProviders
 {
     public class TextManagerPropertiesProvider : IDocumentPropertiesProvider
     {

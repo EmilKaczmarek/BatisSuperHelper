@@ -6,7 +6,7 @@ using System;
 using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 using VSIXProject5.VSIntegration;
 
-namespace VSIXProject5.Actions2
+namespace VSIXProject5.Actions
 {
     public class GoToQueryActions2 : BaseActions
     {
@@ -29,7 +29,7 @@ namespace VSIXProject5.Actions2
         public override void MenuItemCallback(object sender, EventArgs e)
         {
             var queryResult = _documentProcessor.TryResolveQueryValueAtCurrentSelectedLine(out ExpressionResult expressionResult, out string queryValue);
-            _finalAction.PrepareAndExecuteGoToQuery(queryValue, expressionResult);
+            _finalEventActionsExecutor.Execute(queryValue, expressionResult);
         }
     }
 }

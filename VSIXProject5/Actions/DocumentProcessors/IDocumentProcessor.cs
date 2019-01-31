@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VSIXProject5.Actions2.ActionValidators;
+using VSIXProject5.Actions.ActionValidators;
 using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 
-namespace VSIXProject5.Actions2.DocumentProcessors
+namespace VSIXProject5.Actions.DocumentProcessors
 {
     public interface IDocumentProcessor
     {

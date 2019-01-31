@@ -7,7 +7,7 @@
 using Microsoft.VisualStudio.Shell;
 using System;
 using System.ComponentModel.Design;
-using VSIXProject5.Actions2;
+using VSIXProject5.Actions;
 
 namespace VSIXProject5
 {
