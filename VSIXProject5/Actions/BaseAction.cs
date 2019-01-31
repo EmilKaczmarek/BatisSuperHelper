@@ -2,12 +2,16 @@
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
-using VSIXProject5.Actions2.DocumentProcessors;
-using VSIXProject5.Actions2.FinalActions;
-using VSIXProject5.Actions2.TextProviders;
+using System.Diagnostics;
+using VSIXProject5.Actions.DocumentProcessors;
+using VSIXProject5.Actions.DocumentProcessors.Factory;
+using VSIXProject5.Actions.FinalActions;
+using VSIXProject5.Actions.FinalActions.Factory;
+using VSIXProject5.Actions.DocumentProcessors;
+using VSIXProject5.Actions.TextProviders;
 using VSIXProject5.VSIntegration;
 
-namespace VSIXProject5.Actions2
+namespace VSIXProject5.Actions
 {
     public abstract class BaseActions
     {
@@ -20,7 +24,8 @@ namespace VSIXProject5.Actions2
 
         internal IDocumentPropertiesProvider _documentPropertiesProvider;
         internal IDocumentProcessor _documentProcessor;
-        internal IFinalAction _finalAction;
+        internal FinalEventActionsExecutor _finalEventActionsExecutor;
+
         internal ToolWindowPane _resultWindow => _resultWindowLazy.Value;
 
         private Lazy<ToolWindowPane> _resultWindowLazy;
@@ -42,21 +47,38 @@ namespace VSIXProject5.Actions2
             _documentPropertiesProvider = new TextManagerPropertiesProvider(_textManager, _editorAdaptersFactory);
 
             var contentType = _documentPropertiesProvider.GetContentType();
-            if (contentType == "CSharp")
-            {
-                _documentProcessor = await new CSharpDocumentProcessor(_documentPropertiesProvider.GetDocumentRepresentation(), _documentPropertiesProvider.GetSelectionLineNumber()).InitializeAsync();
-                _finalAction = new CSharpDefaultFinalActions(_statusBar, _resultWindow);
-            }
-            if (contentType == "XML")
-            {
-                _documentProcessor = new XmlDocumentProcessor(_documentPropertiesProvider.GetDocumentRepresentation(), _documentPropertiesProvider.GetSelectionLineNumber()).Initialize();
-                _finalAction = new DefaultFinalActions(_statusBar, _resultWindow);
+
+            DocumentProcessorFactory processorFactory;
+            IFinalActionFactory finalActionFactory;
+
+            switch (contentType) {
+                case "CSharp":
+                    processorFactory = new CSharpDocumentProcessorFactory();
+                    //This is not mistake. When working on CSharp document, the result
+                    //we are looking for is xml statment.
+                    finalActionFactory = new XmlFinalActionFactory();
+                    break;
+                case "XML":
+                    processorFactory = new XmlDocumentProcessorFactory();
+                    //This is not mistake. When working on xml document, the result
+                    //we are looking for is code statment.
+                    finalActionFactory = new CSharpFinalActionFactory();
+                    break;
+                default:
+                    return;
             }
 
-            var validationResult = _documentProcessor.GetValidator().CanJumpToQueryInLine(_documentPropertiesProvider.GetSelectionLineNumber());
+            processorFactory
+                .GetProcessorAsync(_documentPropertiesProvider.GetDocumentRepresentation(), _documentPropertiesProvider.GetSelectionLineNumber())
+                .ContinueWith((t) => _documentProcessor = t.Result).Wait();//Only fully working solution found that works for all processors...
 
-            menuCommand.Visible = validationResult;
-            menuCommand.Enabled = validationResult;          
+            _finalEventActionsExecutor = finalActionFactory.GetFinalEventActionsExecutor(_statusBar, _resultWindow);
+
+            var validator = _documentProcessor.GetValidator();
+            var validationTask = validator.CanJumpToQueryInLine(_documentPropertiesProvider.GetSelectionLineNumber());
+
+            menuCommand.Visible = validationTask;
+            menuCommand.Enabled = validationTask;
         }
         public virtual void Change(object sender, EventArgs e)
         {

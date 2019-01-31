@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 using VSIXProject5.Indexers.Models;
 
-namespace VSIXProject5.Actions2
+namespace VSIXProject5.Actions
 {
+    //Placeholder for future fun with other commands(rename)
     public interface IFinalAction
     {
         void PrepareAndExecuteGoToQuery(string queryResult, ExpressionResult expressionResult);
