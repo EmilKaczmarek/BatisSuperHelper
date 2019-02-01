@@ -11,7 +11,7 @@ using VSIXProject5.HelpersAndExtensions.Roslyn;
 using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver;
 using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 
-namespace GoToQueryUnitTests
+namespace Tests
 {
     [TestClass]
     public class ExpressionResolverCrashTests

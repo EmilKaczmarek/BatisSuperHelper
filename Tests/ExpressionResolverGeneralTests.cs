@@ -10,7 +10,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using VSIXProject5.HelpersAndExtensions.Roslyn;
 using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver;
 
-namespace GoToQueryUnitTests
+namespace Tests
 {
     [TestClass()]
     public class ExpressionResolverGeneralTests

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.FindSymbols;
 using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 
 namespace VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver.ResolveStrategy
@@ -24,7 +25,7 @@ namespace VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver.ResolveStr
                 {
                     return expressionResolverInstance.GetStringValueOfExpression(document, property.ExpressionBody.Expression, nodes, semanticModel);
                 }
-                else if (property?.AccessorList != null)
+                if (property?.AccessorList != null)
                 {
                     var getter = property.AccessorList.Accessors.FirstOrDefault(e => e.IsKind(SyntaxKind.GetAccessorDeclaration));
                     var getterBody = getter.Body;
@@ -33,8 +34,32 @@ namespace VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver.ResolveStr
                 }
             }
 
-            var initializerValue = variableDeclaration?.Initializer?.Value;
-            return expressionResolverInstance.GetStringValueOfExpression(document, initializerValue, nodes, semanticModel);
+            if (variableDeclaration?.Initializer != null)
+            {
+                return expressionResolverInstance.GetStringValueOfExpression(document, variableDeclaration.Initializer.Value, nodes, semanticModel);
+            }
+
+            var assigmentsInDocument = nodes.OfType<AssignmentExpressionSyntax>();
+            var assigmentExpressions = assigmentsInDocument
+                .Where(e => (e.Left as IdentifierNameSyntax)?.Identifier.Text == identifierNameSyntax.Identifier.Text).Select(e => e.Right)
+                .Concat(
+                    assigmentsInDocument
+                    .Where(e => (e.Right as IdentifierNameSyntax)?.Identifier.Text == identifierNameSyntax.Identifier.Text).Select(e => e.Left)
+                );
+
+            foreach (var expression in assigmentExpressions)
+            {
+                var expressionResult = expressionResolverInstance.GetStringValueOfExpression(document, expression, nodes, semanticModel);
+                if (expressionResult.IsSolved || expressionResult.CanBeUsedAsQuery)
+                    return expressionResult;
+            }
+
+            return new ExpressionResult
+            {
+                IsSolved = false,
+                UnresolvableReason = "Unable to find identifier initializer in document.",
+                TextResult = "",
+            };
         }
     }
 }
