@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.LanguageServices;
 using Microsoft.VisualStudio.Shell;
+using StackExchange.Profiling;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -46,7 +47,7 @@ namespace VSIXProject5.Indexers
             {
                 if (!Regex.IsMatch(document.FilePath, @"(\\service|\\TemporaryGeneratedFile_.*|\\assemblyinfo|\\assemblyattributes|\.(g\.i|g|designer|generated|assemblyattributes))\.(cs|vb)$"))
                 {
-                    results.Add(await BuildFromDocumentAsync(document));
+                    results.Add(BuildFromDocumentAsync(document).Result);
                 }          
             }
             sw.Stop();
@@ -56,8 +57,12 @@ namespace VSIXProject5.Indexers
 
         public async Task<CSharpIndexerResult> BuildFromDocumentAsync(Document document)
         {
-            SemanticModel semModel = await document.GetSemanticModelAsync();
-            return Build(semModel, document);
+            using (MiniProfiler.Current.Step(nameof(BuildFromDocumentAsync)))
+            {
+                SemanticModel semModel = document.GetSemanticModelAsync().Result;
+                return Build(semModel, document);
+            }
+
         }
 
         public bool HasBatisUsing(CompilationUnitSyntax treeRoot)
@@ -79,55 +84,72 @@ namespace VSIXProject5.Indexers
 
         private CSharpIndexerResult Build(SemanticModel semModel, Document document)
         {
-            var queryResults = new List<CSharpQuery>();
-            var genericResults = new List<ExpressionResult>();
-            SyntaxTree synTree = null;
-            document.TryGetSyntaxTree(out synTree);
-            var treeRoot = (CompilationUnitSyntax)synTree.GetRoot();
-
-            var nodes = treeRoot.DescendantNodesAndSelf();
-            var argumentNodes = nodes
-                .OfType<ArgumentListSyntax>()
-                .Where(x => x.Arguments.Any());
-
-            foreach (var node in argumentNodes)
+            using (MiniProfiler.Current.Step(nameof(Build)))
             {
-                var firstInvocationOfNodeAncestors = node.Ancestors().OfType<InvocationExpressionSyntax>().FirstOrDefault();
-
-                if (firstInvocationOfNodeAncestors == null)
-                    continue;
-             
-                var allowedTypes = new List<Type> { typeof(IdentifierNameSyntax), typeof(GenericNameSyntax) };
-                var nameIdentifiers = firstInvocationOfNodeAncestors.Expression.DescendantNodes().Where(e=>allowedTypes.Contains(e.GetType())).Cast<SimpleNameSyntax>();
-
-                if (nameIdentifiers.Any(e => IBatisConstants.MethodNames.Contains(e.Identifier.ValueText)))
+                var queryResults = new List<CSharpQuery>();
+                var genericResults = new List<ExpressionResult>();
+                SyntaxTree synTree = null;
+                document.TryGetSyntaxTree(out synTree);
+                var treeRoot = (CompilationUnitSyntax)synTree.GetRoot();
+                IEnumerable<SyntaxNode> nodes;
+                IEnumerable<ArgumentListSyntax> argumentNodes;
+                using (MiniProfiler.Current.Step("DescendantNodes and .OfType().Where()"))
                 {
-                    Location loc = Location.Create(synTree, node.Span);
-                    var expressionResult = new ExpressionResolver().GetStringValueOfExpression(document, node.Arguments.FirstOrDefault().Expression, nodes, semModel);
-                    if (expressionResult.IsSolved)
-                    {
-                        queryResults.Add(new CSharpQuery
-                        {
-                            QueryFileName = Path.GetFileName(document.FilePath),
-                            QueryId = expressionResult.TextResult,
-                            QueryLineNumber = loc.GetLineSpan().StartLinePosition.Line + 1,
-                            QueryVsProjectName = document.Project.Name,
-                            QueryFilePath = document.FilePath,
-                            DocumentId = document.Id,
-                        });
-                    }
-                    else
-                    {  
-                        genericResults.Add(expressionResult);
-                    }
+                    nodes = treeRoot.DescendantNodesAndSelf();
+                    argumentNodes = nodes
+                        .OfType<ArgumentListSyntax>()
+                        .Where(x => x.Arguments.Any());
                 }
-            }
+                using (MiniProfiler.Current.Step("foreach"))
+                {
+                    foreach (var node in argumentNodes)
+                    {
+                        var firstInvocationOfNodeAncestors = node.Ancestors().OfType<InvocationExpressionSyntax>().FirstOrDefault();
 
-            return new CSharpIndexerResult
-            {
-                Queries = queryResults,
-                Generics = genericResults,
-            };
+                        if (firstInvocationOfNodeAncestors == null)
+                            continue;
+
+                        var allowedTypes = new List<Type> { typeof(IdentifierNameSyntax), typeof(GenericNameSyntax) };
+                        IEnumerable<SimpleNameSyntax> nameIdentifiers;
+                        using (MiniProfiler.Current.Step("nameIdentifiers"))
+                        {
+                            nameIdentifiers = firstInvocationOfNodeAncestors.Expression.DescendantNodes().Where(e => allowedTypes.Contains(e.GetType())).Cast<SimpleNameSyntax>();
+                        }
+                        if (nameIdentifiers.Any(e => IBatisConstants.MethodNames.Contains(e.Identifier.ValueText)))
+                        {
+                            Location loc = Location.Create(synTree, node.Span);
+                            ExpressionResult expressionResult;
+                            using (MiniProfiler.Current.Step("expression resolver"))
+                            {
+                                expressionResult = new ExpressionResolver().GetStringValueOfExpression(document, node.Arguments.FirstOrDefault().Expression, nodes, semModel);
+                            }
+                            if (expressionResult.IsSolved)
+                            {
+                                queryResults.Add(new CSharpQuery
+                                {
+                                    QueryFileName = Path.GetFileName(document.FilePath),
+                                    QueryId = expressionResult.TextResult,
+                                    QueryLineNumber = loc.GetLineSpan().StartLinePosition.Line + 1,
+                                    QueryVsProjectName = document.Project.Name,
+                                    QueryFilePath = document.FilePath,
+                                    DocumentId = document.Id,
+                                });
+                            }
+                            else
+                            {
+                                genericResults.Add(expressionResult);
+                            }
+                        }
+                    }
+
+                    return new CSharpIndexerResult
+                    {
+                        Queries = queryResults,
+                        Generics = genericResults,
+                    };
+                }
+              
+            } 
         }
     }
 }

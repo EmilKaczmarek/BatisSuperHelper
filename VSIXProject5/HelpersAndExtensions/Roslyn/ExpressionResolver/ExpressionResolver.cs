@@ -43,8 +43,6 @@ namespace VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver
         private MethodInfo ResolveToClassAndMethodNames(SyntaxNode node, SemanticModel semModel)
         {
             var analyzeNode = node as SyntaxNode;
-            string className;
-            string methodName;
             while (analyzeNode != null && !analyzeNode.IsKind(SyntaxKind.MethodDeclaration))
             {   
                 analyzeNode = analyzeNode.Parent;

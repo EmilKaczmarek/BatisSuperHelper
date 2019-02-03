@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using StackExchange.Profiling;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,7 +29,7 @@ namespace VSIXProject5.Storage
         {
             new KeyValuePair<string, object>("HybridNamespaceEnabled", true),
         };
-
+        
         public static void AnalyzeAndStore(List<XmlFileInfo> xmlFiles)
         {
             var xmlResults = XmlFileAnalyzer.BuildIndexerAsync(xmlFiles);
@@ -44,10 +45,14 @@ namespace VSIXProject5.Storage
 
         public static async Task AnalyzeAndStoreAsync(List<Document> documents)
         {
-            var codeResults = await CodeFileAnalyzer.BuildIndexerAsync(documents);
-            var generics = codeResults.SelectMany(e => e.Generics).Select(e => new KeyValuePair<MethodInfo, ExpressionResult>(e.NodeInformation.MethodInfo, e));
-            await GenericMethods.AddMultipleAsync(generics);
-            CodeQueries.AddMultipleWithoutKey(codeResults.Select(e => e.Queries).ToList());
+            using (MiniProfiler.Current.Step(nameof(AnalyzeAndStore)))
+            {
+                var codeResults = CodeFileAnalyzer.BuildIndexerAsync(documents).Result;
+                var generics = codeResults.SelectMany(e => e.Generics).Select(e => new KeyValuePair<MethodInfo, ExpressionResult>(e.NodeInformation.MethodInfo, e));
+                await GenericMethods.AddMultipleAsync(generics);
+                CodeQueries.AddMultipleWithoutKey(codeResults.Select(e => e.Queries).ToList());
+            }
+               
         }
 
         public static void AnalyzeAndStoreSingle(XmlFileInfo xmlFile)
