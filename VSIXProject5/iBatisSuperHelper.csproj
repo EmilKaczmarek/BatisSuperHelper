@@ -127,7 +127,6 @@
     <Compile Include="HelpersAndExtensions\XmlHelper.cs" />
     <Compile Include="Indexers\Models\CSharpIndexerResult.cs" />
     <Compile Include="Indexers\Models\XmlIndexerResult.cs" />
-    <Compile Include="Indexers\ProjectQueue.cs" />
     <Compile Include="Logging\MiniProfiler\NLogStorage.cs" />
     <Compile Include="Logging\NLogConfigurationService.cs" />
     <Compile Include="Logging\OutputWindowLogger.cs" />
