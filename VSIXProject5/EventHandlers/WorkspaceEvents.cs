@@ -1,5 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.LanguageServices;
+using NLog;
+using StackExchange.Profiling;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,6 +9,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using VSIXProject5.Indexers;
+using VSIXProject5.Loggers;
+using VSIXProject5.Logging.MiniProfiler;
 using VSIXProject5.Storage;
 
 namespace VSIXProject5.Events
@@ -50,13 +54,26 @@ namespace VSIXProject5.Events
 
         public static async void WorkspaceChanged(object sender, WorkspaceChangeEventArgs e)
         {
+            var profiler = MiniProfiler.StartNew(nameof(WorkspaceChanged));
+            profiler.Storage = new NLogStorage(LogManager.GetLogger("profiler"));
             var workspace = sender as VisualStudioWorkspace;
             switch (e.Kind)
             {
                 case WorkspaceChangeKind.SolutionAdded:
-                    var solution = e.NewSolution.Projects.Any() ? e.NewSolution : workspace.CurrentSolution;
-                    _projectsAlreadyAdded = new List<ProjectId>(solution.ProjectIds);
-                    await BuildIndexerWithCSharpResults(e.NewSolution.Projects.Any()? e.NewSolution : workspace.CurrentSolution);                  
+                    try
+                    {
+                        using (profiler.Step(WorkspaceChangeKind.SolutionAdded.ToString()))
+                        {
+                            var solution = e.NewSolution.Projects.Any() ? e.NewSolution : workspace.CurrentSolution;
+                            _projectsAlreadyAdded = new List<ProjectId>(solution.ProjectIds);
+                            BuildIndexerWithCSharpResults(e.NewSolution.Projects.Any() ? e.NewSolution : workspace.CurrentSolution);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogManager.GetLogger("error").Error(ex, "WorkspaceChangeKind.SolutionAdded");
+                        OutputWindowLogger.WriteLn($"Exception occured during adding solution: {ex.Message}");
+                    }
                     break;
                 case WorkspaceChangeKind.SolutionChanged:
                     break;
@@ -67,23 +84,34 @@ namespace VSIXProject5.Events
                 case WorkspaceChangeKind.SolutionReloaded:
                     break;
                 case WorkspaceChangeKind.ProjectAdded:
-                    if (!_projectsAlreadyAdded.Any())
+                    try
                     {
-                        _projectsAlreadyAdded = new List<ProjectId>(e.NewSolution.ProjectIds);                       
-                        Loggers.OutputWindowLogger.WriteLn($"Adding {string.Join(",", e.NewSolution.Projects.Select(x=>x.Name))} to indexer");
-                        await BuildIndexerWithCSharpResults(e.NewSolution);
-                    }
-                    else
-                    {
-                        foreach (var project in e.NewSolution.Projects)
+                        using (profiler.Step(WorkspaceChangeKind.SolutionAdded.ToString()))
                         {
-                            if (!_projectsAlreadyAdded.Contains(project.Id))
+                            if (!_projectsAlreadyAdded.Any())
                             {
-                                _projectsAlreadyAdded.Add(project.Id);
-                                Loggers.OutputWindowLogger.WriteLn($"Adding {project.Name} to indexer");
-                                await BuildIndexerUsingProjectWithCSharpResults(project);
+                                _projectsAlreadyAdded = new List<ProjectId>(e.NewSolution.ProjectIds);
+                                Loggers.OutputWindowLogger.WriteLn($"Adding {string.Join(",", e.NewSolution.Projects.Select(x => x.Name))} to indexer");
+                                BuildIndexerWithCSharpResults(e.NewSolution);
+                            }
+                            else
+                            {
+                                foreach (var project in e.NewSolution.Projects)
+                                {
+                                    if (!_projectsAlreadyAdded.Contains(project.Id))
+                                    {
+                                        _projectsAlreadyAdded.Add(project.Id);
+                                        Loggers.OutputWindowLogger.WriteLn($"Adding {project.Name} to indexer");
+                                        BuildIndexerUsingProjectWithCSharpResults(project);
+                                    }
+                                }
                             }
                         }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogManager.GetLogger("error").Error(ex, "WorkspaceChangeKind.ProjectAdded");
+                        OutputWindowLogger.WriteLn($"Exception occured during adding projects: {ex.Message}");
                     }
                     break;
                 case WorkspaceChangeKind.ProjectRemoved:
@@ -120,6 +148,7 @@ namespace VSIXProject5.Events
                 default:
                     throw new Exception("Unexpected Case");
             }
+            profiler.Stop();
         }
     }
 }

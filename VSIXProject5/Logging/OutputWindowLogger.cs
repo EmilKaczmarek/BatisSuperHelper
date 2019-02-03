@@ -1,5 +1,8 @@
 ﻿using Microsoft.VisualStudio.Shell.Interop;
 using System;
+using System.IO;
+using System.Reflection;
+using VSIXProject5.Logging;
 
 namespace VSIXProject5.Loggers
 {
@@ -30,6 +33,7 @@ namespace VSIXProject5.Loggers
                 var outputWindow = (IVsOutputWindow)_SVsOutputWindow;
                 outputWindow.CreatePane(ref guid, _tabName, 1, 1);
                 outputWindow.GetPane(ref guid, out _outputWindowPane);
+                WriteLn($"Log dir: {NLogConfigurationService.AssemblyLocation}");
             }
             return _outputWindowPane != null;
         }

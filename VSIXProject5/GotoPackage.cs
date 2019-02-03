@@ -7,6 +7,7 @@
 using EnvDTE;
 using EnvDTE80;
 using HtmlAgilityPack;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
@@ -16,11 +17,14 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.TextManager.Interop;
+using NLog;
+using NLog.Targets;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Timers;
@@ -33,6 +37,7 @@ using VSIXProject5.Events;
 using VSIXProject5.Helpers;
 using VSIXProject5.Indexers;
 using VSIXProject5.Loggers;
+using VSIXProject5.Logging;
 using VSIXProject5.Parsers;
 using VSIXProject5.Storage;
 using VSIXProject5.VSIntegration.Navigation;
@@ -103,6 +108,12 @@ namespace VSIXProject5
 
         protected override async System.Threading.Tasks.Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
+            NLogConfigurationService.ConfigureNLog();
+            NLogConfigurationService.ConfigureMiniProfilerWithDefaultLogger();
+
+            Logger logger = LogManager.GetLogger("error");
+            logger.Info("Extension initalizing");
+
             EnvDTE = await GetServiceAsync(typeof(DTE)) as DTE2;
             var componentModel = await GetServiceAsync(typeof(SComponentModel)) as IComponentModel;
 
@@ -116,6 +127,15 @@ namespace VSIXProject5
             //Prepare package events
             Workspace = componentModel.GetService<VisualStudioWorkspace>();
             Workspace.WorkspaceChanged += WorkspaceEvents.WorkspaceChanged;
+
+            Observable.FromEventPattern<WorkspaceChangeEventArgs>(Workspace, "WorkspaceChanged")
+               //.Select(e => e.EventArgs.Changes)
+               .DistinctUntilChanged()
+               .Throttle(TimeSpan.FromMilliseconds(500))
+               .Subscribe(e =>
+               {
+
+               });
 
             _solution = await GetServiceAsync(typeof(SVsSolution)) as IVsSolution;
             _solutionEventsHandler = new SolutionEventsHandler(

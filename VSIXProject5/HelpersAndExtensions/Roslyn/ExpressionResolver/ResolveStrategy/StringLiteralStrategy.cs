@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using StackExchange.Profiling;
 using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 
 namespace VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver.ResolveStrategy
@@ -13,15 +14,18 @@ namespace VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver.ResolveStr
     {
         public ExpressionResult Resolve(Document document, ExpressionSyntax expressionSyntax, IEnumerable<SyntaxNode> nodes, SemanticModel semanticModel, ExpressionResolver expressionResolverInstance)
         {
-            var token = (expressionSyntax as LiteralExpressionSyntax).Token;
-            var tokenValue = token.Value;
-            return new ExpressionResult
+            using (MiniProfiler.Current.Step(nameof(StringLiteralStrategy)))
             {
-                CanBeUsedAsQuery = false,
-                ExpressionText = expressionSyntax.ToString(),
-                IsSolved = true,
-                TextResult = token.ValueText,
-            };
+                var token = (expressionSyntax as LiteralExpressionSyntax).Token;
+                var tokenValue = token.Value;
+                return new ExpressionResult
+                {
+                    CanBeUsedAsQuery = false,
+                    ExpressionText = expressionSyntax.ToString(),
+                    IsSolved = true,
+                    TextResult = token.ValueText,
+                };
+            } 
         }
     }
 }

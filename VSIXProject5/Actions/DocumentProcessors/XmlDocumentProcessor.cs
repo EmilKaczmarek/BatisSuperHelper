@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StackExchange.Profiling;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -84,16 +85,18 @@ namespace VSIXProject5.Actions.DocumentProcessors
 
         public bool TryResolveQueryValueAtCurrentSelectedLine(out ExpressionResult expressionResult, out string queryValue)
         {
-            expressionResult = GetQueryValueAtCurrentSelectedLine();
-            if (!expressionResult.IsSolved)
+            using (MiniProfiler.Current.Step(nameof(TryResolveQueryValueAtCurrentSelectedLine)))
             {
-                queryValue = null;
-                return false;
-            }
+                expressionResult = GetQueryValueAtCurrentSelectedLine();
+                if (!expressionResult.IsSolved)
+                {
+                    queryValue = null;
+                    return false;
+                }
 
-            queryValue = expressionResult.TextResult;
-            return true;
-            
+                queryValue = expressionResult.TextResult;
+                return true;
+            }
         }
     }
 }

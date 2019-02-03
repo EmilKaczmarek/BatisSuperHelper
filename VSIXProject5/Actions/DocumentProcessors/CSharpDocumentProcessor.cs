@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using StackExchange.Profiling;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -112,7 +113,11 @@ namespace VSIXProject5.Actions.DocumentProcessors
 
         public bool TryResolveQueryValueAtCurrentSelectedLine(out ExpressionResult expressionResult, out string queryValue)
         {
-            expressionResult = GetQueryValueAtCurrentSelectedLine();
+            using (MiniProfiler.Current.Step(nameof(GetQueryValueAtCurrentSelectedLine)))
+            {
+                expressionResult = GetQueryValueAtCurrentSelectedLine();
+            }
+            
             if (expressionResult.IsSolved)
             {
                 queryValue = expressionResult.TextResult;
@@ -120,9 +125,12 @@ namespace VSIXProject5.Actions.DocumentProcessors
             }
             if (expressionResult.CanBeUsedAsQuery)
             {
-                bool resolveSuccessful = TryResolveExpression(expressionResult, out string result);
-                queryValue = resolveSuccessful ? result : null;
-                return true;
+                using (MiniProfiler.Current.Step(nameof(TryResolveExpression)))
+                {
+                    bool resolveSuccessful = TryResolveExpression(expressionResult, out string result);
+                    queryValue = resolveSuccessful ? result : null;
+                    return true;
+                }
             }
             queryValue = null;
 
