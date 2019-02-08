@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VSIXProject5.Actions;
-using VSIXProject5.VSIntegration;
+using IBatisSuperHelper.Actions;
+using IBatisSuperHelper.VSIntegration;
 
-namespace VSIXProject5.Actions.FinalActions.Factory
+namespace IBatisSuperHelper.Actions.FinalActions.Factory
 {
     public interface IFinalActionFactory
     {

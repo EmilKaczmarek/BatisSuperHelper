@@ -31,20 +31,20 @@ using System.Timers;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
-using VSIXProject5.Constants;
-using VSIXProject5.EventHandlers;
-using VSIXProject5.Events;
-using VSIXProject5.Helpers;
-using VSIXProject5.Indexers;
-using VSIXProject5.Loggers;
-using VSIXProject5.Logging;
-using VSIXProject5.Parsers;
-using VSIXProject5.Storage;
-using VSIXProject5.VSIntegration.Navigation;
-using VSIXProject5.Windows.RenameWindow;
-using static VSIXProject5.Events.VSSolutionEventsHandler;
+using IBatisSuperHelper.Constants;
+using IBatisSuperHelper.EventHandlers;
+using IBatisSuperHelper.Events;
+using IBatisSuperHelper.Helpers;
+using IBatisSuperHelper.Indexers;
+using IBatisSuperHelper.Loggers;
+using IBatisSuperHelper.Logging;
+using IBatisSuperHelper.Parsers;
+using IBatisSuperHelper.Storage;
+using IBatisSuperHelper.VSIntegration.Navigation;
+using IBatisSuperHelper.Windows.RenameWindow;
+using static IBatisSuperHelper.Events.VSSolutionEventsHandler;
 
-namespace VSIXProject5
+namespace IBatisSuperHelper
 {
     /// <summary>
     /// This is the class that implements the package exposed by this assembly.
@@ -66,7 +66,7 @@ namespace VSIXProject5
     /// 
     [ProvideAutoLoad("{f1536ef8-92ec-443c-9ed7-fdadf150da82}")]
     [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionExistsAndFullyLoaded_string)]   
-    [PackageRegistration(UseManagedResourcesOnly = true)]
+    [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)] // Info on this package for Help/About
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [Guid(GotoAsyncPackage.PackageGuidString)]

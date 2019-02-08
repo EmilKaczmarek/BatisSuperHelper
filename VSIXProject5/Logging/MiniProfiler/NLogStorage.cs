@@ -11,7 +11,7 @@ using System.Runtime.Caching;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VSIXProject5.Logging.MiniProfiler
+namespace IBatisSuperHelper.Logging.MiniProfiler
 {
     public class NLogStorage : IAsyncStorage
     {

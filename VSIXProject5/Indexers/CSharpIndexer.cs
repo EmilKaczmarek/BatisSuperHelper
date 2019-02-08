@@ -13,16 +13,16 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using VSIXProject5.Constants;
-using VSIXProject5.Helpers;
-using VSIXProject5.HelpersAndExtensions.Roslyn;
-using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver;
-using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
-using VSIXProject5.Indexers.Models;
-using VSIXProject5.Loggers;
-using VSIXProject5.Models;
+using IBatisSuperHelper.Constants;
+using IBatisSuperHelper.Helpers;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using IBatisSuperHelper.Indexers.Models;
+using IBatisSuperHelper.Loggers;
+using IBatisSuperHelper.Models;
 
-namespace VSIXProject5.Indexers
+namespace IBatisSuperHelper.Indexers
 {
     public class CSharpIndexer
     {

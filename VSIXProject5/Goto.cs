@@ -7,9 +7,9 @@
 using Microsoft.VisualStudio.Shell;
 using System;
 using System.ComponentModel.Design;
-using VSIXProject5.Actions;
+using IBatisSuperHelper.Actions;
 
-namespace VSIXProject5
+namespace IBatisSuperHelper
 {
     /// <summary>
     /// Command handler

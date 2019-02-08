@@ -5,14 +5,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VSIXProject5.Actions.ActionValidators;
-using VSIXProject5.HelpersAndExtensions;
-using VSIXProject5.HelpersAndExtensions.Roslyn;
-using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
-using VSIXProject5.Parsers;
-using static VSIXProject5.HelpersAndExtensions.XmlHelper;
+using IBatisSuperHelper.Actions.ActionValidators;
+using IBatisSuperHelper.HelpersAndExtensions;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using IBatisSuperHelper.Parsers;
+using static IBatisSuperHelper.HelpersAndExtensions.XmlHelper;
 
-namespace VSIXProject5.Actions.DocumentProcessors
+namespace IBatisSuperHelper.Actions.DocumentProcessors
 {
     public class XmlDocumentProcessor : IDocumentProcessor
     {

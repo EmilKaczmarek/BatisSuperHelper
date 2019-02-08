@@ -8,12 +8,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VSIXProject5.Indexers;
-using VSIXProject5.Loggers;
-using VSIXProject5.Logging.MiniProfiler;
-using VSIXProject5.Storage;
+using IBatisSuperHelper.Indexers;
+using IBatisSuperHelper.Loggers;
+using IBatisSuperHelper.Logging.MiniProfiler;
+using IBatisSuperHelper.Storage;
 
-namespace VSIXProject5.Events
+namespace IBatisSuperHelper.Events
 {
     public class WorkspaceEvents
     {

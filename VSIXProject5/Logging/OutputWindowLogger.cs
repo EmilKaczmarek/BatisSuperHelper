@@ -2,9 +2,9 @@
 using System;
 using System.IO;
 using System.Reflection;
-using VSIXProject5.Logging;
+using IBatisSuperHelper.Logging;
 
-namespace VSIXProject5.Loggers
+namespace IBatisSuperHelper.Loggers
 {
     public static class OutputWindowLogger
     {

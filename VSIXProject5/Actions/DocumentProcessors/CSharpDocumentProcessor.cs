@@ -6,11 +6,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VSIXProject5.Actions.ActionValidators;
-using VSIXProject5.Helpers;
-using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using IBatisSuperHelper.Actions.ActionValidators;
+using IBatisSuperHelper.Helpers;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 
-namespace VSIXProject5.Actions.DocumentProcessors
+namespace IBatisSuperHelper.Actions.DocumentProcessors
 {
     public class CSharpDocumentProcessor : IDocumentProcessor
     {

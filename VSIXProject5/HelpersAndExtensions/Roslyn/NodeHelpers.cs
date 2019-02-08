@@ -5,14 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using VSIXProject5.HelpersAndExtensions.Roslyn;
-using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver;
-using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver.Model;
-using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
-using VSIXProject5.Loggers;
-using VSIXProject5.Storage;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.Model;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using IBatisSuperHelper.Loggers;
+using IBatisSuperHelper.Storage;
 
-namespace VSIXProject5.Helpers
+namespace IBatisSuperHelper.Helpers
 {
     public class NodeHelpers
     {

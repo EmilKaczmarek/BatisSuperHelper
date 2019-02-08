@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VSIXProject5.Actions.DocumentProcessors;
+using IBatisSuperHelper.Actions.DocumentProcessors;
 
-namespace VSIXProject5.Actions.DocumentProcessors
+namespace IBatisSuperHelper.Actions.DocumentProcessors
 {
     public abstract class DocumentProcessorFactory
     {

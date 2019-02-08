@@ -3,17 +3,17 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Diagnostics;
-using VSIXProject5.Actions.DocumentProcessors;
-using VSIXProject5.Actions.DocumentProcessors.Factory;
-using VSIXProject5.Actions.FinalActions;
-using VSIXProject5.Actions.FinalActions.Factory;
-using VSIXProject5.Actions.TextProviders;
-using VSIXProject5.VSIntegration;
+using IBatisSuperHelper.Actions.DocumentProcessors;
+using IBatisSuperHelper.Actions.DocumentProcessors.Factory;
+using IBatisSuperHelper.Actions.FinalActions;
+using IBatisSuperHelper.Actions.FinalActions.Factory;
+using IBatisSuperHelper.Actions.TextProviders;
+using IBatisSuperHelper.VSIntegration;
 using NLog;
 using StackExchange.Profiling;
-using VSIXProject5.Logging.MiniProfiler;
+using IBatisSuperHelper.Logging.MiniProfiler;
 
-namespace VSIXProject5.Actions
+namespace IBatisSuperHelper.Actions
 {
     public abstract class BaseActions
     {

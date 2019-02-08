@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VSIXProject5.Constants;
+using IBatisSuperHelper.Constants;
 
-namespace VSIXProject5.Helpers
+namespace IBatisSuperHelper.Helpers
 {
     public static class IBatisHelper
     {

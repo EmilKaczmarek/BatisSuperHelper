@@ -4,7 +4,7 @@ using System.Globalization;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
-namespace VSIXProject5
+namespace IBatisSuperHelper
 {
     /// <summary>
     /// Command handler

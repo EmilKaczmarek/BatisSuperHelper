@@ -8,13 +8,13 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using NLog;
 using StackExchange.Profiling;
-using VSIXProject5.Indexers;
-using VSIXProject5.Indexers.Models;
-using VSIXProject5.Loggers;
-using VSIXProject5.Logging.MiniProfiler;
-using VSIXProject5.Storage;
+using IBatisSuperHelper.Indexers;
+using IBatisSuperHelper.Indexers.Models;
+using IBatisSuperHelper.Loggers;
+using IBatisSuperHelper.Logging.MiniProfiler;
+using IBatisSuperHelper.Storage;
 
-namespace VSIXProject5.VSIntegration.DocumentChanges.Actions
+namespace IBatisSuperHelper.VSIntegration.DocumentChanges.Actions
 {
     public class CSharpFileContentOnChange : IOnFileContentChange
     {

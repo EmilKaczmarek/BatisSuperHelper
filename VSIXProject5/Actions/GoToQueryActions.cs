@@ -5,12 +5,12 @@ using Microsoft.VisualStudio.TextManager.Interop;
 using NLog;
 using StackExchange.Profiling;
 using System;
-using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
-using VSIXProject5.Loggers;
-using VSIXProject5.Logging.MiniProfiler;
-using VSIXProject5.VSIntegration;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using IBatisSuperHelper.Loggers;
+using IBatisSuperHelper.Logging.MiniProfiler;
+using IBatisSuperHelper.VSIntegration;
 
-namespace VSIXProject5.Actions
+namespace IBatisSuperHelper.Actions
 {
     public class GoToQueryActions2 : BaseActions
     {

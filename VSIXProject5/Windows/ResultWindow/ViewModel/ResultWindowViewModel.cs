@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VSIXProject5.Windows.ResultWindow.ViewModel
+namespace IBatisSuperHelper.Windows.ResultWindow.ViewModel
 {
     public class ResultWindowViewModel
     {

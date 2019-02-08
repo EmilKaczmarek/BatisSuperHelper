@@ -1,4 +1,4 @@
-﻿namespace VSIXProject5
+﻿namespace IBatisSuperHelper
 {
     using System;
     using System.Runtime.InteropServices;

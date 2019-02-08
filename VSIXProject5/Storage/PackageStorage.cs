@@ -5,15 +5,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver.Model;
-using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
-using VSIXProject5.Indexers;
-using VSIXProject5.Indexers.Models;
-using VSIXProject5.Models;
-using VSIXProject5.Storage.Domain;
-using VSIXProject5.Storage.Interfaces;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.Model;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using IBatisSuperHelper.Indexers;
+using IBatisSuperHelper.Indexers.Models;
+using IBatisSuperHelper.Models;
+using IBatisSuperHelper.Storage.Domain;
+using IBatisSuperHelper.Storage.Interfaces;
 
-namespace VSIXProject5.Storage
+namespace IBatisSuperHelper.Storage
 {
     public static class PackageStorage
     {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace VSIXProject5.Indexers.Models
+namespace IBatisSuperHelper.Indexers.Models
 {
     public class CSharpQuery : BaseIndexerValue
     {

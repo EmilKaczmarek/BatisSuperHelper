@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VSIXProject5.HelpersAndExtensions;
-using VSIXProject5.Indexers;
-using VSIXProject5.Indexers.Models;
-using VSIXProject5.Storage.Interfaces;
-using VSIXProject5.Storage.Providers;
+using IBatisSuperHelper.HelpersAndExtensions;
+using IBatisSuperHelper.Indexers;
+using IBatisSuperHelper.Indexers.Models;
+using IBatisSuperHelper.Storage.Interfaces;
+using IBatisSuperHelper.Storage.Providers;
 
-namespace VSIXProject5.Storage.Domain
+namespace IBatisSuperHelper.Storage.Domain
 {
     public class XmlQueryProvider : IProvider<IndexerKey, XmlQuery>
     {

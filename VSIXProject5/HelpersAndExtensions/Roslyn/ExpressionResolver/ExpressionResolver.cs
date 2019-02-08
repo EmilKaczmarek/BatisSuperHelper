@@ -9,11 +9,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver.Model;
-using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver.ResolveStrategy;
-using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.Model;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.ResolveStrategy;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 
-namespace VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver
+namespace IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver
 {
     public class ExpressionResolver
     {

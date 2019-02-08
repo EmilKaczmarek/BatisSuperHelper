@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using StackExchange.Profiling;
-using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 
-namespace VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver.ResolveStrategy
+namespace IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.ResolveStrategy
 {
     public class SimpleMemberAccessStrategy : IResolveStrategy
     {
