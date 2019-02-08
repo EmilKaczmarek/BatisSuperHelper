@@ -33,15 +33,9 @@ namespace IBatisSuperHelper
         /// <param name="package">Owner package, not null.</param>
         private BatisSHelperTestConsoleCommand(Package package)
         {
-            if (package == null)
-            {
-                throw new ArgumentNullException("package");
-            }
+            this.package = package ?? throw new ArgumentNullException("package");
 
-            this.package = package;
-
-            OleMenuCommandService commandService = this.ServiceProvider.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-            if (commandService != null)
+            if (this.ServiceProvider.GetService(typeof(IMenuCommandService)) is OleMenuCommandService commandService)
             {
                 var menuCommandID = new CommandID(CommandSet, CommandId);
                 var menuItem = new MenuCommand(this.ShowToolWindow, menuCommandID);
@@ -94,6 +88,7 @@ namespace IBatisSuperHelper
                 throw new NotSupportedException("Cannot create tool window");
             }
 
+            ThreadHelper.ThrowIfNotOnUIThread();
             IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
             Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
         }

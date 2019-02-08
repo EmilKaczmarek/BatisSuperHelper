@@ -64,6 +64,7 @@ namespace IBatisSuperHelper
     /// </para>
     /// </remarks>
     /// 
+#pragma warning disable S1450 // Private fields only used as local variables in methods should become local variables
     [ProvideAutoLoad("{f1536ef8-92ec-443c-9ed7-fdadf150da82}")]
     [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionExistsAndFullyLoaded_string)]   
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
@@ -89,14 +90,14 @@ namespace IBatisSuperHelper
             // not sited yet inside Visual Studio environment. The place to do all the other
             // initialization is the Initialize method.
         }
-    
+
         #region Package Members
         //Event related fields
         private IVsSolution _solution;
         private SolutionEventsHandler _solutionEventsHandler;
         private uint _solutionEventsCookie;
-        private EnvDTE80.Events2 _envDteEvents;
-        private EnvDTE.ProjectItemsEvents _envDteProjectItemsEvents;
+        private Events2 _envDteEvents;
+        private ProjectItemsEvents _envDteProjectItemsEvents;
         //Public fields
         public DTE2 EnvDTE;
         public IVsTextManager TextManager;
@@ -120,7 +121,6 @@ namespace IBatisSuperHelper
             //Initialize public components, initialize instances that are dependent on any component
             TextManager = await GetServiceAsync(typeof(SVsTextManager)) as IVsTextManager;
             EditorAdaptersFactory = componentModel.GetService<IVsEditorAdaptersFactoryService>();
-            IStatusBar = await GetServiceAsync(typeof(SVsStatusbar)) as IVsStatusbar;
             ResultWindow = FindToolWindow(typeof(ResultWindow), 0, true);
 
             DocumentNavigationInstance.InjectDTE(this.EnvDTE);
@@ -137,11 +137,7 @@ namespace IBatisSuperHelper
 
                });
 
-            _solution = await GetServiceAsync(typeof(SVsSolution)) as IVsSolution;
-            _solutionEventsHandler = new SolutionEventsHandler(
-                new Action<EventConstats.VS.SolutionLoad>(HandleSolutionEvent)
-            );
-            _solution.AdviseSolutionEvents(_solutionEventsHandler, out _solutionEventsCookie);
+          
 
             _envDteEvents = EnvDTE.Events as Events2;
             if (_envDteEvents != null)
@@ -156,6 +152,15 @@ namespace IBatisSuperHelper
             OutputWindowLogger.Init(await GetServiceAsync(typeof(SVsOutputWindow)) as SVsOutputWindow);
 
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+            IStatusBar = await GetServiceAsync(typeof(SVsStatusbar)) as IVsStatusbar;
+
+            _solution = await GetServiceAsync(typeof(SVsSolution)) as IVsSolution;
+            _solutionEventsHandler = new SolutionEventsHandler(
+                new Action<EventConstats.VS.SolutionLoad>(HandleSolutionEvent)
+            );
+            _solution.AdviseSolutionEvents(_solutionEventsHandler, out _solutionEventsCookie);
+
             Goto.Initialize(this);
             RenameModalWindowCommand.Initialize(this);
             RenameCommand.Initialize(this);
@@ -166,6 +171,7 @@ namespace IBatisSuperHelper
             switch (eventNumber)
             {
                 case EventConstats.VS.SolutionLoad.SolutionLoadComplete:
+                    ThreadHelper.ThrowIfNotOnUIThread();
                     var projectItemHelper = new ProjectItemHelper();
                     var projectItems = projectItemHelper.GetProjectItemsFromSolutionProjects(EnvDTE.Solution.Projects);
                     XmlIndexer xmlIndexer = new XmlIndexer();

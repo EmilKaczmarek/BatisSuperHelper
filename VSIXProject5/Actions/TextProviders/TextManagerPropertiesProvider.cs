@@ -10,16 +10,16 @@ namespace IBatisSuperHelper.Actions.TextProviders
     public class TextManagerPropertiesProvider : IDocumentPropertiesProvider
     {
         private IVsTextManager _textManager => _textManagerLazy.Value;
-        private Lazy<IVsTextManager> _textManagerLazy;
+        private readonly Lazy<IVsTextManager> _textManagerLazy;
 
         private IVsEditorAdaptersFactoryService _editorAdapersFactory => _editorAdapersFactoryLazy.Value;
-        private Lazy<IVsEditorAdaptersFactoryService> _editorAdapersFactoryLazy;
+        private readonly Lazy<IVsEditorAdaptersFactoryService> _editorAdapersFactoryLazy;
 
         private IVsTextView _textView => _textViewLazy.Value;
-        private Lazy<IVsTextView> _textViewLazy;
+        private readonly Lazy<IVsTextView> _textViewLazy;
 
         private SnapshotPoint _snapshotPoint => _snapshotPointLazy.Value;
-        private Lazy<SnapshotPoint> _snapshotPointLazy;
+        private readonly Lazy<SnapshotPoint> _snapshotPointLazy;
 
         public TextManagerPropertiesProvider(IVsTextManager textManager, IVsEditorAdaptersFactoryService editorAdaptersFactory)
         {

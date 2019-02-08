@@ -15,25 +15,22 @@ using IBatisSuperHelper.Storage;
 
 namespace IBatisSuperHelper.Events
 {
-    public class WorkspaceEvents
+    public static class WorkspaceEvents
     {
-        private static bool _indexingBySolution;
-
-        public static async Task BuildIndexerWithCSharpResults(Solution solution)
+        public static async Task BuildIndexerWithCSharpResultsAsync(Solution solution)
         {
             var solutionFiles = solution.Projects.SelectMany(x => x.Documents).ToList();
             await PackageStorage.AnalyzeAndStoreAsync(solutionFiles);
         }
 
-        public static async Task BuildIndexerUsingProjectWithCSharpResults(Project project)
+        public static async Task BuildIndexerUsingProjectWithCSharpResultsAsync(Project project)
         {
             var solutionFiles = project.Documents.ToList();
             await PackageStorage.AnalyzeAndStoreAsync(solutionFiles);
         }
 
-        private static async Task DocumentsAddedAction(IEnumerable<Document> addedDocuments)
+        private static async Task DocumentsAddedActionAsync(IEnumerable<Document> addedDocuments)
         {
-            CSharpIndexer csIndexer = new CSharpIndexer();
             if (addedDocuments == null)
                 return;
 
@@ -42,7 +39,7 @@ namespace IBatisSuperHelper.Events
                 await PackageStorage.AnalyzeAndStoreSingleAsync(document);
             }
         }
-        private static async Task DocumentRemovedAction(IEnumerable<DocumentId> removedDocumentsIds)
+        private static async Task DocumentRemovedActionAsync(IEnumerable<DocumentId> removedDocumentsIds)
         {
             foreach(var documentId in removedDocumentsIds)
             {
@@ -66,7 +63,7 @@ namespace IBatisSuperHelper.Events
                         {
                             var solution = e.NewSolution.Projects.Any() ? e.NewSolution : workspace.CurrentSolution;
                             _projectsAlreadyAdded = new List<ProjectId>(solution.ProjectIds);
-                            BuildIndexerWithCSharpResults(e.NewSolution.Projects.Any() ? e.NewSolution : workspace.CurrentSolution);
+                            BuildIndexerWithCSharpResultsAsync(e.NewSolution.Projects.Any() ? e.NewSolution : workspace.CurrentSolution);
                         }
                     }
                     catch (Exception ex)
@@ -92,7 +89,7 @@ namespace IBatisSuperHelper.Events
                             {
                                 _projectsAlreadyAdded = new List<ProjectId>(e.NewSolution.ProjectIds);
                                 Loggers.OutputWindowLogger.WriteLn($"Adding {string.Join(",", e.NewSolution.Projects.Select(x => x.Name))} to indexer");
-                                BuildIndexerWithCSharpResults(e.NewSolution);
+                                BuildIndexerWithCSharpResultsAsync(e.NewSolution);
                             }
                             else
                             {
@@ -102,7 +99,7 @@ namespace IBatisSuperHelper.Events
                                     {
                                         _projectsAlreadyAdded.Add(project.Id);
                                         Loggers.OutputWindowLogger.WriteLn($"Adding {project.Name} to indexer");
-                                        BuildIndexerUsingProjectWithCSharpResults(project);
+                                        BuildIndexerUsingProjectWithCSharpResultsAsync(project);
                                     }
                                 }
                             }
@@ -125,13 +122,13 @@ namespace IBatisSuperHelper.Events
                     var addedDocuments = documentAddedChanges.GetProjectChanges()
                         .SelectMany(x => x.GetAddedDocuments())
                         .Select(x => workspace.CurrentSolution.GetDocument(x));
-                    await DocumentsAddedAction(addedDocuments);
+                    await DocumentsAddedActionAsync(addedDocuments);
                     break;
                 case WorkspaceChangeKind.DocumentRemoved:
                     var documentRemovedChanges = e.NewSolution.GetChanges(e.OldSolution);
                     var removedDocuments = documentRemovedChanges.GetProjectChanges()
                         .SelectMany(x => x.GetRemovedDocuments());
-                    await DocumentRemovedAction(removedDocuments);
+                    await DocumentRemovedActionAsync(removedDocuments);
                     break;
                 case WorkspaceChangeKind.DocumentReloaded:
                     break;
@@ -146,7 +143,7 @@ namespace IBatisSuperHelper.Events
                 case WorkspaceChangeKind.AdditionalDocumentChanged:
                     break;
                 default:
-                    throw new Exception("Unexpected Case");
+                    break;
             }
             profiler.Stop();
         }

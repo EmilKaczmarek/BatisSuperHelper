@@ -26,16 +26,9 @@ namespace IBatisSuperHelper.Indexers
 {
     public class CSharpIndexer
     {
-        private readonly Workspace _workspace;
-
         public CSharpIndexer()
         {
 
-        }
-
-        public CSharpIndexer(Workspace workspace)
-        {
-            _workspace = workspace;
         }
 
         public async Task<List<CSharpIndexerResult>> BuildIndexerAsync(List<Document> documents)
@@ -88,8 +81,7 @@ namespace IBatisSuperHelper.Indexers
             {
                 var queryResults = new List<CSharpQuery>();
                 var genericResults = new List<ExpressionResult>();
-                SyntaxTree synTree = null;
-                document.TryGetSyntaxTree(out synTree);
+                document.TryGetSyntaxTree(out SyntaxTree synTree);
                 var treeRoot = (CompilationUnitSyntax)synTree.GetRoot();
                 IEnumerable<SyntaxNode> nodes;
                 IEnumerable<ArgumentListSyntax> argumentNodes;

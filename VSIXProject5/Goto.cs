@@ -31,8 +31,8 @@ namespace IBatisSuperHelper
         /// </summary>
         public readonly Package package;
 
-        private GoToQueryActions2 _commandActions;
-        private OleMenuCommand menuItem;
+        private readonly GoToQueryActions2 _commandActions;
+        private readonly OleMenuCommand menuItem;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Goto"/> class.
@@ -41,12 +41,7 @@ namespace IBatisSuperHelper
         /// <param name="package">Owner package, not null.</param>
         private Goto(Package package)
         {
-            if (package == null)
-            {
-                throw new ArgumentNullException(nameof(package));
-            }
-            
-            this.package = package;
+            this.package = package ?? throw new ArgumentNullException(nameof(package));
  
             _commandActions = new GoToQueryActions2(this.package as GotoAsyncPackage);
 

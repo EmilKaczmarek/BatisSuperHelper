@@ -4,11 +4,15 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+#pragma warning disable S1481 // Unused local variables should be removed
+#pragma warning disable S125 // Sections of code should not be commented out
 
 namespace Playground
 {
@@ -38,7 +42,7 @@ namespace Playground
         }
 
         [TestMethod]
-        public void SingleDirectNamespace()
+        public async Task SingleDirectNamespaceAsync()
         {
             var code = @"using System;
 using System.Collections.Generic;
@@ -74,20 +78,21 @@ namespace GenericTest
                 
             var document = workspace.GetDocument(did);
 
-            var semanticModel = document.GetSemanticModelAsync().Result;
+            var semanticModel = await document.GetSemanticModelAsync();
 
-            var syntaxTree = document.GetSyntaxTreeAsync().Result;
-            var nodes = syntaxTree.GetRoot().DescendantNodes();
-            var text = syntaxTree.GetText();
+            var syntaxTree = await document.GetSyntaxTreeAsync();
+
+            var text = await syntaxTree.GetTextAsync();
 
             var line = text.Lines[8];
             var span = line.Span;
-            var nodesAtLine = syntaxTree.GetRoot().DescendantNodes(span).OfType<VariableDeclarationSyntax>().FirstOrDefault();
+            var nodesAtLine = (await syntaxTree.GetRootAsync()).DescendantNodes(span).OfType<VariableDeclarationSyntax>().FirstOrDefault();
+
 
             var test1 = nodesAtLine.Ancestors();
             var test2 = nodesAtLine.ChildNodes();
 
-            var initializer = syntaxTree.GetRoot().DescendantNodes(text.Lines[12].Span);
+            var initializer = (await syntaxTree.GetRootAsync()).DescendantNodes(text.Lines[12].Span);
 
 
             List<List<ISymbol>> xx = new List<List<ISymbol>>();
@@ -107,15 +112,16 @@ namespace GenericTest
                 {
                     dfl.Add(node, semanticModel.AnalyzeDataFlow(node));
                 }
-                
-                //var symbol = semanticModel.GetDeclaredSymbol(node);
-                //if (symbol != null)
-                //{
-                //    xx.Add(SymbolFinder.FindImplementationsAsync(symbol, workspace).Result.ToList());
-                //    xxx.Add(SymbolFinder.FindCallersAsync(symbol, workspace).Result.ToList());
-                //    var t = SymbolFinder.
-                //}
-              
+
+
+                            //var symbol = semanticModel.GetDeclaredSymbol(node);
+                            //if (symbol != null)
+                            //{
+                            //    xx.Add(SymbolFinder.FindImplementationsAsync(symbol, workspace).Result.ToList());
+                            //    xxx.Add(SymbolFinder.FindCallersAsync(symbol, workspace).Result.ToList());
+                            //    var t = SymbolFinder.
+                            //}
+
             }
 
         }
