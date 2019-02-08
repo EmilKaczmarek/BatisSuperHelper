@@ -72,7 +72,7 @@ namespace IBatisSuperHelper.Helpers
             //Posibly not enough to determine if this is proper iBatis method.
             //Placeholder for handling other iBatis method.
             //But what other factors could be used here?
-            return ArgumentListSyntaxNodes.FirstOrDefault(e => e.Arguments.Count > 1) as ArgumentListSyntax;
+            return ArgumentListSyntaxNodes.FirstOrDefault(e => e.Arguments.Count > 1);
         }
         /// <summary>
         /// Looks for Argument of type String, and returns it.
@@ -128,7 +128,7 @@ namespace IBatisSuperHelper.Helpers
                 var queryArgument = GetArgumentSyntaxOfStringType(singleArgumentListSyntax);
                 var constantValue = _semanticModel.GetConstantValue(queryArgument.Expression).Value;
 
-                return constantValue != null ? constantValue.ToString() : queryArgument.ToString().Replace("\"", "").Trim();//TODO: Use scripting to handle even more crazy cases.
+                return constantValue != null ? constantValue.ToString() : queryArgument.ToString().Replace("\"", "").Trim();
             }
             return null;
         }
@@ -138,7 +138,7 @@ namespace IBatisSuperHelper.Helpers
         /// </summary>
         /// <param name="SyntaxNodes"></param>
         /// <param name="allDocumentNodes"></param>
-        /// <param name="document">todo: describe document parameter on GetQueryStringFromSyntaxNodes</param>
+        /// <param name="document"></param>
         public ExpressionResult GetQueryStringFromSyntaxNodes(Document document, IEnumerable<SyntaxNode> SyntaxNodes, IEnumerable<SyntaxNode> allDocumentNodes)
         {
             if (IsAnySyntaxNodeContainIBatisNamespace(SyntaxNodes))
@@ -202,9 +202,10 @@ namespace IBatisSuperHelper.Helpers
             //There is GenericNameSyntax in line, so just get it...
             if (genericNameSyntax.Count() == 1)
             {
-                var singleGenericNameSyntax = genericNameSyntax.First() as GenericNameSyntax;
-                var firstArgument =  singleGenericNameSyntax.TypeArgumentList.Arguments.FirstOrDefault() as PredefinedTypeSyntax;
-                return firstArgument != null ? firstArgument.Keyword.ValueText : null;
+                var singleGenericNameSyntax = genericNameSyntax.First();
+                return singleGenericNameSyntax.TypeArgumentList.Arguments.FirstOrDefault() is PredefinedTypeSyntax firstArgument 
+                    ? firstArgument.Keyword.ValueText 
+                    : null;
             }
             //WTF
             if (genericNameSyntax.Count() > 1)

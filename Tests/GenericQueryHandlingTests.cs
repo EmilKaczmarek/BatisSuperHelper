@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using IBatisSuperHelper.Indexers;
+using System.Threading.Tasks;
 
 namespace Tests
 {
@@ -38,7 +39,7 @@ namespace Tests
         }
 
         [TestMethod, ]
-        public void SingleDirectNamespace()
+        public async Task SingleDirectNamespaceAsync()
         {
             ProjectId pid = ProjectId.CreateNewId();
             DocumentId did = DocumentId.CreateNewId(pid);
@@ -52,24 +53,23 @@ namespace Tests
                     SourceText.From(_directNamespaceText));
 
             var genericDocument = workspace.GetDocument(did);
-            var results = new CSharpIndexer()
-                .BuildFromDocumentAsync(genericDocument)
-                .Result;
+            var results = await new CSharpIndexer()
+                .BuildFromDocumentAsync(genericDocument);
 
             Assert.IsNotNull(results);
-            Assert.AreEqual(results.Generics.Count, 1);
-            Assert.AreEqual(results.Queries.Count, 0);
+            Assert.AreEqual(1, results.Generics.Count);
+            Assert.AreEqual(0, results.Queries.Count);
 
             var indexerResult = results.Generics.FirstOrDefault();
 
             Assert.IsNotNull(indexerResult);
             Assert.IsFalse(indexerResult.IsSolved);
             Assert.IsTrue(indexerResult.CanBeUsedAsQuery);
-            Assert.AreEqual(indexerResult.TextResult, "T.SelectNumber");
+            Assert.AreEqual("T.SelectNumber", indexerResult.TextResult);
         }
 
         [TestMethod]
-        public void SingleFieldNamespace()
+        public async Task SingleFieldNamespaceAsync()
         {
             ProjectId pid = ProjectId.CreateNewId();
             DocumentId did = DocumentId.CreateNewId(pid);
@@ -83,24 +83,23 @@ namespace Tests
                     SourceText.From(_fieldNamespaceText));
 
             var genericDocument = workspace.GetDocument(did);
-            var results = new CSharpIndexer()
-                .BuildFromDocumentAsync(genericDocument)
-                .Result;
+            var results = await new CSharpIndexer()
+                .BuildFromDocumentAsync(genericDocument);
 
             Assert.IsNotNull(results);
-            Assert.AreEqual(results.Generics.Count, 1);
-            Assert.AreEqual(results.Queries.Count, 0);
+            Assert.AreEqual(1, results.Generics.Count);
+            Assert.AreEqual(0, results.Queries.Count);
 
             var indexerResult = results.Generics.FirstOrDefault();
 
             Assert.IsNotNull(indexerResult);
             Assert.IsFalse(indexerResult.IsSolved);
             Assert.IsTrue(indexerResult.CanBeUsedAsQuery);
-            Assert.AreEqual(indexerResult.TextResult, "T.SelectNumber");
+            Assert.AreEqual("T.SelectNumber", indexerResult.TextResult);
         }
 
         [TestMethod]
-        public void SingleFieldAssignedByCtorNamespace()
+        public async Task SingleFieldAssignedByCtorNamespaceAsync()
         {
             ProjectId pid = ProjectId.CreateNewId();
             DocumentId did = DocumentId.CreateNewId(pid);
@@ -114,20 +113,19 @@ namespace Tests
                     SourceText.From(_fieldNamespaceCtor));
 
             var genericDocument = workspace.GetDocument(did);
-            var results = new CSharpIndexer()
-                .BuildFromDocumentAsync(genericDocument)
-                .Result;
+            var results = await new CSharpIndexer()
+                .BuildFromDocumentAsync(genericDocument);
 
             Assert.IsNotNull(results);
-            Assert.AreEqual(results.Generics.Count, 1);
-            Assert.AreEqual(results.Queries.Count, 0);
+            Assert.AreEqual(1, results.Generics.Count);
+            Assert.AreEqual(0, results.Queries.Count);
 
             var indexerResult = results.Generics.FirstOrDefault();
 
             Assert.IsNotNull(indexerResult);
             Assert.IsFalse(indexerResult.IsSolved);
             Assert.IsTrue(indexerResult.CanBeUsedAsQuery);
-            Assert.AreEqual(indexerResult.TextResult, "T.SelectNumber");
+            Assert.AreEqual("T.SelectNumber", indexerResult.TextResult);
         }
     }
 }

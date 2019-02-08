@@ -9,7 +9,7 @@ namespace IBatisSuperHelper.Storage
 {
     public class GenericStorage<T, T1> : IEnumerable<KeyValuePair<T, T1>>
     {
-        private ConcurrentDictionary<T, Lazy<T1>> keyValuePairs = new ConcurrentDictionary<T, Lazy<T1>>();
+        private readonly ConcurrentDictionary<T, Lazy<T1>> keyValuePairs = new ConcurrentDictionary<T, Lazy<T1>>();
 
         public IEnumerator<KeyValuePair<T, T1>> GetEnumerator()
         {

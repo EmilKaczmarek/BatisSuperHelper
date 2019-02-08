@@ -2,6 +2,7 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using IBatisSuperHelper.Storage;
+using System.Threading.Tasks;
 
 namespace Tests
 {
@@ -22,18 +23,29 @@ namespace Tests
         {
             Initialize();
         }
+
         [TestMethod]
         public void ShouldCallAddItemWithoutException()
         {
             _storage.Add(1, "1");
-            _storage.AddAsync(2, "2").Wait();
+        }
+
+        [TestMethod]
+        public async Task ShouldCallAddItemWithoutExceptionAsync()
+        {
+            await _storage.AddAsync(2, "2");
         }
 
         [TestMethod]
         public void ShouldCallGetAllValuesWithoutException()
         {
             _storage.GetAllValues();
-            _storage.GetAllValuesAsync().Wait();
+        }
+
+        [TestMethod]
+        public async Task ShouldCallGetAllValuesWithoutExceptionAsync()
+        {
+            await _storage.GetAllValuesAsync();
         }
 
         [TestMethod]
@@ -47,12 +59,12 @@ namespace Tests
         }
 
         [TestMethod]
-        public void ShouldAddAndGetSameItemAsync()
+        public async Task ShouldAddAndGetSameItemAsync()
         {
             var key = 1;
             var value = "1";
-            _storage.AddAsync(key, value).Wait();
-            var result = _storage.GetValueAsync(key).Result;
+            await _storage.AddAsync(key, value);
+            var result = await _storage.GetValueAsync(key);
             Assert.AreEqual(value, result);
         }
 
@@ -63,20 +75,20 @@ namespace Tests
             _storage.Add(2, "2");
             _storage.Add(3, "3");
             var result = _storage.GetAllValues().ToList();
-            Assert.AreEqual(result.Count, 3);
-            Assert.AreEqual(result[0], "1");
-            Assert.AreEqual(result[1], "2");
-            Assert.AreEqual(result[2], "3");
+            Assert.AreEqual(3, result.Count);
+            Assert.AreEqual("1", result[0]);
+            Assert.AreEqual("2", result[1]);
+            Assert.AreEqual("3", result[2]);
         }
 
         [TestMethod]
-        public void ShouldAddAndGetAllAddedItemsAsync()
+        public async Task ShouldAddAndGetAllAddedItemsAsync()
         {
-            _storage.AddAsync(1, "1").Wait();
-            _storage.AddAsync(2, "2").Wait();
-            _storage.AddAsync(3, "3").Wait();
-            var result = _storage.GetAllValuesAsync().Result.ToList();
-            Assert.AreEqual(result.Count, 3);
+            await _storage.AddAsync(1, "1");
+            await _storage.AddAsync(2, "2");
+            await _storage.AddAsync(3, "3");
+            var result = await _storage.GetAllValuesAsync();
+            Assert.AreEqual(3, result.Count());
             Assert.IsTrue(result.Contains("1"));
             Assert.IsTrue(result.Contains("2"));
             Assert.IsTrue(result.Contains("3"));
@@ -88,16 +100,16 @@ namespace Tests
             _storage.Add(1, "1");
             _storage.RemoveByKey(1);
             var result = _storage.GetAllValues().ToList();
-            Assert.AreEqual(result.Count, 0);
+            Assert.AreEqual(0, result.Count);
         }
 
         [TestMethod]
-        public void ShouldAddAndRemoveItemByKeyAsync()
+        public async Task ShouldAddAndRemoveItemByKeyAsync()
         {
-            _storage.AddAsync(1, "1").Wait();
-            _storage.RemoveByKeyAsync(1).Wait();
-            var result = _storage.GetAllValues().ToList();
-            Assert.AreEqual(result.Count, 0);
+            await _storage.AddAsync(1, "1");
+            await _storage.RemoveByKeyAsync(1);
+            var result = await _storage.GetAllValuesAsync();
+            Assert.AreEqual(0, result.Count());
         }
 
         [TestMethod]
@@ -106,16 +118,16 @@ namespace Tests
             _storage.Add(1, "1");
             _storage.RemoveWhereValue(e => e == "1");
             var result = _storage.GetAllValues().ToList();
-            Assert.AreEqual(result.Count, 0);
+            Assert.AreEqual(0, result.Count);
         }
 
         [TestMethod]
-        public void ShouldAddAndRemoveItemByPredictateAsync()
+        public async Task ShouldAddAndRemoveItemByPredictateAsync()
         {
-            _storage.AddAsync(1, "1").Wait();
-            _storage.RemoveWhereValueAsync(e => e == "1").Wait();
-            var result = _storage.GetAllValues().ToList();
-            Assert.AreEqual(result.Count, 0);
+            await _storage.AddAsync(1, "1");
+            await _storage.RemoveWhereValueAsync(e => e == "1");
+            var result = await _storage.GetAllValuesAsync();
+            Assert.AreEqual(0, result.Count());
         }
 
         [TestMethod]
@@ -128,11 +140,11 @@ namespace Tests
         }
 
         [TestMethod]
-        public void ShouldAddAndUpdateValueAsync()
+        public async Task ShouldAddAndUpdateValueAsync()
         {
-            _storage.AddAsync(1, "1").Wait();
-            _storage.UpdateAsync(1, "2").Wait();
-            var result = _storage.GetValue(1);
+            await _storage.AddAsync(1, "1");
+            await _storage.UpdateAsync(1, "2");
+            var result = await _storage.GetValueAsync(1);
             Assert.AreEqual("2", result);
         }
 
@@ -141,8 +153,8 @@ namespace Tests
         {
             _storage.Add(1, "1");
             var result = _storage.GetByPredictate(e => e == "1");
-            Assert.AreEqual(result.Count(), 1);
-            Assert.AreEqual(result.First(), "1");
+            Assert.AreEqual(1, result.Count());
+            Assert.AreEqual("1", result.First());
         }
 
         [TestMethod]

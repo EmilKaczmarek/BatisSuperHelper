@@ -14,13 +14,13 @@ namespace IBatisSuperHelper.Actions.DocumentProcessors
 {
     public class CSharpDocumentProcessor : IDocumentProcessor
     {
-        private IActionValidator _validator;
-        private Document _documentContent;
+        private readonly IActionValidator _validator;
+        private readonly Document _documentContent;
 
         private IEnumerable<SyntaxNode> _lineNodes;
         private NodeHelpers _helperInstance;
         private Lazy<IEnumerable<SyntaxNode>> _documentNodes;
-        private int _selectedLineNumber;
+        private readonly int _selectedLineNumber;
 
         private CSharpDocumentProcessor()
         {
@@ -50,7 +50,7 @@ namespace IBatisSuperHelper.Actions.DocumentProcessors
                 InitializeUsingSemanticModel(semModel);
                 return this;
             }
-            throw new Exception($"Unable to get semantic model for: {_documentContent.Name}");
+            throw new InvalidOperationException($"Unable to get semantic model for: {_documentContent.Name}");
         }
 
         public async Task<IDocumentProcessor> InitializeAsync()
@@ -97,7 +97,6 @@ namespace IBatisSuperHelper.Actions.DocumentProcessors
             //In this case we need to Descendant Node to find ArgumentList
             if (returnNode != null)
             {
-                var returnNodeDescendanted = returnNode.DescendantNodesAndSelf();
                 var expressionResolution = _helperInstance.GetQueryStringFromSyntaxNodes(_documentContent, _lineNodes, _documentNodes.Value);
                 return expressionResolution;
             }
@@ -148,7 +147,7 @@ namespace IBatisSuperHelper.Actions.DocumentProcessors
                     result = expressionResult.Resolve(_helperInstance.GetClassNameUsedAsGenericParameter(_lineNodes, _documentNodes.Value));
                     return !string.IsNullOrEmpty(result);
                 default:
-                    throw new Exception("Unexpected Case");
+                    throw new InvalidOperationException("Unexpected Case");
             }
         }
     }
