@@ -8,9 +8,9 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using VSIXProject5.Models;
+using IBatisSuperHelper.Models;
 
-namespace VSIXProject5.Helpers
+namespace IBatisSuperHelper.Helpers
 {
     public static class DocumentHelper
     {

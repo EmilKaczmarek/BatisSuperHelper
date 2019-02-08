@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Shell;
-using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
-using VSIXProject5.Indexers.Models;
-using VSIXProject5.VSIntegration;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using IBatisSuperHelper.Indexers.Models;
+using IBatisSuperHelper.VSIntegration;
 
-namespace VSIXProject5.Actions.FinalActions.SubActions.Logic
+namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Logic
 {
     public class XmlLogicHandler : BaseLogicHandler<XmlQuery>
     {

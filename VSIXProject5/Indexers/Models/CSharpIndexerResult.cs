@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 
-namespace VSIXProject5.Indexers.Models
+namespace IBatisSuperHelper.Indexers.Models
 {
     public class CSharpIndexerResult
     {

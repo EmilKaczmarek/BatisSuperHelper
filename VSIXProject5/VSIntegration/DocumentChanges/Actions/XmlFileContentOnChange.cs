@@ -8,14 +8,14 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using NLog;
 using StackExchange.Profiling;
-using VSIXProject5.Constants;
-using VSIXProject5.Indexers;
-using VSIXProject5.Loggers;
-using VSIXProject5.Logging.MiniProfiler;
-using VSIXProject5.Parsers;
-using VSIXProject5.Storage;
+using IBatisSuperHelper.Constants;
+using IBatisSuperHelper.Indexers;
+using IBatisSuperHelper.Loggers;
+using IBatisSuperHelper.Logging.MiniProfiler;
+using IBatisSuperHelper.Parsers;
+using IBatisSuperHelper.Storage;
 
-namespace VSIXProject5.VSIntegration.DocumentChanges.Actions
+namespace IBatisSuperHelper.VSIntegration.DocumentChanges.Actions
 {
     public class XmlFileContentOnChange : IOnFileContentChange
     {

@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
-using VSIXProject5.Indexers;
-using VSIXProject5.Indexers.Models;
-using VSIXProject5.Storage.Providers;
-using VSIXProject5.Windows.ResultWindow.ViewModel;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using IBatisSuperHelper.Indexers;
+using IBatisSuperHelper.Indexers.Models;
+using IBatisSuperHelper.Storage.Providers;
+using IBatisSuperHelper.Windows.ResultWindow.ViewModel;
 
-namespace VSIXProject5.Actions.FinalActions.SubActions.Data
+namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Data
 {
     public interface IQueryDataService<T> where T: BaseIndexerValue
     {

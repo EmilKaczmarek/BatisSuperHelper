@@ -1,4 +1,4 @@
-﻿namespace VSIXProject5.Windows.RenameWindow
+﻿namespace IBatisSuperHelper.Windows.RenameWindow
 {
     using System;
     using System.Runtime.InteropServices;

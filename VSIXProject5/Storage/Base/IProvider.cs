@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VSIXProject5.Storage.Providers;
+using IBatisSuperHelper.Storage.Providers;
 
-namespace VSIXProject5.Storage.Interfaces
+namespace IBatisSuperHelper.Storage.Interfaces
 {
     public interface IProvider<T, T1>
     {

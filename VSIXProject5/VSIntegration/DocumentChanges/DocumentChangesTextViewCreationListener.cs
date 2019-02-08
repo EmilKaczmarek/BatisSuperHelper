@@ -2,12 +2,12 @@
 using Microsoft.VisualStudio.Utilities;
 using System;
 using System.Reactive.Linq;
-using VSIXProject5.HelpersAndExtensions.VisualStudio;
-using VSIXProject5.VSIntegration.DocumentChanges.Actions;
+using IBatisSuperHelper.HelpersAndExtensions.VisualStudio;
+using IBatisSuperHelper.VSIntegration.DocumentChanges.Actions;
 using Microsoft.VisualStudio.Text;
 using System.ComponentModel.Composition;
 
-namespace VSIXProject5.VSIntegration.DocumentChanges
+namespace IBatisSuperHelper.VSIntegration.DocumentChanges
 {
     [Export(typeof(IWpfTextViewCreationListener))]
     [ContentType("XML")]
@@ -16,7 +16,7 @@ namespace VSIXProject5.VSIntegration.DocumentChanges
     internal sealed class DocumentChangesTextViewCreationListener : IWpfTextViewCreationListener
     {
         [Export(typeof(AdornmentLayerDefinition))]
-        [Name("TextAdornmentExample")]
+        [Name("Document Scanner")]
         [Order(After = PredefinedAdornmentLayers.Selection, Before = PredefinedAdornmentLayers.Text)]
         private AdornmentLayerDefinition editorAdornmentLayer;
 

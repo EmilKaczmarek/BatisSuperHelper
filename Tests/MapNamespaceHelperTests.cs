@@ -1,6 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using VSIXProject5.HelpersAndExtensions;
+using IBatisSuperHelper.HelpersAndExtensions;
 
 namespace Tests
 {

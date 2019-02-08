@@ -1,7 +1,7 @@
 ﻿//using System;
 //using Microsoft.VisualStudio.TestTools.UnitTesting;
-//using VSIXProject5.Indexers;
-//using static VSIXProject5.Indexers.XmlIndexer;
+//using IBatisSuperHelper.Indexers;
+//using static IBatisSuperHelper.Indexers.XmlIndexer;
 //using System.Collections.Generic;
 
 //namespace GoToQueryUnitTests

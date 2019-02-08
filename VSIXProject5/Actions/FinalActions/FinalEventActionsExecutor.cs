@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VSIXProject5.Actions.FinalActions.SubActions.Data;
-using VSIXProject5.Actions.FinalActions.SubActions.Logic;
-using VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
-using VSIXProject5.Indexers.Models;
-using VSIXProject5.Storage.Providers;
+using IBatisSuperHelper.Actions.FinalActions.SubActions.Data;
+using IBatisSuperHelper.Actions.FinalActions.SubActions.Logic;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using IBatisSuperHelper.Indexers.Models;
+using IBatisSuperHelper.Storage.Providers;
 
-namespace VSIXProject5.Actions.FinalActions
+namespace IBatisSuperHelper.Actions.FinalActions
 {
     public class FinalEventActionsExecutor
     {

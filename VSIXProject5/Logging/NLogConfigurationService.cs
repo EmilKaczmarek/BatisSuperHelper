@@ -8,9 +8,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using VSIXProject5.Logging.MiniProfiler;
+using IBatisSuperHelper.Logging.MiniProfiler;
 
-namespace VSIXProject5.Logging
+namespace IBatisSuperHelper.Logging
 {
     public static class NLogConfigurationService
     {

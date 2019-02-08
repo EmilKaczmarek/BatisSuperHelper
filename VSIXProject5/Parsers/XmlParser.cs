@@ -4,12 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
-using VSIXProject5.Constants;
-using VSIXProject5.Helpers;
-using VSIXProject5.HelpersAndExtensions;
-using VSIXProject5.Indexers.Models;
+using IBatisSuperHelper.Constants;
+using IBatisSuperHelper.Helpers;
+using IBatisSuperHelper.HelpersAndExtensions;
+using IBatisSuperHelper.Indexers.Models;
 
-namespace VSIXProject5.Parsers
+namespace IBatisSuperHelper.Parsers
 {
     public class XmlParser
     {

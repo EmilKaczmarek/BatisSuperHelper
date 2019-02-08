@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VSIXProject5.Actions.ActionValidators
+namespace IBatisSuperHelper.Actions.ActionValidators
 {
     public class FunctionBasedActionValidator : IActionValidator
     {

@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VSIXProject5.Models;
+using IBatisSuperHelper.Models;
 
-namespace VSIXProject5.HelpersAndExtensions.Roslyn
+namespace IBatisSuperHelper.HelpersAndExtensions.Roslyn
 {
     public static class RoslynSolutionExtension
     {

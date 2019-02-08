@@ -5,14 +5,14 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
-using VSIXProject5.Constants;
-using VSIXProject5.Helpers;
-using VSIXProject5.Indexers.Models;
-using VSIXProject5.Loggers;
-using VSIXProject5.Models;
-using VSIXProject5.Parsers;
+using IBatisSuperHelper.Constants;
+using IBatisSuperHelper.Helpers;
+using IBatisSuperHelper.Indexers.Models;
+using IBatisSuperHelper.Loggers;
+using IBatisSuperHelper.Models;
+using IBatisSuperHelper.Parsers;
 
-namespace VSIXProject5.Indexers
+namespace IBatisSuperHelper.Indexers
 {
     public class XmlIndexer
     {

@@ -5,12 +5,12 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VSIXProject5.Indexers;
-using VSIXProject5.Models;
-using VSIXProject5.Parsers;
-using VSIXProject5.Storage;
+using IBatisSuperHelper.Indexers;
+using IBatisSuperHelper.Models;
+using IBatisSuperHelper.Parsers;
+using IBatisSuperHelper.Storage;
 
-namespace VSIXProject5.EventHandlers
+namespace IBatisSuperHelper.EventHandlers
 {
     public class ProjectItemEventsEx
     {

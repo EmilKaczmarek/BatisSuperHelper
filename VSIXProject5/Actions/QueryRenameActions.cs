@@ -9,18 +9,18 @@
 //using Microsoft.VisualStudio.TextManager.Interop;
 //using System;
 //using System.Linq;
-//using VSIXProject5.Actions.Abstracts;
-//using VSIXProject5.Actions.Shared;
-//using VSIXProject5.Helpers;
-//using VSIXProject5.HelpersAndExtensions;
-//using VSIXProject5.HelpersAndExtensions.VisualStudio;
-//using VSIXProject5.Indexers;
-//using VSIXProject5.Storage;
-//using VSIXProject5.VSIntegration;
-//using VSIXProject5.Windows.RenameWindow;
-//using VSIXProject5.Windows.RenameWindow.ViewModel;
+//using IBatisSuperHelper.Actions.Abstracts;
+//using IBatisSuperHelper.Actions.Shared;
+//using IBatisSuperHelper.Helpers;
+//using IBatisSuperHelper.HelpersAndExtensions;
+//using IBatisSuperHelper.HelpersAndExtensions.VisualStudio;
+//using IBatisSuperHelper.Indexers;
+//using IBatisSuperHelper.Storage;
+//using IBatisSuperHelper.VSIntegration;
+//using IBatisSuperHelper.Windows.RenameWindow;
+//using IBatisSuperHelper.Windows.RenameWindow.ViewModel;
 
-//namespace VSIXProject5.Actions
+//namespace IBatisSuperHelper.Actions
 //{
 //    public class QueryRenameActions : BaseActions
 //    {

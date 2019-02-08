@@ -2,11 +2,11 @@
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.Threading.Tasks;
-using VSIXProject5.Constants;
+using IBatisSuperHelper.Constants;
 using Microsoft.VisualStudio.Shell;
-using static VSIXProject5.Constants.EventConstats.VS;
+using static IBatisSuperHelper.Constants.EventConstats.VS;
 
-namespace VSIXProject5.Events
+namespace IBatisSuperHelper.Events
 {
     public class VSSolutionEventsHandler
     {

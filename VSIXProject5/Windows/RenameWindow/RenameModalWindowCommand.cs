@@ -4,7 +4,7 @@ using System.Globalization;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
-namespace VSIXProject5.Windows.RenameWindow
+namespace IBatisSuperHelper.Windows.RenameWindow
 {
     /// <summary>
     /// Command handler

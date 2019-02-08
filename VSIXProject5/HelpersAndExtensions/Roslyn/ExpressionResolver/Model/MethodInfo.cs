@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VSIXProject5.HelpersAndExtensions.Roslyn.ExpressionResolver.Model
+namespace IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.Model
 {
     public class MethodInfo
     {

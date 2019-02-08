@@ -1,25 +1,8 @@
 ﻿using System;
-using System.ComponentModel.Design;
-using System.Globalization;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using VSIXProject5.Windows.RenameWindow;
-using VSIXProject5.Windows.RenameWindow.ViewModel;
-using VSIXProject5.Indexers;
-using EnvDTE;
-using EnvDTE80;
-using Microsoft.VisualStudio.TextManager.Interop;
-using Microsoft.VisualStudio.Text;
-using Microsoft.VisualStudio.ComponentModelHost;
-using Microsoft.VisualStudio.Editor;
-using System.Linq;
-using System.Xml.Linq;
-using System.Xml;
-using VSIXProject5.Constants;
-using VSIXProject5.Helpers;
-using VSIXProject5.Actions;
+using IBatisSuperHelper.Actions;
 
-namespace VSIXProject5
+namespace IBatisSuperHelper
 {
     /// <summary>
     /// Command handler

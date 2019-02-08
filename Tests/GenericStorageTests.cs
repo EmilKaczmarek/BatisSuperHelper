@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using VSIXProject5.Storage;
+using IBatisSuperHelper.Storage;
 
 namespace Tests
 {

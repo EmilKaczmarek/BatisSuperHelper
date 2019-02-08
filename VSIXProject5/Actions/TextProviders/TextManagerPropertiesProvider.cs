@@ -4,12 +4,8 @@ using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace VSIXProject5.Actions.TextProviders
+namespace IBatisSuperHelper.Actions.TextProviders
 {
     public class TextManagerPropertiesProvider : IDocumentPropertiesProvider
     {
