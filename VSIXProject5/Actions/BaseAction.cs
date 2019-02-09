@@ -34,12 +34,12 @@ namespace IBatisSuperHelper.Actions
 
         private Lazy<ToolWindowPane> _resultWindowLazy;
 
-        internal BaseActions(IVsTextManager textManager, IVsEditorAdaptersFactoryService editorAdapersFactory, StatusBarIntegration statusBar)
+        internal BaseActions(IVsTextManager textManager, IVsEditorAdaptersFactoryService editorAdapersFactory, StatusBarIntegration statusBar, ToolWindowPane resultWindow)
         {
             _textManager = textManager;
             _editorAdaptersFactory = editorAdapersFactory;
             _statusBar = statusBar;
-            _resultWindowLazy = new Lazy<ToolWindowPane>(()=>package.ResultWindow);
+            _resultWindowLazy = new Lazy<ToolWindowPane>(()=> resultWindow);
         }
         public virtual async void BeforeQuery(object sender, EventArgs e)
         {

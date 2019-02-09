@@ -153,7 +153,12 @@ namespace IBatisSuperHelper.Helpers
                     var oneArgumentSyntaxParent = allArgumentSyntaxes.First().Parent;
                     var resolveResult = GetMethodInfoForNode(oneArgumentSyntaxParent, _semanticModel);
 
-                    return PackageStorage.GenericMethods.GetValue(resolveResult);
+                    var genericExists = PackageStorage.GenericMethods.TryGetValue(resolveResult, out ExpressionResult result);
+                    if (genericExists)
+                    {
+                        return result;
+                    }
+                    return null;
                 }
                 return new ExpressionResolver().GetStringValueOfExpression(document, queryArgument?.Expression, allDocumentNodes, _semanticModel);
             }
@@ -219,11 +224,11 @@ namespace IBatisSuperHelper.Helpers
 
                 var allTypeInfos = identifierNames.Select(e => _semanticModel.GetTypeInfo(e)).ToList();
 
-                TypeInfo? genericType = allTypeInfos.FirstOrDefault(e => e.Type != null && (e.Type as INamedTypeSymbol).IsGenericType);
+                TypeInfo? genericType = allTypeInfos.FirstOrDefault(e => e.Type != null && (e.Type as INamedTypeSymbol)?.IsGenericType != false);
                 
                 if (genericType != null)
                 {
-                    return (genericType.Value.Type as INamedTypeSymbol).TypeArguments.First().Name;
+                    return (genericType.Value.Type as INamedTypeSymbol)?.TypeArguments.First().Name;
                 }
             }
             
