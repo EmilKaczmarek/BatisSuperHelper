@@ -117,12 +117,12 @@ namespace IBatisSuperHelper.Actions.DocumentProcessors
                 expressionResult = GetQueryValueAtCurrentSelectedLine();
             }
             
-            if (expressionResult.IsSolved)
+            if (expressionResult?.IsSolved == true)
             {
                 queryValue = expressionResult.TextResult;
                 return true;
             }
-            if (expressionResult.CanBeUsedAsQuery)
+            if (expressionResult?.CanBeUsedAsQuery == true)
             {
                 using (MiniProfiler.Current.Step(nameof(TryResolveExpression)))
                 {

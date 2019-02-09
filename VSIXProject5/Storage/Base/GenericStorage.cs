@@ -90,6 +90,18 @@ namespace IBatisSuperHelper.Storage
             return false;
         }
 
+        public async Task<Tuple<bool, T1>> TryGetValueAsync(T key)
+        {
+            return await Task.Run(() =>
+            {
+                 if (keyValuePairs.TryGetValue(key, out Lazy<T1> lazyValue))
+                 {
+                     return Tuple.Create(true, lazyValue.Value);
+                 }
+                 return Tuple.Create(false, default(T1));
+            });   
+        }
+
         public T1 GetValue(T key)
         {
             return keyValuePairs[key].Value;

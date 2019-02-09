@@ -14,7 +14,7 @@ namespace IBatisSuperHelper.Actions
 {
     public class GoToQueryActions2 : BaseActions
     {
-        public GoToQueryActions2(GotoAsyncPackage package) : base(package.TextManager, package.EditorAdaptersFactory, new StatusBarIntegration(package.IStatusBar))
+        public GoToQueryActions2(GotoAsyncPackage package) : base(package.TextManager, package.EditorAdaptersFactory, new StatusBarIntegration(package.IStatusBar), package.ResultWindow)
         {
         }
 
