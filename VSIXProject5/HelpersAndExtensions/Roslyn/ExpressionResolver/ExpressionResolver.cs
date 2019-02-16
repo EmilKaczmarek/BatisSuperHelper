@@ -29,14 +29,17 @@ namespace IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver
               };
 
         private int _maxCallStackNum;
+        private int _maxCallStackNumAtStart;
 
         public ExpressionResolver()
         {
-            _maxCallStackNum = 1000;
+            _maxCallStackNum = 100;
+            _maxCallStackNumAtStart = _maxCallStackNum;
         }
         public ExpressionResolver(int maxCallStack)
         {
             _maxCallStackNum = maxCallStack;
+            _maxCallStackNumAtStart = _maxCallStackNum;
         }
         private int _callStackNum = 1;
 
@@ -102,8 +105,7 @@ namespace IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver
 
             if (_strategies.TryGetValue(expressionSyntax.Kind(), out var strategy))
             {
-                //var allSymbolsForSpan = nodes.Select(e => semanticModel.GetSymbolInfo(e)).Where(e=>e.Symbol !=null).ToList();
-                var symbolInfo = semanticModel.GetSymbolInfo(expressionSyntax.Parent);
+                _maxCallStackNum = expressionSyntax.IsKind(SyntaxKind.IdentifierName)? 10 : _maxCallStackNumAtStart;
 
                 return strategy.Resolve(document, expressionSyntax, nodes, semanticModel, this)
                     .WithNodeInfo(new NodeInfo
