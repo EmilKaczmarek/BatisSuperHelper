@@ -32,6 +32,7 @@ namespace IBatisSuperHelper.Logging
             var errorFile = new FileTarget("errorLogFile")
             {
                 FileName = $"{AssemblyLocation}/logs/log.txt",
+                Layout = $"{"${longdate} ${message} ${exception:format=StackTrace:maxInnerExceptionLevel=5}"}",
             };
 
             Debug.WriteLine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
