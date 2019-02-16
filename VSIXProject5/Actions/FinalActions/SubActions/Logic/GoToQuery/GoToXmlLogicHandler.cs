@@ -10,9 +10,9 @@ using IBatisSuperHelper.VSIntegration;
 
 namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Logic
 {
-    public class XmlLogicHandler : BaseLogicHandler<XmlQuery>
+    public class GoToXmlLogicHandler : GoToBaseLogicHandler<XmlQuery>
     {
-        public XmlLogicHandler(StatusBarIntegration statusBar, ToolWindowPane toolWindowPane) : base(statusBar, toolWindowPane)
+        public GoToXmlLogicHandler(StatusBarIntegration statusBar, ToolWindowPane toolWindowPane) : base(statusBar, toolWindowPane)
         {
         }
 

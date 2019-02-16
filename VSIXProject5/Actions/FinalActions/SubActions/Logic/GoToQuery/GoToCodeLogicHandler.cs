@@ -12,9 +12,9 @@ using IBatisSuperHelper.Windows.ResultWindow.ViewModel;
 
 namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Logic
 {
-    public class CodeLogicHandler : BaseLogicHandler<CSharpQuery>
+    public class GoToCodeLogicHandler : GoToBaseLogicHandler<CSharpQuery>
     {
-        public CodeLogicHandler(StatusBarIntegration statusBar, ToolWindowPane toolWindowPane) : base(statusBar, toolWindowPane)
+        public GoToCodeLogicHandler(StatusBarIntegration statusBar, ToolWindowPane toolWindowPane) : base(statusBar, toolWindowPane)
         {
         }
 

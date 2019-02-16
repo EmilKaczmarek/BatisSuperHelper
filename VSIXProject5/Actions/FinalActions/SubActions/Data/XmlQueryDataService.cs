@@ -29,6 +29,11 @@ namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Data
             return keys.Select(PackageStorage.XmlQueries.GetValueOrNull).ToList();
         }
 
+        public XmlQuery GetSingleStatmentFromKey(IndexerKey key)
+        {
+            return PackageStorage.XmlQueries.GetValueOrNull(key);
+        }
+
         public List<ResultWindowViewModel> PrepareViewModels(List<ExpressionResult> genericResults, ExpressionResult expressionResult, List<XmlQuery> nonGenericResults)
         {
             return nonGenericResults.Select(x => new ResultWindowViewModel
@@ -39,6 +44,11 @@ namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Data
                Namespace = x.MapNamespace,
                Query = x.QueryId,
            }).ToList();
+        }
+
+        public void Rename(IndexerKey key, string value)
+        {
+            PackageStorage.XmlQueries.RenameQuery(key, value);
         }
     }
 }

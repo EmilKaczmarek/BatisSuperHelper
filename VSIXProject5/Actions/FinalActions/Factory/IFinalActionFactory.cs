@@ -6,11 +6,14 @@ using System.Text;
 using System.Threading.Tasks;
 using IBatisSuperHelper.Actions;
 using IBatisSuperHelper.VSIntegration;
+using EnvDTE80;
+using Microsoft.VisualStudio.LanguageServices;
 
 namespace IBatisSuperHelper.Actions.FinalActions.Factory
 {
     public interface IFinalActionFactory
     {
-        FinalEventActionsExecutor GetFinalEventActionsExecutor(StatusBarIntegration statusBar, ToolWindowPane toolWindowPane);
+        GoToQueryFinalEventActionsExecutor GetFinalGoToQueryActionsExecutor(StatusBarIntegration statusBar, ToolWindowPane toolWindowPane);
+        RenameFinalActionsExecutor GetFinalRenameQueryActionsExecutor(StatusBarIntegration statusBar, ToolWindowPane toolWindowPane, DTE2 dte, VisualStudioWorkspace workspace);
     }
 }
