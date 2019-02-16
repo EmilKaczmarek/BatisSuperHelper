@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.Shell;
 using IBatisSuperHelper.Actions;
+using System.ComponentModel.Design;
 
 namespace IBatisSuperHelper
 {
@@ -26,6 +27,7 @@ namespace IBatisSuperHelper
 
         private BaseActions _commandActions;
         private OleMenuCommand menuItem;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RenameCommand"/> class.
         /// Adds our command handlers for menu (commands must exist in the command table file)
@@ -40,15 +42,15 @@ namespace IBatisSuperHelper
 
             this.package = package;
 
-            //_commandActions = new QueryRenameActions(this.package as GotoAsyncPackage);
+            _commandActions = new QueryRenameActions(this.package as GotoAsyncPackage);
 
-            //OleMenuCommandService commandService = this.ServiceProvider.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-            //if (commandService != null)
-            //{
-            //    var menuCommandID = new CommandID(CommandSet, CommandId);
-            //    var menuItem = new OleMenuCommand(_commandActions.MenuItemCallback,_commandActions.Change, _commandActions.BeforeQuery, menuCommandID);
-            //    commandService.AddCommand(menuItem);
-            //}
+            OleMenuCommandService commandService = this.ServiceProvider.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
+            if (commandService != null)
+            {
+                var menuCommandID = new CommandID(CommandSet, CommandId);
+                menuItem = new OleMenuCommand(_commandActions.MenuItemCallback, _commandActions.Change, _commandActions.BeforeQuery, menuCommandID);
+                commandService.AddCommand(menuItem);
+            }
         }
 
         /// <summary>

@@ -18,6 +18,23 @@ namespace IBatisSuperHelper.Actions
         {
         }
 
+        public override void BeforeQuery(object sender, EventArgs e)
+        {
+            base.BeforeQuery(sender, e);
+
+            OleMenuCommand menuCommand = sender as OleMenuCommand;
+            menuCommand.Text = "Go to Query";
+            menuCommand.Visible = false;
+            menuCommand.Enabled = false;
+
+            var validator = _documentProcessor.GetValidator();
+            bool validationResult = validator.CanJumpToQueryInLine(_documentPropertiesProvider.GetSelectionLineNumber());
+
+            menuCommand.Visible = validationResult;
+            menuCommand.Enabled = validationResult;
+
+        }
+
         public override void MenuItemCallback(object sender, EventArgs e)
         {
             try
@@ -27,7 +44,9 @@ namespace IBatisSuperHelper.Actions
                 using (profiler.Step("Event start"))
                 {
                     _documentProcessor.TryResolveQueryValueAtCurrentSelectedLine(out ExpressionResult expressionResult, out string queryValue);
-                    _finalEventActionsExecutor.Execute(queryValue, expressionResult);
+                    _finalActionFactory
+                        .GetFinalGoToQueryActionsExecutor(_statusBar, _commandWindow)
+                        .Execute(queryValue, expressionResult);
                 }
             }
             catch (Exception ex)
