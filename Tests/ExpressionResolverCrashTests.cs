@@ -264,12 +264,12 @@ namespace Tests
         }
 
         [TestMethod, TestCategory("Stackoverflow prevention")]
-        public void Call10Times()
+        public void Call5Times()
         {
             int i;
             var sb = new StringBuilder();
             sb.AppendLine(@"var c1 = ""finally here"";");
-            for (i = 1; i < 10; i++)
+            for (i = 1; i < 5; i++)
             {
                 sb.AppendLine($"var c{i + 1} = c{i};");
             }
@@ -281,24 +281,6 @@ namespace Tests
             Assert.AreEqual("finally here", result.TextResult);
         }
 
-        [TestMethod, TestCategory("Stackoverflow prevention")]
-        public void Call100Times()
-        {
-            int i;
-            var sb = new StringBuilder();
-            sb.AppendLine(@"var c1 = ""finally here"";");
-            for (i = 1; i < 100; i++)
-            {
-                sb.AppendLine($"var c{i + 1} = c{i};");
-            }
-            string insideMethodCode = $"c{i.ToString()}";
-            string insideClassCode = sb.ToString();
-            string outsideClassCode = @"";
-
-            var result = Execute(insideMethodCode, insideClassCode, outsideClassCode);
-            Assert.AreEqual("finally here", result.TextResult);
-        }
- 
         //When calls extends ~1000(+-2) than method should return fallback value of ""
         [TestMethod, TestCategory("Stackoverflow prevention")]
         public void Call1001Times()

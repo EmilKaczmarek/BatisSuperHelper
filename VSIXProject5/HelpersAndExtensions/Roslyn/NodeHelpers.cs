@@ -11,12 +11,19 @@ using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.Model;
 using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 using IBatisSuperHelper.Loggers;
 using IBatisSuperHelper.Storage;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.ResolveStrategy;
+using IBatisSuperHelper.Constants;
 
 namespace IBatisSuperHelper.Helpers
 {
     public class NodeHelpers
     {
         public readonly SemanticModel _semanticModel;
+
+        public NodeHelpers()
+        {
+
+        }
         /// <summary>
         /// Ctor
         /// </summary>
@@ -35,6 +42,51 @@ namespace IBatisSuperHelper.Helpers
         {
             return SyntaxNodes.FirstOrDefault(x => x is ReturnStatementSyntax);
         }
+
+        public bool TryGetArgumentNodeFromInvocation(InvocationExpressionSyntax node, int argumentIndex, out ExpressionSyntax argumentNode)
+        {
+            argumentNode = null;
+            if (argumentIndex < 0 || (node.ArgumentList == null && argumentIndex + 1 > node.ArgumentList.Arguments.Count))
+                return false;
+
+            argumentNode = node.ArgumentList.Arguments[argumentIndex].Expression;
+            return true;
+        }
+
+        public bool IsIBatisMethod(InvocationExpressionSyntax analyzeNode)
+        {
+            MemberAccessExpressionSyntax nameSyntax = null;
+            if (analyzeNode == null || analyzeNode.Expression == null)
+                return false;
+            if (analyzeNode.Expression is MemberAccessExpressionSyntax)
+                nameSyntax = analyzeNode.Expression as MemberAccessExpressionSyntax;
+
+            if (nameSyntax == null || nameSyntax.Name == null)
+                return false;
+
+            return IBatisConstants.MethodNames.Contains(nameSyntax.Name.Identifier.ValueText);
+        }
+
+        public T GetFirstParentNodeOfType<T>(SyntaxNode node) where T: SyntaxNode
+        {
+            var analyzeNode = node;
+            while (analyzeNode != null && analyzeNode.GetType() != typeof(T))
+            {
+                analyzeNode = analyzeNode.Parent;
+            }
+            return analyzeNode as T;
+        }
+
+        public bool DoesSyntaxNodeContainsIBatisNamespace(SyntaxNode node)
+        {
+            var type = _semanticModel.GetTypeInfo(node);
+            if (type.Type != null && type.Type.ContainingNamespace != null)
+            {
+                return type.Type.ContainingNamespace.ToDisplayString().Contains("Batis");
+            }
+            return false;
+        }
+
         //Method is working 100% correct, but could lead to unwanted behaviour.
         //Should work on better method to determine if it's using iBatis.
         /// <summary>
@@ -113,6 +165,20 @@ namespace IBatisSuperHelper.Helpers
             }
             return null;
         }
+
+        public bool TryGetQueryStringFromStringLiteralNode(LiteralExpressionSyntax node, out string result)
+        {
+            var strategyResult =  new StringLiteralStrategy().Resolve(null, node, null, null, null);
+            if (strategyResult.IsSolved)
+            {
+                result = strategyResult.TextResult;
+                return true;
+            }
+
+            result = null;
+            return false;
+        }
+
         /// <summary>
         /// Get text presentation of Query argument value
         /// </summary>
