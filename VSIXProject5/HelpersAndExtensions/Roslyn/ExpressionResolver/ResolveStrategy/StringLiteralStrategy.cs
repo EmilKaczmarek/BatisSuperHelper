@@ -17,7 +17,6 @@ namespace IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.Resol
             using (MiniProfiler.Current.Step(nameof(StringLiteralStrategy)))
             {
                 var token = (expressionSyntax as LiteralExpressionSyntax).Token;
-                var tokenValue = token.Value;
                 return new ExpressionResult
                 {
                     CanBeUsedAsQuery = false,

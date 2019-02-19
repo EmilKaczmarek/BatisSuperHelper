@@ -163,5 +163,15 @@ namespace IBatisSuperHelper.Storage.Domain
         {
             xmlStatments.Clear();
         }
+
+        public List<XmlQuery> GetAllValues()
+        {
+            return xmlStatments.Select(e => e.Value).ToList();
+        }
+
+        public List<IndexerKey> GetAllKeys()
+        {
+            return xmlStatments.Keys.ToList();
+        }
     }
 }

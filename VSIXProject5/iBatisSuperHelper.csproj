@@ -167,6 +167,9 @@
     <Compile Include="Storage\Base\GenericStorage.cs" />
     <Compile Include="Storage\Base\IProvider.cs" />
     <Compile Include="Storage\PackageStorage.cs" />
+    <Compile Include="Validation\Helpers\QuerySearchHelp.cs" />
+    <Compile Include="Validation\QueryNotExists.cs" />
+    <Compile Include="Validation\QueryNotExistsCodeFixProvider.cs" />
     <Compile Include="VSIntegration\DocumentChanges\Actions\CSharpFileContentOnChange.cs" />
     <Compile Include="VSIntegration\DocumentChanges\Actions\IOnFileContentChange.cs" />
     <Compile Include="VSIntegration\DocumentChanges\Actions\XmlFileContentOnChange.cs" />
@@ -298,10 +301,14 @@
     <PackageReference Include="NLog">
       <Version>4.5.11</Version>
     </PackageReference>
+    <PackageReference Include="Ruzzie.FuzzyStrings">
+      <Version>3.0.0.23</Version>
+    </PackageReference>
     <PackageReference Include="System.Reactive">
       <Version>4.1.2</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
   <PropertyGroup>
@@ -314,6 +321,7 @@
       <VSIXSourceItem Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)' == 'MiniProfiler'" />
       <VSIXSourceItem Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)' == 'MiniProfiler.Shared'" />
       <VSIXSourceItem Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)' == 'HtmlAgilityPack'" />
+      <VSIXSourceItem Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)' == 'Ruzzie.FuzzyStrings'" />
     </ItemGroup>
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,4 +1,7 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using IBatisSuperHelper.Helpers;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver;
+using IBatisSuperHelper.Storage;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -8,16 +11,16 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VSIXProject5.Helpers;
-using VSIXProject5.Indexers;
 
 namespace VSIXProject5.Validation
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class QueryNotExists : DiagnosticAnalyzer
     {
+        public const string DiagnosticId = "QueryNotExists";
+
         public static readonly DiagnosticDescriptor QueryNotExistsRule = new DiagnosticDescriptor(
-            "QueryNotExistId",
+            DiagnosticId,
             "Query not exist in any map",
             "Query '{0}' do not exist in any map file",
             "iBatis",
@@ -29,34 +32,29 @@ namespace VSIXProject5.Validation
 
         public override void Initialize(AnalysisContext context)
         {
-            context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.StringLiteralExpression);
+            context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.InvocationExpression);
         }
 
         private void AnalyzeNode(SyntaxNodeAnalysisContext context)
         {
             NodeHelpers helper = new NodeHelpers(context.SemanticModel);
-            var nodes = context.Node.Parent;
 
-            var test = context.SemanticModel.SyntaxTree.GetLineSpan(context.Node.Span);
-            var lineSpan = context.SemanticModel.SyntaxTree.GetText().Lines[test.StartLinePosition.Line].Span;
-            var treeRoot = (CompilationUnitSyntax)context.SemanticModel.SyntaxTree.GetRoot();
-            var nodesAtLine = treeRoot.DescendantNodesAndSelf(lineSpan);
-
-            var returnNode = helper.GetFirstNodeOfReturnStatmentSyntaxType(nodesAtLine);
-            if (returnNode != null)
+            if (helper.IsIBatisMethod(context.Node as InvocationExpressionSyntax))
             {
-                nodesAtLine = returnNode.DescendantNodesAndSelf();
-            }
-            var validLine = helper.IsAnySyntaxNodeContainIBatisNamespace(nodesAtLine);
-            if (validLine)
-            {
-                var queryName = helper.GetQueryStringFromSyntaxNodes(nodesAtLine);
-                var queryKeys = Indexer.Instance.GetXmlKeysByQueryId(queryName);
-                if (queryKeys.Count == 0)
+                if (helper.TryGetArgumentNodeFromInvocation(context.Node as InvocationExpressionSyntax, 0, out ExpressionSyntax expressionSyntax))
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(QueryNotExistsRule, context.Node.GetLocation(), queryName));
-                }               
-            } 
+                    var resolverResult = new ExpressionResolver().GetStringValueOfExpression(expressionSyntax, context.SemanticModel);
+                    if (resolverResult.IsSolved)
+                    {
+                        var queryKeys = PackageStorage.XmlQueries.GetKeysByQueryId(resolverResult.TextResult, IBatisSuperHelper.Storage.Providers.NamespaceHandlingType.HYBRID_NAMESPACE);
+                        if (queryKeys.Count < 1)
+                        {
+                            context.ReportDiagnostic(Diagnostic.Create(QueryNotExistsRule, expressionSyntax.GetLocation(), resolverResult.TextResult));
+                        }
+                    }
+                }
+
+            }
         }
     }
 }
