@@ -4,12 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
-using VSIXProject5.Constants;
-using VSIXProject5.Helpers;
-using VSIXProject5.HelpersAndExtensions;
-using VSIXProject5.Indexers.Models;
+using IBatisSuperHelper.Constants;
+using IBatisSuperHelper.Helpers;
+using IBatisSuperHelper.HelpersAndExtensions;
+using IBatisSuperHelper.Indexers.Models;
 
-namespace VSIXProject5.Parsers
+namespace IBatisSuperHelper.Parsers
 {
     public class XmlParser
     {
@@ -26,67 +26,53 @@ namespace VSIXProject5.Parsers
         private string _filePath;
         private string _fileName;
         private string _fileProjectName;
+        private StringReader _stringReader;
 
-
-        private XmlParser()
+        public XmlParser()
         {
             _xmlDocument = new HtmlDocument();
         }
 
-        private XmlParser(string filePath, string fileProject) :this()
-        {           
+        public XmlParser WithStringReader(StringReader stringReader)
+        {
+            _stringReader = stringReader;
+            return this;
+        }
+
+        public XmlParser WithFileInfo(string filePath, string fileProjectName)
+        {
             _filePath = filePath;
             _fileName = Path.GetFileName(filePath);
-            _fileProjectName = fileProject;
+            _fileProjectName = fileProjectName;
+            return this;
         }
 
-        public static async Task<XmlParser> WithFilePathAndFileInfoAsync(string filePath, string fileProjectName)
+        public XmlParser Load()
         {
-            var instance = new XmlParser(filePath, fileProjectName);
-            await Task.Run(() => instance._xmlDocument.Load(filePath));
-            return instance;
+            if (_stringReader != null)
+            {
+                _xmlDocument.Load(_stringReader);
+            }
+            else
+            {
+                _xmlDocument.Load(_filePath);
+            }
+            return this;
         }
 
-        public static XmlParser WithStringReaderAndFileInfo(StringReader stringReader, string filePath, string fileProjectName)
-        {
-            var instance = new XmlParser(filePath, fileProjectName);
-            instance._xmlDocument.Load(stringReader);
-            return instance;
-        }
-
-        public static XmlParser WithStringReader(StringReader stringReader)
-        {
-            var instance = new XmlParser();
-            instance._xmlDocument.Load(stringReader);
-            return instance;
-        }
-
-        public static XmlParser WithFilePathAndFileInfo(string filePath, string fileProjectName)
-        {
-            var instance = new XmlParser(filePath, fileProjectName);
-            instance._xmlDocument.Load(filePath);
-            return instance;
-        }
-
-        public static XmlParser WithFilePath(string filePath)
-        {
-            var instance = new XmlParser();
-            instance._xmlDocument.Load(filePath);
-            return instance;
-        }
-
-        public List<XmlIndexerResult> GetMapFileStatments()
+        public List<XmlQuery> GetMapFileStatments()
         {
             var statementChildNodes = GetChildNodesOfParentByXPath(IBatisConstants.StatementsRootElementXPath);
-            return statementChildNodes.Where(e => IBatisHelper.IsIBatisStatment(e.Name)).Select(e => new XmlIndexerResult
+            return statementChildNodes.Where(e => IBatisHelper.IsIBatisStatment(e.Name)).Select(e => new XmlQuery
             {
                 QueryFileName = _fileName,
                 QueryFilePath = _filePath,
-                QueryId = IsUsingStatementNamespaces ? MapNamespaceHelper.CreateFullQueryString(MapNamespace, e.Id) : e.Id,
+                QueryId = e.Id,
+                FullyQualifiedQuery = IsUsingStatementNamespaces ? MapNamespaceHelper.CreateFullQueryString(MapNamespace, e.Id) : e.Id,
                 QueryLineNumber = e.Line,
                 QueryVsProjectName = _fileProjectName,
                 MapNamespace = MapNamespace
-        }).ToList();
+            }).ToList();
         }
 
         public string GetQueryAtLineOrNull(int lineNumber)

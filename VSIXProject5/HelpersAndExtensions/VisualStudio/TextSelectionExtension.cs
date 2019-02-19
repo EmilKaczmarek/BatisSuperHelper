@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VSIXProject5.HelpersAndExtensions.VisualStudio
+namespace IBatisSuperHelper.HelpersAndExtensions.VisualStudio
 {
     public static class TextSelectionExtension
     {

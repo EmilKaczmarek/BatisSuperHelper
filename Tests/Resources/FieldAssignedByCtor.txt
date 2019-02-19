@@ -1,0 +1,21 @@
+﻿using System.Collections.Generic;
+using System.Linq;
+using IBatisNet.DataMapper;
+
+namespace IBatisSample
+{
+    public class GenericDataAccess<T>
+    {
+		private string _namespace;
+		
+		public GenericDataAccess()
+		{
+			_namespace = typeof(T).Name;
+		}
+
+        public virtual List<T> GetAll()
+        {
+            return Mapper.Instance().QueryForList<T>($"{_namespace}.SelectNumber", true).ToList();
+        }
+    }
+}

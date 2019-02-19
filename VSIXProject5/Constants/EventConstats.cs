@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VSIXProject5.Constants
+namespace IBatisSuperHelper.Constants
 {
     public static class EventConstats
     {

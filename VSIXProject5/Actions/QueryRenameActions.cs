@@ -4,21 +4,29 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.VisualStudio.Editor;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Linq;
-using VSIXProject5.Actions.Abstracts;
-using VSIXProject5.Actions.Shared;
-using VSIXProject5.Helpers;
-using VSIXProject5.HelpersAndExtensions;
-using VSIXProject5.HelpersAndExtensions.VisualStudio;
-using VSIXProject5.Indexers;
-using VSIXProject5.VSIntegration;
-using VSIXProject5.Windows.RenameWindow;
-using VSIXProject5.Windows.RenameWindow.ViewModel;
+using IBatisSuperHelper.Helpers;
+using IBatisSuperHelper.HelpersAndExtensions;
+using IBatisSuperHelper.HelpersAndExtensions.VisualStudio;
+using IBatisSuperHelper.Indexers;
+using IBatisSuperHelper.Storage;
+using IBatisSuperHelper.VSIntegration;
+using IBatisSuperHelper.Windows.RenameWindow;
+using IBatisSuperHelper.Windows.RenameWindow.ViewModel;
+using IBatisSuperHelper.Actions.TextProviders;
+using StackExchange.Profiling;
+using IBatisSuperHelper.Logging.MiniProfiler;
+using NLog;
+using IBatisSuperHelper.Actions.DocumentProcessors;
+using IBatisSuperHelper.Actions.FinalActions.Factory;
+using IBatisSuperHelper.Actions.DocumentProcessors.Factory;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 
-namespace VSIXProject5.Actions
+namespace IBatisSuperHelper.Actions
 {
     public class QueryRenameActions : BaseActions
     {
@@ -28,7 +36,7 @@ namespace VSIXProject5.Actions
         private DTE2 _envDTE;
         private Workspace _workspace;
 
-        public QueryRenameActions(GotoPackage package) : base(package.TextManager, package.EditorAdaptersFactory, new StatusBarIntegration(package.IStatusBar))
+        public QueryRenameActions(GotoAsyncPackage package) : base(package.TextManager, package.EditorAdaptersFactory, new StatusBarIntegration(package.IStatusBar))
         {
             base.package = package;
             _textManager = package.TextManager;
@@ -38,91 +46,30 @@ namespace VSIXProject5.Actions
             _workspace = package.Workspace;
         }
 
+        public override void BeforeQuery(object sender, EventArgs e)
+        {
+            base.BeforeQuery(sender, e);
+
+            OleMenuCommand menuCommand = sender as OleMenuCommand;
+            menuCommand.Text = "Rename Query";
+            menuCommand.Visible = false;
+            menuCommand.Enabled = false;
+
+            if (_documentPropertiesProvider.GetContentType() == "CSharp")
+            {
+                var validator = _documentProcessor.GetValidator();
+
+                menuCommand.Visible = true;
+                menuCommand.Enabled = validator.CanRenameQueryInLin(_documentPropertiesProvider.GetSelectionLineNumber());
+            }
+        }
+
         public override void MenuItemCallback(object sender, EventArgs e)
         {
-            IVsTextView textView = null;
-            _textManager.GetActiveView(1, null, out textView);
-            textView.GetCaretPos(out int selectionLineNum, out int selectionCol);
-            var wpfTextView = _editorAdaptersFactory.GetWpfTextView(textView);
-
-            ITextSnapshot snapshot = wpfTextView.Caret.Position.BufferPosition.Snapshot;
-            ILineOperation lineOperation = snapshot.IsCSharpType() ? new CodeLineOperations() : (ILineOperation)(new XmlLineOperations());
-
-            string queryName = lineOperation.GetQueryNameAtLine(snapshot, selectionLineNum);
-
-            if (queryName == null)
-            {
-                return;
-            }
-
-            var codeKeys = Indexer.Instance.GetCodeKeysByQueryId(queryName);
-            var xmlKeys = Indexer.Instance.GetXmlKeysByQueryId(queryName);
-
-            var namespaceQueryPair = MapNamespaceHelper.DetermineMapNamespaceQueryPairFromCodeInput(queryName);
-
-            RenameModalWindowControl window = new RenameModalWindowControl(
-                new RenameViewModel
-                {
-                    QueryText = namespaceQueryPair.Item2,
-                    Namespace = string.IsNullOrEmpty(namespaceQueryPair.Item1)?null:namespaceQueryPair.Item1,
-                });
-
-            window.ShowModal();
-            var returnViewModel = window.DataContext as RenameViewModel;
-
-            if (returnViewModel.WasInputCanceled || returnViewModel.QueryText == queryName)
-            {
-                return;
-            }           
-
-            foreach (var xmlQuery in xmlKeys)
-            {
-                var query = Indexer.Instance.GetXmlStatment(xmlQuery);
-                var projectItem = _envDTE.Solution.FindProjectItem(query.QueryFileName);
-
-                var isProjectItemOpened = projectItem.IsOpen;
-                if (!isProjectItemOpened)
-                {
-                    projectItem.Open();
-                }
-
-                var textSelection = projectItem.Document.Selection as TextSelection;
-                textSelection.GotoLine(query.QueryLineNumber, true);
-
-                var line = textSelection.GetText();
-                line = line.Replace(MapNamespaceHelper.GetQueryWithoutNamespace(query), MapNamespaceHelper.GetQueryWithoutNamespace(returnViewModel.QueryText));
-
-                textSelection.Insert(line, (int)vsInsertFlags.vsInsertFlagsContainNewText);
-                projectItem.Document.Save();      
-
-                Indexer.Instance.RenameXmlQuery(xmlQuery, returnViewModel.QueryText);
-            }
-            foreach (var codeKey in codeKeys) { 
-                var codeQueries = Indexer.Instance.GetCodeStatments(codeKey);
-                foreach(var file in codeQueries.GroupBy(x => x.DocumentId, x => x))
-                {
-                    var doc = _workspace.CurrentSolution.GetDocument(file.Key);
-                    SemanticModel semModel = doc.GetSemanticModelAsync().Result;
-                    NodeHelpers helper = new NodeHelpers(semModel);
-                    doc.TryGetSyntaxTree(out SyntaxTree synTree);
-                    var root = (CompilationUnitSyntax)synTree.GetRoot();
-                    var newArgumentSyntax = SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(returnViewModel.QueryText)));
-
-                    foreach (var query in file)
-                    {                    
-                        var span = synTree.GetText().Lines[query.QueryLineNumber - 1].Span;                     
-                        var nodes = root.DescendantNodesAndSelf(span);
-                        var existingQueryArgumentSyntax = helper.GetProperArgumentNodeInNodes(nodes);
-                       
-                        var newRoot = root.ReplaceNode(existingQueryArgumentSyntax, newArgumentSyntax);
-                        root = newRoot;
-
-                        doc = doc.WithText(newRoot.GetText());
-                        var sucess = _workspace.TryApplyChanges(doc.Project.Solution);
-                    }
-                }
-                Indexer.Instance.RenameCodeQueries(codeKey, returnViewModel.QueryText);
-            }
+            _documentProcessor.TryResolveQueryValueAtCurrentSelectedLine(out ExpressionResult expressionResult, out string queryValue);
+            _finalActionFactory
+                       .GetFinalRenameQueryActionsExecutor(_statusBar, _commandWindow, package.EnvDTE, package.Workspace)
+                       .Execute(queryValue, expressionResult);
         }
     }
 }

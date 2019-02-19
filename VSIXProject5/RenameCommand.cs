@@ -1,26 +1,9 @@
 ﻿using System;
-using System.ComponentModel.Design;
-using System.Globalization;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using VSIXProject5.Windows.RenameWindow;
-using VSIXProject5.Windows.RenameWindow.ViewModel;
-using VSIXProject5.Indexers;
-using EnvDTE;
-using EnvDTE80;
-using Microsoft.VisualStudio.TextManager.Interop;
-using Microsoft.VisualStudio.Text;
-using Microsoft.VisualStudio.ComponentModelHost;
-using Microsoft.VisualStudio.Editor;
-using System.Linq;
-using System.Xml.Linq;
-using System.Xml;
-using VSIXProject5.Constants;
-using VSIXProject5.Helpers;
-using VSIXProject5.Actions;
-using VSIXProject5.Actions.Abstracts;
+using IBatisSuperHelper.Actions;
+using System.ComponentModel.Design;
 
-namespace VSIXProject5
+namespace IBatisSuperHelper
 {
     /// <summary>
     /// Command handler
@@ -44,6 +27,7 @@ namespace VSIXProject5
 
         private BaseActions _commandActions;
         private OleMenuCommand menuItem;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RenameCommand"/> class.
         /// Adds our command handlers for menu (commands must exist in the command table file)
@@ -58,13 +42,13 @@ namespace VSIXProject5
 
             this.package = package;
 
-            _commandActions = new QueryRenameActions(this.package as GotoPackage);
+            _commandActions = new QueryRenameActions(this.package as GotoAsyncPackage);
 
             OleMenuCommandService commandService = this.ServiceProvider.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
             if (commandService != null)
             {
                 var menuCommandID = new CommandID(CommandSet, CommandId);
-                var menuItem = new OleMenuCommand(_commandActions.MenuItemCallback,_commandActions.Change, _commandActions.BeforeQuery, menuCommandID);
+                menuItem = new OleMenuCommand(_commandActions.MenuItemCallback, _commandActions.Change, _commandActions.BeforeQuery, menuCommandID);
                 commandService.AddCommand(menuItem);
             }
         }

@@ -2,25 +2,29 @@
 using Microsoft.VisualStudio.Utilities;
 using System;
 using System.Reactive.Linq;
-using VSIXProject5.HelpersAndExtensions.VisualStudio;
-using VSIXProject5.VSIntegration.DocumentChanges.Actions;
+using IBatisSuperHelper.HelpersAndExtensions.VisualStudio;
+using IBatisSuperHelper.VSIntegration.DocumentChanges.Actions;
 using Microsoft.VisualStudio.Text;
 using System.ComponentModel.Composition;
 
-namespace VSIXProject5.VSIntegration.DocumentChanges
+namespace IBatisSuperHelper.VSIntegration.DocumentChanges
 {
     [Export(typeof(IWpfTextViewCreationListener))]
-    [ContentType("text")]
+    [ContentType("XML")]
+    [ContentType("CSharp")]
     [TextViewRole(PredefinedTextViewRoles.Document)]
     internal sealed class DocumentChangesTextViewCreationListener : IWpfTextViewCreationListener
     {
         [Export(typeof(AdornmentLayerDefinition))]
-        [Name("TextAdornmentExample")]
+        [Name("Document Scanner")]
         [Order(After = PredefinedAdornmentLayers.Selection, Before = PredefinedAdornmentLayers.Text)]
         private AdornmentLayerDefinition editorAdornmentLayer;
 
         public void TextViewCreated(IWpfTextView textView)
         {
+            if (textView?.Caret?.Position == null)
+                return;
+
             var contentType = textView.Caret.Position.BufferPosition.Snapshot.GetContentTypeName();
             IOnFileContentChange fileAction = contentType == "CSharp" ? new  CSharpFileContentOnChange() : (IOnFileContentChange)new XmlFileContentOnChange();
             Observable.FromEventPattern<TextContentChangedEventArgs>(textView.TextBuffer, "Changed")

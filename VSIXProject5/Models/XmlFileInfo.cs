@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VSIXProject5.Models
+namespace IBatisSuperHelper.Models
 {
     public class XmlFileInfo
     {

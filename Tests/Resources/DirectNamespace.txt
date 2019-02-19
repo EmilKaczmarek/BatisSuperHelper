@@ -1,0 +1,14 @@
+﻿using System.Collections.Generic;
+using System.Linq;
+using IBatisNet.DataMapper;
+
+namespace GenericTest
+{
+    public class GenericDataAccess<T>
+    {
+        public virtual List<T> GetAll()
+        {
+            return Mapper.Instance().QueryForList<T>($"{typeof(T).Name}.SelectNumber", true).ToList();
+        }
+    }
+}

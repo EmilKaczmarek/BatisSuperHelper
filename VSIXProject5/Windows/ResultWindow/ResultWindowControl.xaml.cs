@@ -1,13 +1,13 @@
-﻿namespace VSIXProject5
+﻿namespace IBatisSuperHelper
 {
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Media;
-    using VSIXProject5.Indexers.Models;
-    using VSIXProject5.VSIntegration.Navigation;
-    using VSIXProject5.Windows.ResultWindow.ViewModel;
+    using IBatisSuperHelper.Indexers.Models;
+    using IBatisSuperHelper.VSIntegration.Navigation;
+    using IBatisSuperHelper.Windows.ResultWindow.ViewModel;
 
 
     /// <summary>

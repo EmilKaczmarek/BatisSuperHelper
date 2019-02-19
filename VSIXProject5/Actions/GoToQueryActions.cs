@@ -1,113 +1,60 @@
 ﻿using EnvDTE80;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.TextManager.Interop;
+using NLog;
+using StackExchange.Profiling;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using VSIXProject5.Actions.Abstracts;
-using VSIXProject5.Actions.Shared;
-using VSIXProject5.HelpersAndExtensions;
-using VSIXProject5.HelpersAndExtensions.VisualStudio;
-using VSIXProject5.Indexers;
-using VSIXProject5.Indexers.Models;
-using VSIXProject5.VSIntegration;
-using VSIXProject5.VSIntegration.Navigation;
-using VSIXProject5.Windows.ResultWindow.ViewModel;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using IBatisSuperHelper.Loggers;
+using IBatisSuperHelper.Logging.MiniProfiler;
+using IBatisSuperHelper.VSIntegration;
 
-namespace VSIXProject5.Actions
+namespace IBatisSuperHelper.Actions
 {
-    public class GoToQueryActions : BaseActions
+    public class GoToQueryActions2 : BaseActions
     {
-        private IVsTextManager _textManager;
-        private IVsEditorAdaptersFactoryService _editorAdaptersFactory;
-        private StatusBarIntegration _statusBar;
-        private ToolWindowPane _resultWindow;
-        private DTE2 _envDTE;
-  
-        public GoToQueryActions(GotoPackage package) : base(package.TextManager, package.EditorAdaptersFactory, new StatusBarIntegration(package.IStatusBar))
+        public GoToQueryActions2(GotoAsyncPackage package) : base(package.TextManager, package.EditorAdaptersFactory, new StatusBarIntegration(package.IStatusBar), package.ResultWindow)
         {
-            base.package = package;
-            _textManager = package.TextManager;
-             _editorAdaptersFactory = package.EditorAdaptersFactory;
-            _resultWindow = package.ResultWindow;
-            _envDTE = package.EnvDTE;
-            _statusBar = new StatusBarIntegration(package.IStatusBar);
+        }
+
+        public override void BeforeQuery(object sender, EventArgs e)
+        {
+            base.BeforeQuery(sender, e);
+
+            OleMenuCommand menuCommand = sender as OleMenuCommand;
+            menuCommand.Text = "Go to Query";
+            menuCommand.Visible = false;
+            menuCommand.Enabled = false;
+
+            var validator = _documentProcessor.GetValidator();
+            bool validationResult = validator.CanJumpToQueryInLine(_documentPropertiesProvider.GetSelectionLineNumber());
+
+            menuCommand.Visible = validationResult;
+            menuCommand.Enabled = validationResult;
+
         }
 
         public override void MenuItemCallback(object sender, EventArgs e)
         {
-            IVsTextView textView = null;
-            _textManager.GetActiveView(1, null, out textView);
-            textView.GetCaretPos(out int selectionLineNum, out int selectionCol);
-            var wpfTextView = _editorAdaptersFactory.GetWpfTextView(textView);
-            ITextSnapshot snapshot = wpfTextView.Caret.Position.BufferPosition.Snapshot;
-
-            List<ResultWindowViewModel> windowViewModels = new List<ResultWindowViewModel>();
-            ILineOperation lineOperation = snapshot.IsCSharpType() ? new CodeLineOperations() : (ILineOperation)(new XmlLineOperations());
-
-            var queryName = lineOperation.GetQueryNameAtLine(snapshot, selectionLineNum);
-
-            if (snapshot.GetContentTypeName() == "XML")
+            try
             {
-                var statmentsKeys = Indexer.Instance.GetCodeKeysByQueryId(queryName);
-                var statments = statmentsKeys.Select(Indexer.Instance.GetCodeStatments).SelectMany(x => x);
-
-                if (!statments.Any())
+                var profiler = MiniProfiler.StartNew($"{nameof(GoToQueryActions2)}.{nameof(MenuItemCallback)}");
+                profiler.Storage = new NLogStorage(LogManager.GetLogger("profiler"));
+                using (profiler.Step("Event start"))
                 {
-                    _statusBar.ShowText($"No occurence of query named: {queryName} find in Code.");
-                }
-                if (statments.Count() == 1)
-                {
-                    DocumentNavigationInstance.instance.OpenDocumentAndHighlightLine(statments.First().QueryFilePath, statments.First().QueryLineNumber);
-                }
-                if(statments.Count() > 1)
-                {
-                    windowViewModels = statments.Select(x => new ResultWindowViewModel
-                    {
-                        File = x.QueryFileName,
-                        Line = x.QueryLineNumber,
-                        Query = x.QueryId,
-                        FilePath = x.QueryFilePath,
-                        Namespace = MapNamespaceHelper.DetermineMapNamespaceQueryPairFromCodeInput(x.QueryId).Item1,
-                    }).ToList();
-                    _statusBar.ShowText($"Multiple occurence of same statment({queryName}) found.");
+                    _documentProcessor.TryResolveQueryValueAtCurrentSelectedLine(out ExpressionResult expressionResult, out string queryValue);
+                    _finalActionFactory
+                        .GetFinalGoToQueryActionsExecutor(_statusBar, _commandWindow)
+                        .Execute(queryValue, expressionResult);
                 }
             }
-            else
-            { 
-                var keys = Indexer.Instance.GetXmlKeysByQueryId(queryName);
-                if (keys.Any())
-                {
-                    var statment = Indexer.Instance.GetXmlStatmentOrNull(keys.First());
-                    windowViewModels = keys.Select(Indexer.Instance.GetXmlStatmentOrNull).Select(x => new ResultWindowViewModel
-                    {
-                        File = x.QueryFileName,
-                        FilePath = x.QueryFilePath,
-                        Line = x.QueryLineNumber,
-                        Namespace = x.MapNamespace,
-                        Query = x.QueryId,
-                    }).ToList();
-                    DocumentNavigationInstance.instance.OpenDocumentAndHighlightLine(statment.QueryFilePath, statment.QueryLineNumber);
-                }
-                else
-                {
-                    _statusBar.ShowText($"No occurence of query named: {queryName} found in SqlMaps.");
-                }
-            }
-
-            if(windowViewModels != null && windowViewModels.Count > 1)
+            catch (Exception ex)
             {
-                var windowContent = (ResultWindowControl)_resultWindow.Content;
-                windowContent.ShowResults(windowViewModels);
-                IVsWindowFrame windowFrame = (IVsWindowFrame)_resultWindow.Frame;
-                ErrorHandler.ThrowOnFailure(windowFrame.Show());
+                LogManager.GetLogger("error").Error(ex, "GoToQuery.MenuItemCallback");
+                OutputWindowLogger.WriteLn($"Exception occured during GoToActionMenuCallback: {ex.Message}");
             }
+          
         }
     }
 }

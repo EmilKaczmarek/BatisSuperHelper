@@ -1,5 +1,5 @@
 ﻿//------------------------------------------------------------------------------
-// <copyright file="GotoPackage.cs" company="Company">
+// <copyright file="GotoAsyncPackage.cs" company="Company">
 //     Copyright (c) Company.  All rights reserved.
 // </copyright>
 //------------------------------------------------------------------------------
@@ -7,6 +7,7 @@
 using EnvDTE;
 using EnvDTE80;
 using HtmlAgilityPack;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
@@ -16,27 +17,34 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.TextManager.Interop;
+using NLog;
+using NLog.Targets;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Timers;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
-using VSIXProject5.Constants;
-using VSIXProject5.EventHandlers;
-using VSIXProject5.Events;
-using VSIXProject5.Helpers;
-using VSIXProject5.Indexers;
-using VSIXProject5.Loggers;
-using VSIXProject5.Parsers;
-using VSIXProject5.VSIntegration.Navigation;
-using static VSIXProject5.Events.VSSolutionEventsHandler;
+using IBatisSuperHelper.Constants;
+using IBatisSuperHelper.EventHandlers;
+using IBatisSuperHelper.Events;
+using IBatisSuperHelper.Helpers;
+using IBatisSuperHelper.Indexers;
+using IBatisSuperHelper.Loggers;
+using IBatisSuperHelper.Logging;
+using IBatisSuperHelper.Parsers;
+using IBatisSuperHelper.Storage;
+using IBatisSuperHelper.VSIntegration.Navigation;
+using IBatisSuperHelper.Windows.RenameWindow;
+using static IBatisSuperHelper.Events.VSSolutionEventsHandler;
 
-namespace VSIXProject5
+namespace IBatisSuperHelper
 {
     /// <summary>
     /// This is the class that implements the package exposed by this assembly.
@@ -56,27 +64,26 @@ namespace VSIXProject5
     /// </para>
     /// </remarks>
     /// 
+#pragma warning disable S1450 // Private fields only used as local variables in methods should become local variables
     [ProvideAutoLoad("{f1536ef8-92ec-443c-9ed7-fdadf150da82}")]
     [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionExistsAndFullyLoaded_string)]   
-    [PackageRegistration(UseManagedResourcesOnly = true)]
+    [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)] // Info on this package for Help/About
     [ProvideMenuResource("Menus.ctmenu", 1)]
-    [Guid(GotoPackage.PackageGuidString)]
+    [Guid(GotoAsyncPackage.PackageGuidString)]
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
-    //[ProvideToolWindow(typeof(BatisSHelperTestConsole))]
     [ProvideToolWindow(typeof(ResultWindow))]
-    //[ProvideToolWindow(typeof(VSIXProject5.Windows.RenameWindow.RenameModalWindow))]
-    public sealed class GotoPackage : Package
+    public sealed class GotoAsyncPackage : AsyncPackage
     {
         /// <summary>
-        /// GotoPackage GUID string.
+        /// GotoAsyncPackage GUID string.
         /// </summary>
         public const string PackageGuidString = "0d0c7a5a-951b-4d78-ab1d-870fa377376f";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Goto"/> class.
         /// </summary>
-        public GotoPackage()
+        public GotoAsyncPackage()
         {
             // Inside this method you can place any initialization code that does not require
             // any Visual Studio service because at this point the package object is created but
@@ -89,8 +96,8 @@ namespace VSIXProject5
         private IVsSolution _solution;
         private SolutionEventsHandler _solutionEventsHandler;
         private uint _solutionEventsCookie;
-        private EnvDTE80.Events2 _envDteEvents;
-        private EnvDTE.ProjectItemsEvents _envDteProjectItemsEvents;
+        private Events2 _envDteEvents;
+        private ProjectItemsEvents _envDteProjectItemsEvents;
         //Public fields
         public DTE2 EnvDTE;
         public IVsTextManager TextManager;
@@ -99,36 +106,38 @@ namespace VSIXProject5
         public ToolWindowPane ResultWindow;
         public Window SolutionExplorer;
         public VisualStudioWorkspace Workspace;
-        /// <summary>
-        /// Initialization of the package; this method is called right after the package is sited, so this is the place
-        /// where you can put all the initialization code that rely on services provided by VisualStudio.
-        /// </summary>
-        protected override void Initialize()
+
+        protected override async System.Threading.Tasks.Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
-            base.Initialize();
-            //Initialize window
-            //BatisSHelperTestConsoleCommand.Initialize(this);
-            ResultWindowCommand.Initialize(this);
-            //Initialize base components
-            EnvDTE = base.GetService(typeof(DTE)) as DTE2;
-            var componentModel = (IComponentModel)Package.GetGlobalService(typeof(SComponentModel));
+            NLogConfigurationService.ConfigureNLog();
+            NLogConfigurationService.ConfigureMiniProfilerWithDefaultLogger();
+
+            Logger logger = LogManager.GetLogger("error");
+            logger.Info("Extension initalizing");
+
+            EnvDTE = await GetServiceAsync(typeof(DTE)) as DTE2;
+            var componentModel = await GetServiceAsync(typeof(SComponentModel)) as IComponentModel;
+
             //Initialize public components, initialize instances that are dependent on any component
-            TextManager = (IVsTextManager)GetService(typeof(SVsTextManager));
+            TextManager = await GetServiceAsync(typeof(SVsTextManager)) as IVsTextManager;
             EditorAdaptersFactory = componentModel.GetService<IVsEditorAdaptersFactoryService>();
-            IStatusBar = GetService(typeof(SVsStatusbar)) as IVsStatusbar;
             ResultWindow = FindToolWindow(typeof(ResultWindow), 0, true);
+
             DocumentNavigationInstance.InjectDTE(this.EnvDTE);
             //Prepare package events
             Workspace = componentModel.GetService<VisualStudioWorkspace>();
             Workspace.WorkspaceChanged += WorkspaceEvents.WorkspaceChanged;
-            //Initialize logger
-            OutputWindowLogger.Init(base.GetService(typeof(SVsOutputWindow)) as SVsOutputWindow);
 
-            _solution = base.GetService(typeof(SVsSolution)) as IVsSolution;
-            _solutionEventsHandler = new SolutionEventsHandler(
-                new Action<EventConstats.VS.SolutionLoad>(HandleSolutionEvent)
-            );      
-            _solution.AdviseSolutionEvents(_solutionEventsHandler, out _solutionEventsCookie);
+            Observable.FromEventPattern<WorkspaceChangeEventArgs>(Workspace, "WorkspaceChanged")
+               //.Select(e => e.EventArgs.Changes)
+               .DistinctUntilChanged()
+               .Throttle(TimeSpan.FromMilliseconds(500))
+               .Subscribe(e =>
+               {
+
+               });
+
+          
 
             _envDteEvents = EnvDTE.Events as Events2;
             if (_envDteEvents != null)
@@ -140,25 +149,39 @@ namespace VSIXProject5
                 _envDteProjectItemsEvents.ItemRenamed += projectItemEvents.ItemRenamed;
             }
 
+            OutputWindowLogger.Init(await GetServiceAsync(typeof(SVsOutputWindow)) as SVsOutputWindow);
+
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+            IStatusBar = await GetServiceAsync(typeof(SVsStatusbar)) as IVsStatusbar;
+
+            _solution = await GetServiceAsync(typeof(SVsSolution)) as IVsSolution;
+            _solutionEventsHandler = new SolutionEventsHandler(
+                new Action<EventConstats.VS.SolutionLoad>(HandleSolutionEvent)
+            );
+            _solution.AdviseSolutionEvents(_solutionEventsHandler, out _solutionEventsCookie);
+
             Goto.Initialize(this);
-            VSIXProject5.Windows.RenameWindow.RenameModalWindowCommand.Initialize(this);
+            RenameModalWindowCommand.Initialize(this);
             RenameCommand.Initialize(this);
         }
-      
+
         internal void HandleSolutionEvent(EventConstats.VS.SolutionLoad eventNumber)
         {
             switch (eventNumber)
             {
                 case EventConstats.VS.SolutionLoad.SolutionLoadComplete:
+                    ThreadHelper.ThrowIfNotOnUIThread();
                     var projectItemHelper = new ProjectItemHelper();
                     var projectItems = projectItemHelper.GetProjectItemsFromSolutionProjects(EnvDTE.Solution.Projects);
                     XmlIndexer xmlIndexer = new XmlIndexer();
                     var xmlFiles = DocumentHelper.GetXmlFiles(projectItems);
                     var xmlIndexerResult = xmlIndexer.BuildIndexerAsync(xmlFiles);
-                    Indexer.Instance.Build(xmlIndexerResult);
+                    PackageStorage.XmlQueries.AddMultipleWithoutKey(xmlIndexerResult);
                     break;
                 case EventConstats.VS.SolutionLoad.SolutionOnClose:
-                    Indexer.Instance.ClearAll();
+                    PackageStorage.CodeQueries.Clear();
+                    PackageStorage.XmlQueries.Clear();
                     break;
                 default:
                     break;

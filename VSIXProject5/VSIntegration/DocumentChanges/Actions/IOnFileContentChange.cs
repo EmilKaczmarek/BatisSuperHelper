@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VSIXProject5.VSIntegration.DocumentChanges.Actions
+namespace IBatisSuperHelper.VSIntegration.DocumentChanges.Actions
 {
     public interface IOnFileContentChange
     {
