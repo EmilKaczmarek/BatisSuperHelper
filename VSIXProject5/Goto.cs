@@ -7,9 +7,9 @@
 using Microsoft.VisualStudio.Shell;
 using System;
 using System.ComponentModel.Design;
-using VSIXProject5.Actions;
+using IBatisSuperHelper.Actions;
 
-namespace VSIXProject5
+namespace IBatisSuperHelper
 {
     /// <summary>
     /// Command handler
@@ -31,8 +31,8 @@ namespace VSIXProject5
         /// </summary>
         public readonly Package package;
 
-        private GoToQueryActions _commandActions;
-        private OleMenuCommand menuItem;
+        private readonly GoToQueryActions2 _commandActions;
+        private readonly OleMenuCommand menuItem;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Goto"/> class.
@@ -41,14 +41,9 @@ namespace VSIXProject5
         /// <param name="package">Owner package, not null.</param>
         private Goto(Package package)
         {
-            if (package == null)
-            {
-                throw new ArgumentNullException(nameof(package));
-            }
-            
-            this.package = package;
+            this.package = package ?? throw new ArgumentNullException(nameof(package));
  
-            _commandActions = new GoToQueryActions(this.package as GotoPackage);
+            _commandActions = new GoToQueryActions2(this.package as GotoAsyncPackage);
 
             if (ServiceProvider.GetService(typeof(IMenuCommandService)) is OleMenuCommandService commandService)
             {

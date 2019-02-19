@@ -1,49 +1,76 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.LanguageServices;
+using NLog;
+using StackExchange.Profiling;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VSIXProject5.Indexers;
+using IBatisSuperHelper.Indexers;
+using IBatisSuperHelper.Loggers;
+using IBatisSuperHelper.Logging.MiniProfiler;
+using IBatisSuperHelper.Storage;
 
-namespace VSIXProject5.Events
+namespace IBatisSuperHelper.Events
 {
-    public class WorkspaceEvents
-    {   
-
-        private static async Task BuildIndexerWithCSharpResults(Solution solution)
+    public static class WorkspaceEvents
+    {
+        public static async Task BuildIndexerWithCSharpResultsAsync(Solution solution)
         {
             var solutionFiles = solution.Projects.SelectMany(x => x.Documents).ToList();
-            CSharpIndexer csIndexer = new CSharpIndexer();
-            var codeIndexerResult = await csIndexer.BuildIndexerAsync(solutionFiles);
-            Indexer.Instance.Build(codeIndexerResult);
+            await PackageStorage.AnalyzeAndStoreAsync(solutionFiles);
         }
-        private static async Task DocumentsAddedAction(IEnumerable<Document> addedDocuments)
+
+        public static async Task BuildIndexerUsingProjectWithCSharpResultsAsync(Project project)
         {
-            CSharpIndexer csIndexer = new CSharpIndexer();
+            var solutionFiles = project.Documents.ToList();
+            await PackageStorage.AnalyzeAndStoreAsync(solutionFiles);
+        }
+
+        private static async Task DocumentsAddedActionAsync(IEnumerable<Document> addedDocuments)
+        {
+            if (addedDocuments == null)
+                return;
 
             foreach (var document in addedDocuments)
             {
-                var documentIndexerResult = await csIndexer.BuildFromDocumentAsync(document);
-                Indexer.Instance.Build(documentIndexerResult);
+                await PackageStorage.AnalyzeAndStoreSingleAsync(document);
             }
         }
-        private static async Task DocumentRemovedAction(IEnumerable<DocumentId> removedDocumentsIds)
+        private static async Task DocumentRemovedActionAsync(IEnumerable<DocumentId> removedDocumentsIds)
         {
             foreach(var documentId in removedDocumentsIds)
             {
-                Indexer.Instance.RemoveCodeStatmentsForDocumentId(documentId);
+                PackageStorage.CodeQueries.RemoveStatmentsByDefinedObject(documentId);
             }
         }
+
+        private static List<ProjectId> _projectsAlreadyAdded = new List<ProjectId>();
+
         public static async void WorkspaceChanged(object sender, WorkspaceChangeEventArgs e)
         {
+            var profiler = MiniProfiler.StartNew(nameof(WorkspaceChanged));
+            profiler.Storage = new NLogStorage(LogManager.GetLogger("profiler"));
             var workspace = sender as VisualStudioWorkspace;
             switch (e.Kind)
             {
                 case WorkspaceChangeKind.SolutionAdded:
-                    await BuildIndexerWithCSharpResults(e.NewSolution);
+                    try
+                    {
+                        using (profiler.Step(WorkspaceChangeKind.SolutionAdded.ToString()))
+                        {
+                            var solution = e.NewSolution.Projects.Any() ? e.NewSolution : workspace.CurrentSolution;
+                            _projectsAlreadyAdded = new List<ProjectId>(solution.ProjectIds);
+                            BuildIndexerWithCSharpResultsAsync(e.NewSolution.Projects.Any() ? e.NewSolution : workspace.CurrentSolution);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogManager.GetLogger("error").Error(ex, "WorkspaceChangeKind.SolutionAdded");
+                        OutputWindowLogger.WriteLn($"Exception occured during adding solution: {ex.Message}");
+                    }
                     break;
                 case WorkspaceChangeKind.SolutionChanged:
                     break;
@@ -54,6 +81,35 @@ namespace VSIXProject5.Events
                 case WorkspaceChangeKind.SolutionReloaded:
                     break;
                 case WorkspaceChangeKind.ProjectAdded:
+                    try
+                    {
+                        using (profiler.Step(WorkspaceChangeKind.SolutionAdded.ToString()))
+                        {
+                            if (!_projectsAlreadyAdded.Any())
+                            {
+                                _projectsAlreadyAdded = new List<ProjectId>(e.NewSolution.ProjectIds);
+                                Loggers.OutputWindowLogger.WriteLn($"Adding {string.Join(",", e.NewSolution.Projects.Select(x => x.Name))} to indexer");
+                                BuildIndexerWithCSharpResultsAsync(e.NewSolution);
+                            }
+                            else
+                            {
+                                foreach (var project in e.NewSolution.Projects)
+                                {
+                                    if (!_projectsAlreadyAdded.Contains(project.Id))
+                                    {
+                                        _projectsAlreadyAdded.Add(project.Id);
+                                        Loggers.OutputWindowLogger.WriteLn($"Adding {project.Name} to indexer");
+                                        BuildIndexerUsingProjectWithCSharpResultsAsync(project);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogManager.GetLogger("error").Error(ex, "WorkspaceChangeKind.ProjectAdded");
+                        OutputWindowLogger.WriteLn($"Exception occured during adding projects: {ex.Message}");
+                    }
                     break;
                 case WorkspaceChangeKind.ProjectRemoved:
                     break;
@@ -66,13 +122,13 @@ namespace VSIXProject5.Events
                     var addedDocuments = documentAddedChanges.GetProjectChanges()
                         .SelectMany(x => x.GetAddedDocuments())
                         .Select(x => workspace.CurrentSolution.GetDocument(x));
-                    await DocumentsAddedAction(addedDocuments);
+                    await DocumentsAddedActionAsync(addedDocuments);
                     break;
                 case WorkspaceChangeKind.DocumentRemoved:
                     var documentRemovedChanges = e.NewSolution.GetChanges(e.OldSolution);
                     var removedDocuments = documentRemovedChanges.GetProjectChanges()
                         .SelectMany(x => x.GetRemovedDocuments());
-                    await DocumentRemovedAction(removedDocuments);
+                    await DocumentRemovedActionAsync(removedDocuments);
                     break;
                 case WorkspaceChangeKind.DocumentReloaded:
                     break;
@@ -87,8 +143,9 @@ namespace VSIXProject5.Events
                 case WorkspaceChangeKind.AdditionalDocumentChanged:
                     break;
                 default:
-                    throw new Exception("Unexpected Case");
+                    break;
             }
+            profiler.Stop();
         }
     }
 }

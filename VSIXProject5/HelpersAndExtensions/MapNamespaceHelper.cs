@@ -3,21 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VSIXProject5.Indexers.Models;
+using IBatisSuperHelper.Indexers.Models;
 
-namespace VSIXProject5.HelpersAndExtensions
+namespace IBatisSuperHelper.HelpersAndExtensions
 {
     public static class MapNamespaceHelper
     {
         public static Tuple<string,string> DetermineMapNamespaceQueryPairFromCodeInput(string queryWithNamespace)
         {
             if (queryWithNamespace == null)
-                return null;
+               return Tuple.Create(string.Empty, string.Empty);
 
             var splited = queryWithNamespace.Split('.');
             if(splited.Count() < 2)
             {
-                return Tuple.Create<string,string>(null, queryWithNamespace);
+                return Tuple.Create(string.Empty, queryWithNamespace);
             }
 
             var query = splited.Last();
@@ -26,15 +26,15 @@ namespace VSIXProject5.HelpersAndExtensions
 
         public static string CreateFullQueryString(string mapNamespace, string queryName)
         {
-            return queryName == null? null : (string.IsNullOrEmpty(mapNamespace)?queryName:$"{mapNamespace}.{queryName}");
+            return string.IsNullOrEmpty(queryName) ? string.Empty : (string.IsNullOrEmpty(mapNamespace)?queryName:$"{mapNamespace}.{queryName}");
         }
 
         public static string GetQueryWithoutNamespace(string queryWithNamespace)
         {
-            return DetermineMapNamespaceQueryPairFromCodeInput(queryWithNamespace).Item2;
+            return DetermineMapNamespaceQueryPairFromCodeInput(queryWithNamespace)?.Item2;
         }
 
-        public static string GetQueryWithoutNamespace(XmlIndexerResult xmlIndexerResult)
+        public static string GetQueryWithoutNamespace(XmlQuery xmlIndexerResult)
         {
             if(xmlIndexerResult != null && xmlIndexerResult.MapNamespace != null)
             {

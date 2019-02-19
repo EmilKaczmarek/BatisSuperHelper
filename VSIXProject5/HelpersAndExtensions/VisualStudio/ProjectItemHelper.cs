@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VSIXProject5.Helpers
+namespace IBatisSuperHelper.Helpers
 {
     //TODO: rewrote, maybe add some thing like generic recurvice scope?
     public class ProjectItemHelper

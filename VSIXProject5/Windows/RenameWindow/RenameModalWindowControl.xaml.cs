@@ -1,11 +1,11 @@
-﻿namespace VSIXProject5.Windows.RenameWindow
+﻿namespace IBatisSuperHelper.Windows.RenameWindow
 {
     using Microsoft.VisualStudio.PlatformUI;
     using System.Diagnostics.CodeAnalysis;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Input;
-    using VSIXProject5.Windows.RenameWindow.ViewModel;
+    using IBatisSuperHelper.Windows.RenameWindow.ViewModel;
 
     /// <summary>
     /// Interaction logic for RenameModalWindowControl.

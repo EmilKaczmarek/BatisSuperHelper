@@ -1,21 +1,15 @@
-﻿using Microsoft.CodeAnalysis;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 
-namespace VSIXProject5.Indexers.Models
+namespace IBatisSuperHelper.Indexers.Models
 {
-    public class CSharpIndexerResult : BaseIndexerValue
+    public class CSharpIndexerResult
     {
-        public DocumentId DocumentId { get; set; }
-        public int HashCode
-        {
-            get
-            {
-                return base.GetHashCode();
-            }
-        }
+        public List<CSharpQuery> Queries { get; set; }
+        public List<ExpressionResult> Generics { get; set; }
     }
 }

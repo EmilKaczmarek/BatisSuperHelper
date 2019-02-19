@@ -5,8 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.Model;
+using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using IBatisSuperHelper.Loggers;
+using IBatisSuperHelper.Storage;
 
-namespace VSIXProject5.Helpers
+namespace IBatisSuperHelper.Helpers
 {
     public class NodeHelpers
     {
@@ -66,7 +72,7 @@ namespace VSIXProject5.Helpers
             //Posibly not enough to determine if this is proper iBatis method.
             //Placeholder for handling other iBatis method.
             //But what other factors could be used here?
-            return ArgumentListSyntaxNodes.FirstOrDefault(e => e.Arguments.Count > 1) as ArgumentListSyntax;
+            return ArgumentListSyntaxNodes.FirstOrDefault(e => e.Arguments.Count > 1);
         }
         /// <summary>
         /// Looks for Argument of type String, and returns it.
@@ -75,9 +81,12 @@ namespace VSIXProject5.Helpers
         /// <returns></returns>
         public ArgumentSyntax GetArgumentSyntaxOfStringType(ArgumentListSyntax argumentList)
         {
-            ISymbol stringISymbol= _semanticModel.Compilation.GetTypeByMetadataName(typeof(String).FullName);
+            if (argumentList == null)
+                return null;
+
+            ISymbol stringISymbol = _semanticModel.Compilation.GetTypeByMetadataName(typeof(String).FullName);
             var arguments = argumentList.Arguments;
-            foreach(var argument in arguments)
+            foreach (var argument in arguments)
             {
                 var childNodes = argument.ChildNodes();
                 var firstChildNode = childNodes.First();
@@ -93,7 +102,7 @@ namespace VSIXProject5.Helpers
                 else
                 {
                     //NULL type? check maybe it's function/expression?
-                    if (typeInfo.ConvertedType.Name.Equals("Func")){
+                    if (typeInfo.ConvertedType.Name.Equals("Func")) {
                         //this is Function! now, lets test if this contains iBatis querry
                         var nodes = argument.DescendantNodes();
                         var syntaxArguments = GetArgumentListSyntaxFromSyntaxNodesWhereArgumentsAreNotEmpty(nodes);
@@ -108,6 +117,7 @@ namespace VSIXProject5.Helpers
         /// Get text presentation of Query argument value
         /// </summary>
         /// <param name="SyntaxNodes"></param>
+        [Obsolete("Old logic for expression analysis. Use overload instead", false)]
         public String GetQueryStringFromSyntaxNodes(IEnumerable<SyntaxNode> SyntaxNodes)
         {
             if (IsAnySyntaxNodeContainIBatisNamespace(SyntaxNodes))
@@ -117,10 +127,61 @@ namespace VSIXProject5.Helpers
 
                 var queryArgument = GetArgumentSyntaxOfStringType(singleArgumentListSyntax);
                 var constantValue = _semanticModel.GetConstantValue(queryArgument.Expression).Value;
-                
-                return constantValue != null?constantValue.ToString(): queryArgument.ToString().Replace("\"", "").Trim();//TODO: Use scripting to handle even more crazy cases.
+
+                return constantValue != null ? constantValue.ToString() : queryArgument.ToString().Replace("\"", "").Trim();
             }
             return null;
+        }
+
+        /// <summary>
+        /// Get text presentation of Query argument expression if possible
+        /// </summary>
+        /// <param name="SyntaxNodes"></param>
+        /// <param name="allDocumentNodes"></param>
+        /// <param name="document"></param>
+        public ExpressionResult GetQueryStringFromSyntaxNodes(Document document, IEnumerable<SyntaxNode> SyntaxNodes, IEnumerable<SyntaxNode> allDocumentNodes)
+        {
+            if (IsAnySyntaxNodeContainIBatisNamespace(SyntaxNodes))
+            {
+                var syntaxArguments = GetArgumentListSyntaxFromSyntaxNodesWhereArgumentsAreNotEmpty(SyntaxNodes);
+                var singleArgumentListSyntax = GetProperArgumentSyntaxNode(syntaxArguments);
+
+                var queryArgument = GetArgumentSyntaxOfStringType(singleArgumentListSyntax);
+                if (queryArgument == null)
+                {
+                    var allArgumentSyntaxes = SyntaxNodes.OfType<ArgumentListSyntax>();
+                    var oneArgumentSyntaxParent = allArgumentSyntaxes.First().Parent;
+                    var resolveResult = GetMethodInfoForNode(oneArgumentSyntaxParent, _semanticModel);
+
+                    var genericExists = PackageStorage.GenericMethods.TryGetValue(resolveResult, out ExpressionResult result);
+                    if (genericExists)
+                    {
+                        return result;
+                    }
+                    return null;
+                }
+                return new ExpressionResolver().GetStringValueOfExpression(document, queryArgument?.Expression, allDocumentNodes, _semanticModel);
+            }
+            return null;
+        }
+
+        public SyntaxKind GetExpressionKindForBatisMethodArgument(IEnumerable<SyntaxNode> SyntaxNodes)
+        {
+            if (IsAnySyntaxNodeContainIBatisNamespace(SyntaxNodes))
+            {
+                var syntaxArguments = GetArgumentListSyntaxFromSyntaxNodesWhereArgumentsAreNotEmpty(SyntaxNodes);
+                var singleArgumentListSyntax = GetProperArgumentSyntaxNode(syntaxArguments);
+
+                var queryArgument = GetArgumentSyntaxOfStringType(singleArgumentListSyntax);
+
+                if (queryArgument == null)
+                    return SyntaxKind.None;
+
+                var queryArgumentExpression = queryArgument.Expression;
+
+                return queryArgumentExpression != null ? queryArgumentExpression.Kind() : SyntaxKind.None;
+            }
+            return SyntaxKind.None;
         }
 
         public ArgumentSyntax GetProperArgumentNodeInNodes(IEnumerable<SyntaxNode> nodes)
@@ -128,6 +189,51 @@ namespace VSIXProject5.Helpers
             var syntaxArguments = GetArgumentListSyntaxFromSyntaxNodesWhereArgumentsAreNotEmpty(nodes);
             var singleArgumentListSyntax = GetProperArgumentSyntaxNode(syntaxArguments);
             return GetArgumentSyntaxOfStringType(singleArgumentListSyntax);
+        }
+
+        public MethodInfo GetMethodInfoForNode(SyntaxNode node, SemanticModel semModel)
+        {
+            var analyzedNodeSymbolInfo = semModel.GetSymbolInfo(node);
+            return new MethodInfo
+            {
+                MethodName = analyzedNodeSymbolInfo.Symbol.Name,
+                MethodClass = analyzedNodeSymbolInfo.Symbol.ContainingSymbol.Name,
+            };
+        }
+        public string GetClassNameUsedAsGenericParameter(IEnumerable<SyntaxNode> lineNodes, IEnumerable<SyntaxNode> documentNodes)
+        {
+            //Try get GenericNameSyntaxNodes in lineNodes
+            var genericNameSyntax = lineNodes.OfType<GenericNameSyntax>();
+            //There is GenericNameSyntax in line, so just get it...
+            if (genericNameSyntax.Count() == 1)
+            {
+                var singleGenericNameSyntax = genericNameSyntax.First();
+                return singleGenericNameSyntax.TypeArgumentList.Arguments.FirstOrDefault() is PredefinedTypeSyntax firstArgument 
+                    ? firstArgument.Keyword.ValueText 
+                    : null;
+            }
+            //WTF
+            if (genericNameSyntax.Count() > 1)
+            {
+                return null;
+            }
+            else
+            {
+                var identifierNames = lineNodes.OfType<IdentifierNameSyntax>();
+                if (!identifierNames.Any()) return null;
+
+                var allTypeInfos = identifierNames.Select(e => _semanticModel.GetTypeInfo(e)).ToList();
+
+                TypeInfo? genericType = allTypeInfos.FirstOrDefault(e => e.Type != null && (e.Type as INamedTypeSymbol)?.IsGenericType != false);
+                
+                if (genericType != null)
+                {
+                    return (genericType.Value.Type as INamedTypeSymbol)?.TypeArguments.First().Name;
+                }
+            }
+            
+
+            return null;
         }
     }
 }

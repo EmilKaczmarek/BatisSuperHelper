@@ -4,7 +4,7 @@ using System.Globalization;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
-namespace VSIXProject5.Windows.RenameWindow
+namespace IBatisSuperHelper.Windows.RenameWindow
 {
     /// <summary>
     /// Command handler
@@ -33,15 +33,9 @@ namespace VSIXProject5.Windows.RenameWindow
         /// <param name="package">Owner package, not null.</param>
         private RenameModalWindowCommand(Package package)
         {
-            if (package == null)
-            {
-                throw new ArgumentNullException("package");
-            }
+            this.package = package ?? throw new ArgumentNullException("package");
 
-            this.package = package;
-
-            OleMenuCommandService commandService = this.ServiceProvider.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-            if (commandService != null)
+            if (this.ServiceProvider.GetService(typeof(IMenuCommandService)) is OleMenuCommandService commandService)
             {
                 var menuCommandID = new CommandID(CommandSet, CommandId);
                 var menuItem = new MenuCommand(this.ShowToolWindow, menuCommandID);
@@ -94,6 +88,7 @@ namespace VSIXProject5.Windows.RenameWindow
                 throw new NotSupportedException("Cannot create tool window");
             }
 
+            ThreadHelper.ThrowIfNotOnUIThread();
             IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
             Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
         }
