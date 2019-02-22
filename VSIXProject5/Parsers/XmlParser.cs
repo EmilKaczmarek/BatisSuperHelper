@@ -75,6 +75,19 @@ namespace IBatisSuperHelper.Parsers
             }).ToList();
         }
 
+        public string GetQueryAtLineOrNull(int lineNumber, bool forceNoNamespace)
+        {
+            if (forceNoNamespace)
+            {
+                var nodes = _xmlDocument.DocumentNode.Descendants();
+                var lineNode = GetFirstStatmentNodeForLineOrNull(nodes, lineNumber);
+
+                return lineNode?.Id;
+            }
+
+            return GetQueryAtLineOrNull(lineNumber);
+        }
+
         public string GetQueryAtLineOrNull(int lineNumber)
         {
             var nodes = _xmlDocument.DocumentNode.Descendants();
