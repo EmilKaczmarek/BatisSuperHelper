@@ -24,9 +24,6 @@ namespace IBatisSuperHelper.VSIntegration.BatisFilesTextViewIntegration
         [Import]
         IClassifierAggregatorService _classifierAggregatorService = null;
 
-        [Import]
-        IBufferTagAggregatorFactoryService _s = null;
-
         public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
         {
             if (!buffer.Properties.TryGetProperty(typeof(ErrorListProvider), out ErrorListProvider errorProvider))
