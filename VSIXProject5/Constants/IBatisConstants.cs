@@ -27,8 +27,8 @@ namespace IBatisSuperHelper.Constants
             "Delete",
             "Insert",           
             "Update",
-
         };
+
         public const string StatementsRootElementName = "statements";
         public const string StatementsRootElementXPath = "/sqlmap[1]/statements[1]";
         public const string StatmentIdAttributeName = "id";

@@ -170,6 +170,8 @@
     <Compile Include="Validation\Helpers\QuerySearchHelp.cs" />
     <Compile Include="Validation\QueryNotExists.cs" />
     <Compile Include="Validation\QueryNotExistsCodeFixProvider.cs" />
+    <Compile Include="VSIntegration\BatisFilesTextViewIntegration\BatisMapErrorTagger.cs" />
+    <Compile Include="VSIntegration\BatisFilesTextViewIntegration\BatisMapErrorTaggerProvider.cs" />
     <Compile Include="VSIntegration\DocumentChanges\Actions\CSharpFileContentOnChange.cs" />
     <Compile Include="VSIntegration\DocumentChanges\Actions\IOnFileContentChange.cs" />
     <Compile Include="VSIntegration\DocumentChanges\Actions\XmlFileContentOnChange.cs" />
