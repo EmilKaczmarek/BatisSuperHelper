@@ -1,0 +1,115 @@
+﻿using IBatisSuperHelper.Constants;
+using IBatisSuperHelper.Parsers;
+using IBatisSuperHelper.Storage;
+using IBatisSuperHelper.VSIntegration.ErrorList;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Classification;
+using Microsoft.VisualStudio.Text.Editor;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace IBatisSuperHelper.Validation.XmlValidators
+{
+    public class QueryUnused : IXmlValidator
+    {
+        private IClassifier _classifier;
+        private SnapshotSpan _span;
+        private ITextDocument _document;
+        private ITextBuffer _buffer;
+        private XmlParser _xmlParser;
+
+        private readonly List<BatisError> _errors = new List<BatisError>();
+        public List<BatisError> Errors => _errors;
+
+        private bool _isRunning = false;
+        public bool IsRunning => _isRunning;
+
+        public QueryUnused(IClassifier classifier, SnapshotSpan span, ITextDocument document, ITextBuffer buffer)
+        {
+            _classifier = classifier;
+            _span = span;
+            _document = document;
+            _buffer = buffer;
+            _xmlParser = new XmlParser().WithStringReader(new StringReader(span.Snapshot.GetText())).Load();
+
+            ValidateAllSpans();
+        }
+
+        public void OnChange(SnapshotSpan newSpans)
+        {
+            ClearErrors();
+            _span = newSpans;
+            _xmlParser = new XmlParser().WithStringReader(new StringReader(newSpans.Snapshot.GetText())).Load();
+            ValidateAllSpans();
+        }
+
+        public void ClearErrors()
+        {
+            _errors.Clear();
+        }
+        public bool IsDocumentSupportedForValidation()
+        {
+            return _xmlParser.XmlNamespace == IBatisConstants.SqlMapNamespace;
+        }
+
+        private void ValidateAllSpans()
+        {
+            _isRunning = true;
+            ClearErrors();
+            var classificationSpans = _classifier.GetClassificationSpans(_span);
+            foreach (var cSpan in classificationSpans)
+            {
+                if (cSpan.ClassificationType.Classification == "XML Name" && 
+                    IBatisConstants.StatementNames.Contains(cSpan.Span.GetText())
+                    && cSpan.Span.Start.GetContainingLine().Extent.GetText().Contains("id"))
+                {
+                    var line = cSpan.Span.Start.GetContainingLine();
+                    var mapNamespace = _xmlParser.MapNamespace;
+                    if (_xmlParser.HasSelectedLineValidQuery(line.LineNumber + 1))
+                    {
+                        var test = PackageStorage.GenericMethods;
+                        var query = _xmlParser.GetQueryAtLineOrNull(line.LineNumber + 1, true);
+                        var queryUsages = PackageStorage.CodeQueries.GetKeysByQueryId(query, Storage.Providers.NamespaceHandlingType.HYBRID_NAMESPACE);
+                        if (!queryUsages.Any())
+                        {
+                            var statmentIdCSpan = classificationSpans.FirstOrDefault(e => 
+                                e.Span.GetText().Trim() == query && 
+                                e.Span.IntersectsWith(line.Extent));
+
+                            AddError(line, statmentIdCSpan?.Span??cSpan.Span, $"Query {query} is unused.");
+                        }
+                    }
+                }
+            }
+            TableDataSource.Instance.AddErrors(_errors);
+            _isRunning = false;
+        }
+
+        private void AddError(ITextSnapshotLine line, SnapshotSpan span, string message)
+        {
+            var error = new BatisError
+            {
+                Span = span,
+                Text = message,
+                Line = line.LineNumber,
+                Column = span.Start.Position - line.Start.Position,
+                Category = TaskCategory.Misc,
+                Document = _document.FilePath,
+            };
+
+            if (!_errors.Any(e=>e.Line == error.Line && 
+                                e.Column == error.Column && 
+                                e.Text == error.Text &&
+                                e.Document == error.Document))
+            {
+                _errors.Add(error);
+            }
+        }
+    }
+}

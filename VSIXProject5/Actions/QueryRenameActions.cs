@@ -42,7 +42,7 @@ namespace IBatisSuperHelper.Actions
             _textManager = package.TextManager;
             _editorAdaptersFactory = package.EditorAdaptersFactory;
             _statusBar = new StatusBarIntegration(package.IStatusBar);
-            _envDTE = package.EnvDTE;
+            _envDTE = GotoAsyncPackage.EnvDTE;
             _workspace = package.Workspace;
         }
 
@@ -68,7 +68,7 @@ namespace IBatisSuperHelper.Actions
         {
             _documentProcessor.TryResolveQueryValueAtCurrentSelectedLine(out ExpressionResult expressionResult, out string queryValue);
             _finalActionFactory
-                       .GetFinalRenameQueryActionsExecutor(_statusBar, _commandWindow, package.EnvDTE, package.Workspace)
+                       .GetFinalRenameQueryActionsExecutor(_statusBar, _commandWindow, GotoAsyncPackage.EnvDTE, package.Workspace)
                        .Execute(queryValue, expressionResult);
         }
     }
