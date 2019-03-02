@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.Shell;
+﻿using IBatisSuperHelper.Validation.XmlValidators;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
@@ -18,6 +19,8 @@ namespace IBatisSuperHelper.VSIntegration.BatisFilesTextViewIntegration
     [TagType(typeof(ErrorTag))]
     public class BatisMapErrorTaggerProvider : ITaggerProvider
     {
+        private IWpfTextView _view;
+
         [Import]
         private ITextDocumentFactoryService TextDocumentFactoryService { get; set; }
 
@@ -29,12 +32,20 @@ namespace IBatisSuperHelper.VSIntegration.BatisFilesTextViewIntegration
             if (!buffer.Properties.TryGetProperty(typeof(ErrorListProvider), out ErrorListProvider errorProvider))
                 return null;
 
-            if (!buffer.Properties.TryGetProperty(typeof(IWpfTextView), out IWpfTextView view))
+            if (!buffer.Properties.TryGetProperty(typeof(IWpfTextView), out IWpfTextView _view))
                 return null;
 
-            TextDocumentFactoryService.TryGetTextDocument(buffer, out ITextDocument document);
-            return new BatisMapErrorTagger(view, _classifierAggregatorService, errorProvider, document) as ITagger<T>;
 
+            TextDocumentFactoryService.TryGetTextDocument(buffer, out ITextDocument document);
+            var classifier = _classifierAggregatorService.GetClassifier(_view.TextBuffer);
+            var span = new SnapshotSpan(_view.TextBuffer.CurrentSnapshot, 0, _view.TextBuffer.CurrentSnapshot.Length);
+
+            var validator = XmlValidatorsAggregator
+                .Create
+                .ForBuffer(classifier, span, document, _view, buffer)
+                .All();
+
+            return new BatisMapErrorTagger(validator, buffer) as ITagger<T>;
         }
     }
 }

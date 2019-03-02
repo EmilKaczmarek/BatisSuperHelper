@@ -1,9 +1,6 @@
 ﻿using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
-using System.Threading.Tasks;
-using IBatisSuperHelper.Constants;
-using Microsoft.VisualStudio.Shell;
 using static IBatisSuperHelper.Constants.EventConstats.VS;
 
 namespace IBatisSuperHelper.Events
@@ -13,7 +10,8 @@ namespace IBatisSuperHelper.Events
         internal class SolutionEventsHandler : IVsSolutionLoadEvents, IVsSolutionEvents
         {
             private Action<SolutionLoad> _handler;
-            public SolutionEventsHandler(Action<SolutionLoad> handlerAction)
+
+            public SolutionEventsHandler(Action<SolutionLoad> handlerAction, IVsSolution solution)
             {
                 if (handlerAction == null)
                     throw new Exception("Event handler action is null");
@@ -47,8 +45,9 @@ namespace IBatisSuperHelper.Events
 
             public int OnAfterBackgroundSolutionLoadComplete()
             {
-                 _handler(SolutionLoad.SolutionLoadComplete);
                 //Load Xml files from indexer
+                _handler(SolutionLoad.SolutionLoadComplete);
+                
                 return VSConstants.S_OK;
             }
 

@@ -170,6 +170,10 @@
     <Compile Include="Validation\Helpers\QuerySearchHelp.cs" />
     <Compile Include="Validation\QueryNotExists.cs" />
     <Compile Include="Validation\QueryNotExistsCodeFixProvider.cs" />
+    <Compile Include="Validation\XmlValidators\IXmlValidator.cs" />
+    <Compile Include="Validation\XmlValidators\MapNotEmbedded.cs" />
+    <Compile Include="Validation\XmlValidators\QueryUnused.cs" />
+    <Compile Include="Validation\XmlValidators\XmlValidatorsAggregator.cs" />
     <Compile Include="VSIntegration\BatisFilesTextViewIntegration\BatisMapErrorTagger.cs" />
     <Compile Include="VSIntegration\BatisFilesTextViewIntegration\BatisMapErrorTaggerProvider.cs" />
     <Compile Include="VSIntegration\BatisFilesTextViewIntegration\XmlTextViewCreationListener.cs" />
@@ -177,6 +181,10 @@
     <Compile Include="VSIntegration\DocumentChanges\Actions\IOnFileContentChange.cs" />
     <Compile Include="VSIntegration\DocumentChanges\Actions\XmlFileContentOnChange.cs" />
     <Compile Include="VSIntegration\DocumentChanges\DocumentChangesTextViewCreationListener.cs" />
+    <Compile Include="VSIntegration\ErrorList\BatisError.cs" />
+    <Compile Include="VSIntegration\ErrorList\SinkManager.cs" />
+    <Compile Include="VSIntegration\ErrorList\TableDataSource.cs" />
+    <Compile Include="VSIntegration\ErrorList\TableEntriesSnapshot.cs" />
     <Compile Include="VSIntegration\Navigation\DocumentNavigation.cs" />
     <Compile Include="VSIntegration\Navigation\DocumentNavigationInstance.cs" />
     <Compile Include="Windows\DebugConsole\BatisSHelperTestConsole.cs" />

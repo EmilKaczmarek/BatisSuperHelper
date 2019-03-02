@@ -32,7 +32,7 @@ namespace IBatisSuperHelper.VSIntegration.DocumentChanges.Actions
                     textView.TextBuffer.Properties.TryGetProperty(typeof(ITextDocument), out textDoc);
                     using (var stringReader = new StringReader(snapshot.GetText()))
                     {
-                        var project = (Goto.Instance.package as GotoAsyncPackage).EnvDTE.Solution.FindProjectItem(textDoc.FilePath).ContainingProject.Name;
+                        var project = GotoAsyncPackage.EnvDTE.Solution.FindProjectItem(textDoc.FilePath).ContainingProject.Name;
                         XmlParser parser = new XmlParser().WithStringReader(stringReader).WithFileInfo(textDoc.FilePath, project).Load();
                         if (parser.XmlNamespace == IBatisConstants.SqlMapNamespace)
                         {
