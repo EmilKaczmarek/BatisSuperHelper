@@ -34,17 +34,14 @@ namespace IBatisSuperHelper.VSIntegration.BatisFilesTextViewIntegration
 
             if (!buffer.Properties.TryGetProperty(typeof(IWpfTextView), out IWpfTextView _view))
                 return null;
-
-
+    
             TextDocumentFactoryService.TryGetTextDocument(buffer, out ITextDocument document);
             var classifier = _classifierAggregatorService.GetClassifier(_view.TextBuffer);
             var span = new SnapshotSpan(_view.TextBuffer.CurrentSnapshot, 0, _view.TextBuffer.CurrentSnapshot.Length);
 
             var validator = XmlValidatorsAggregator
                 .Create
-                .ForBuffer(classifier, span, document, _view, buffer)
-                .All();
-
+                .AllValidatorsForBuffer(classifier, span, document, _view, buffer);
             return new BatisMapErrorTagger(validator, buffer) as ITagger<T>;
         }
     }

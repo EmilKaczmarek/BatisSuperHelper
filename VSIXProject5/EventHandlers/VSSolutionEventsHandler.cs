@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio;
+﻿using IBatisSuperHelper.VSIntegration.ErrorList;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using static IBatisSuperHelper.Constants.EventConstats.VS;
@@ -90,6 +91,8 @@ namespace IBatisSuperHelper.Events
             {
                 //Remove everything from indexer instance
                 _handler(SolutionLoad.SolutionOnClose);
+                //Remove Errors
+                TableDataSource.Instance.CleanAllErrors();
                 return 1;
             }
 

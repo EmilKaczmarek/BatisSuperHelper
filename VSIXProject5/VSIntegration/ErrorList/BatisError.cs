@@ -14,6 +14,7 @@ namespace IBatisSuperHelper.VSIntegration.ErrorList
         public string BuildTools => "Batis";
         public string ErrorCategory => "Batis";
         public string ErrorCode { get; set; }
+        public string Project { get; set; }
         public __VSERRORCATEGORY ErrorSeverity { get; set; } = __VSERRORCATEGORY.EC_WARNING;
         public VSTASKCATEGORY TaskCategory { get; set; }
         public SnapshotSpan Span { get; set; }

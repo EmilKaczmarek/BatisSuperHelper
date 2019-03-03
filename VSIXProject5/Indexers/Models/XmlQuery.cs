@@ -11,5 +11,7 @@ namespace IBatisSuperHelper.Indexers.Models
         public string MapNamespace { get; set; }
         public string FullyQualifiedQuery { get; set; }
         public bool UsesStatementNamespaces { get; set; }
+        public int? XmlLine { get; set; }
+        public int? XmlLineColumn { get; set; }
     }
 }
