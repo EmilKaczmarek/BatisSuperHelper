@@ -97,6 +97,7 @@ namespace IBatisSuperHelper
         private uint _solutionEventsCookie;
         private Events2 _envDteEvents;
         private ProjectItemsEvents _envDteProjectItemsEvents;
+        private EnvDTE.BuildEvents _buildEvents;
         //Public fields
         public IVsSolution Solution;
         public static DTE2 EnvDTE;
@@ -148,6 +149,11 @@ namespace IBatisSuperHelper
                 _envDteProjectItemsEvents.ItemAdded += projectItemEvents.ItemAdded;
                 _envDteProjectItemsEvents.ItemRemoved += projectItemEvents.ItemRemoved;
                 _envDteProjectItemsEvents.ItemRenamed += projectItemEvents.ItemRenamed;
+
+                EventHandlers.BuildEvents buildEvents = new EventHandlers.BuildEvents();
+                _buildEvents = _envDteEvents.BuildEvents;
+                _buildEvents.OnBuildBegin += buildEvents.OnBuildBegin;
+                
             }
 
             OutputWindowLogger.Init(await GetServiceAsync(typeof(SVsOutputWindow)) as SVsOutputWindow);

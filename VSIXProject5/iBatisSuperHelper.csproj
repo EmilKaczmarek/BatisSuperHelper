@@ -128,6 +128,7 @@
     <Compile Include="Actions\TextProviders\TextManagerPropertiesProvider.cs" />
     <Compile Include="Actions\QueryRenameActions.cs" />
     <Compile Include="Constants\EventConstats.cs" />
+    <Compile Include="EventHandlers\BuildEvents.cs" />
     <Compile Include="EventHandlers\ProjectItemEvents.cs" />
     <Compile Include="EventHandlers\VSSolutionEventsHandler.cs" />
     <Compile Include="EventHandlers\WorkspaceEvents.cs" />
@@ -170,6 +171,8 @@
     <Compile Include="Validation\Helpers\QuerySearchHelp.cs" />
     <Compile Include="Validation\QueryNotExists.cs" />
     <Compile Include="Validation\QueryNotExistsCodeFixProvider.cs" />
+    <Compile Include="Validation\XmlValidators\IBufferValidator.cs" />
+    <Compile Include="Validation\XmlValidators\IBuildDocumentValidator.cs" />
     <Compile Include="Validation\XmlValidators\IXmlValidator.cs" />
     <Compile Include="Validation\XmlValidators\MapNotEmbedded.cs" />
     <Compile Include="Validation\XmlValidators\QueryUnused.cs" />

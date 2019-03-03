@@ -20,18 +20,21 @@ namespace IBatisSuperHelper.VSIntegration.BatisFilesTextViewIntegration
     {
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
-        private IXmlValidator _validator;
+        private IBufferValidator _validator;
         private ITextBuffer _buffer;
 
         private ITextSnapshot _currentSnapshot;
 
-        public BatisMapErrorTagger(IXmlValidator xmlValidator, ITextBuffer buffer)
+        public BatisMapErrorTagger(IBufferValidator bufferValidator, ITextBuffer buffer)
         {
-            _validator = xmlValidator;
+            _validator = bufferValidator;
 
             _buffer = buffer;
             _currentSnapshot = _buffer.CurrentSnapshot;
             _buffer.Changed += Buffer_Changed;
+
+            _validator.ValidateAllSpans();
+            _validator.AddToErrorList();
         }
 
         public IEnumerable<ITagSpan<IErrorTag>> GetTags(NormalizedSnapshotSpanCollection spans)
@@ -62,6 +65,7 @@ namespace IBatisSuperHelper.VSIntegration.BatisFilesTextViewIntegration
         {
             _currentSnapshot = _buffer.CurrentSnapshot;
             _validator.OnChange(new SnapshotSpan(e.After, 0, e.After.Length));
+            _validator.AddToErrorList();
         }
     }
 }
