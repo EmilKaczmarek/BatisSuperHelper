@@ -1,6 +1,8 @@
-﻿using IBatisSuperHelper.VSIntegration.ErrorList;
+﻿using IBatisSuperHelper.Loggers;
+using IBatisSuperHelper.VSIntegration.ErrorList;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
+using NLog;
 using System;
 using static IBatisSuperHelper.Constants.EventConstats.VS;
 
@@ -46,9 +48,16 @@ namespace IBatisSuperHelper.Events
 
             public int OnAfterBackgroundSolutionLoadComplete()
             {
-                //Load Xml files from indexer
-                _handler(SolutionLoad.SolutionLoadComplete);
-                
+                try
+                {
+                    //Load Xml files from indexer
+                    _handler(SolutionLoad.SolutionLoadComplete);
+                }
+                catch (Exception ex)
+                {
+                    LogManager.GetLogger("error").Error(ex, "SolutionEventsHandler.OnAfterBackgroundSolutionLoadComplete");
+                    OutputWindowLogger.WriteLn($"Exception occured during SolutionEventsHandler.OnAfterBackgroundSolutionLoadComplete: { ex.Message}");
+                }
                 return VSConstants.S_OK;
             }
 
@@ -89,10 +98,18 @@ namespace IBatisSuperHelper.Events
 
             public int OnQueryCloseSolution(object pUnkReserved, ref int pfCancel)
             {
-                //Remove everything from indexer instance
-                _handler(SolutionLoad.SolutionOnClose);
-                //Remove Errors
-                TableDataSource.Instance.CleanAllErrors();
+                try
+                {
+                    //Remove everything from indexer instance
+                    _handler(SolutionLoad.SolutionOnClose);
+                    //Remove Errors
+                    TableDataSource.Instance.CleanAllErrors();
+                }
+                catch (Exception ex)
+                {
+                    LogManager.GetLogger("error").Error(ex, "SolutionEventsHandler.OnQueryCloseSolution");
+                    OutputWindowLogger.WriteLn($"Exception occured during SolutionEventsHandler.OnQueryCloseSolution: { ex.Message}");
+                }
                 return 1;
             }
 

@@ -17,7 +17,7 @@ namespace VSIXProject5.Validation
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class QueryNotExists : DiagnosticAnalyzer
     {
-        public const string DiagnosticId = "QueryNotExists";
+        public const string DiagnosticId = "IB001";
 
         public static readonly DiagnosticDescriptor QueryNotExistsRule = new DiagnosticDescriptor(
             DiagnosticId,

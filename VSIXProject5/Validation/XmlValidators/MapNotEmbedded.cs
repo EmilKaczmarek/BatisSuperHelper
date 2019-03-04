@@ -100,6 +100,7 @@ namespace IBatisSuperHelper.Validation.XmlValidators
                 Column = span.Start.Position - line.Start.Position,
                 Category = TaskCategory.Misc,
                 Document = _document.FilePath,
+                ErrorCode = "IB003",
             };
 
             if (!_errors.Any(e => e.Line == error.Line &&
@@ -120,6 +121,7 @@ namespace IBatisSuperHelper.Validation.XmlValidators
                 Column = 0,
                 Category = TaskCategory.Misc,
                 Document = _filePath,
+                ErrorCode = "IB003",
             };
 
             if (!_errors.Any(e => e.Line == error.Line &&

@@ -127,6 +127,7 @@ namespace IBatisSuperHelper.Validation.XmlValidators
                 Column = query.XmlLineColumn.HasValue ? query.XmlLineColumn.Value + 2 : 0,
                 Category = TaskCategory.Misc,
                 Document = _filePath,
+                ErrorCode = "IB002",
             };
 
             if (!_errors.Any(e => e.Line == error.Line &&
@@ -148,6 +149,7 @@ namespace IBatisSuperHelper.Validation.XmlValidators
                 Column = span.Start.Position - line.Start.Position,
                 Category = TaskCategory.Misc,
                 Document = _document.FilePath,
+                ErrorCode = "IB002",
             };
 
             if (!_errors.Any(e=>e.Line == error.Line && 

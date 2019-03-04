@@ -25,6 +25,7 @@ using IBatisSuperHelper.Actions.DocumentProcessors;
 using IBatisSuperHelper.Actions.FinalActions.Factory;
 using IBatisSuperHelper.Actions.DocumentProcessors.Factory;
 using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using IBatisSuperHelper.Loggers;
 
 namespace IBatisSuperHelper.Actions
 {
@@ -38,7 +39,7 @@ namespace IBatisSuperHelper.Actions
 
         public QueryRenameActions(GotoAsyncPackage package) : base(package.TextManager, package.EditorAdaptersFactory, new StatusBarIntegration(package.IStatusBar))
         {
-            base.package = package;
+            base.Package = package;
             _textManager = package.TextManager;
             _editorAdaptersFactory = package.EditorAdaptersFactory;
             _statusBar = new StatusBarIntegration(package.IStatusBar);
@@ -66,10 +67,19 @@ namespace IBatisSuperHelper.Actions
 
         public override void MenuItemCallback(object sender, EventArgs e)
         {
-            _documentProcessor.TryResolveQueryValueAtCurrentSelectedLine(out ExpressionResult expressionResult, out string queryValue);
-            _finalActionFactory
-                       .GetFinalRenameQueryActionsExecutor(_statusBar, _commandWindow, GotoAsyncPackage.EnvDTE, package.Workspace)
-                       .Execute(queryValue, expressionResult);
+            try
+            {
+                _documentProcessor.TryResolveQueryValueAtCurrentSelectedLine(out ExpressionResult expressionResult, out string queryValue);
+                _finalActionFactory
+                           .GetFinalRenameQueryActionsExecutor(_statusBar, _commandWindow, GotoAsyncPackage.EnvDTE, Package.Workspace)
+                           .Execute(queryValue, expressionResult);
+            }
+            catch (Exception ex)
+            {
+                LogManager.GetLogger("error").Error(ex, "QueryRenameActions.MenuItemCallback");
+                OutputWindowLogger.WriteLn($"Exception occured during QueryRenameActionsMenuCallback: {ex.Message}");
+            }
+            
         }
     }
 }
