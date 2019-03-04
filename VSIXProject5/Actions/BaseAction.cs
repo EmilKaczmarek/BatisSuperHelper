@@ -17,9 +17,7 @@ namespace IBatisSuperHelper.Actions
 {
     public abstract class BaseActions
     {
-        private static Logger _log = LogManager.GetCurrentClassLogger();
-
-        internal GotoAsyncPackage package { get; set; }
+        internal GotoAsyncPackage Package { get; set; }
         public abstract void MenuItemCallback(object sender, EventArgs e);
 
         private IVsTextManager _textManager;

@@ -6,10 +6,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EnvDTE;
+using IBatisSuperHelper.Loggers;
 using IBatisSuperHelper.VSIntegration.ErrorList;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
+using NLog;
 
 namespace IBatisSuperHelper.Validation.XmlValidators
 {
@@ -75,17 +77,33 @@ namespace IBatisSuperHelper.Validation.XmlValidators
 
         public void ValidateBuildDocument()
         {
-            foreach (var validator in _validators)
+            try
             {
-                (validator as IBuildDocumentValidator).ValidateBuildDocument();
+                foreach (var validator in _validators)
+                {
+                    (validator as IBuildDocumentValidator).ValidateBuildDocument();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogManager.GetLogger("error").Error(ex, "XmlValidatorsAggregator.ValidateBuildDocument");
+                OutputWindowLogger.WriteLn($"Exception occured during XmlValidatorsAggregator.ValidateBuildDocument: { ex.Message}");
             }
         }
 
         public void ValidateAllSpans()
         {
-            foreach (var validator in _validators)
+            try
             {
-                (validator as IBufferValidator).ValidateAllSpans();
+                foreach (var validator in _validators)
+                {
+                    (validator as IBufferValidator).ValidateAllSpans();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogManager.GetLogger("error").Error(ex, "XmlValidatorsAggregator.ValidateAllSpans");
+                OutputWindowLogger.WriteLn($"Exception occured during XmlValidatorsAggregator.ValidateAllSpans: { ex.Message}");
             }
         }
 
