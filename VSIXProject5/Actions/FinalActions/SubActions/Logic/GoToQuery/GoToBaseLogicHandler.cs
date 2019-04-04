@@ -14,14 +14,14 @@ using IBatisSuperHelper.Windows.ResultWindow.ViewModel;
 
 namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Logic
 {
-    public abstract class BaseLogicHandler<T> where T : BaseIndexerValue
+    public abstract class GoToBaseLogicHandler<T> where T : BaseIndexerValue
     {
         protected StatusBarIntegration StatusBar;
         protected ToolWindowPane ToolWindowPane;
 
-        private BaseLogicHandler() { }
+        private GoToBaseLogicHandler() { }
 
-        protected BaseLogicHandler(StatusBarIntegration statusBar, ToolWindowPane toolWindowPane)
+        protected GoToBaseLogicHandler(StatusBarIntegration statusBar, ToolWindowPane toolWindowPane)
         {
             StatusBar = statusBar;
             ToolWindowPane = toolWindowPane;

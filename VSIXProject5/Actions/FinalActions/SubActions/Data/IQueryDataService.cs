@@ -17,5 +17,6 @@ namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Data
         List<T> GetStatmentsFromKeys(List<IndexerKey> keys);
         List<ExpressionResult> GetResultsForGenericQueries(string queryResult, NamespaceHandlingType namespaceHandlingLogic);
         List<ResultWindowViewModel> PrepareViewModels(List<ExpressionResult> genericResults, ExpressionResult expressionResult, List<T> nonGenericResults);
+        void Rename(IndexerKey key, string value);
     }
 }

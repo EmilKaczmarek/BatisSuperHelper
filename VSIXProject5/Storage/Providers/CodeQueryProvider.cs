@@ -249,5 +249,15 @@ namespace IBatisSuperHelper.Storage.Domain
         {
             codeStatments.Clear();
         }
+
+        public List<List<CSharpQuery>> GetAllValues()
+        {
+            return codeStatments.Select(e => e.Value).ToList();
+        }
+
+        public List<IndexerKey> GetAllKeys()
+        {
+            return codeStatments.Keys.ToList();
+        }
     }
 }

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using IBatisSuperHelper.Actions.ActionValidators;
 using IBatisSuperHelper.Helpers;
 using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace IBatisSuperHelper.Actions.DocumentProcessors
 {
@@ -33,7 +34,10 @@ namespace IBatisSuperHelper.Actions.DocumentProcessors
                .WithFunctionList("jump", new List<Func<int, bool>>{
                    (selectedLine) => DoesNodeOrReturnNodeContainBatisNamespace()
                })
-               .WithFunctionList("rename", new List<Func<int, bool>>());
+               .WithFunctionList("rename", new List<Func<int, bool>>
+               {
+                   (selectedLine)=>DoesNodeOrReturnNodeContainBatisNamespace() && IsAnyNodeLiteralStringExpression()
+               });
         }
 
         public CSharpDocumentProcessor(object documentContent, int selectedLineNumber, IActionValidator validator)
@@ -83,6 +87,17 @@ namespace IBatisSuperHelper.Actions.DocumentProcessors
             }
 
             return _helperInstance.IsAnySyntaxNodeContainIBatisNamespace(nodesAtLine);
+        }
+
+        private bool IsAnyNodeLiteralStringExpression()
+        {
+            var nodesAtLine = _lineNodes;
+            var returnNode = _helperInstance.GetFirstNodeOfReturnStatmentSyntaxType(nodesAtLine);
+            if (returnNode != null)
+            {
+                nodesAtLine = returnNode.DescendantNodesAndSelf();
+            }
+            return _helperInstance.GetExpressionKindForBatisMethodArgument(nodesAtLine) == SyntaxKind.StringLiteralExpression;
         }
 
         public ExpressionResult GetQueryValueAtCurrentSelectedLine()

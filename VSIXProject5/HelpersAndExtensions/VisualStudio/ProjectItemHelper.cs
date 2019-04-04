@@ -38,7 +38,6 @@ namespace IBatisSuperHelper.Helpers
                 var currentItem = (ProjectItem)items.Current;
                 _projectItems.Add(GetFiles(currentItem));
             }
-
             return projectItem;
         }
         /// <summary>

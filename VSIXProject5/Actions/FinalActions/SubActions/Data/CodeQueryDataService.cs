@@ -13,7 +13,7 @@ using IBatisSuperHelper.Windows.ResultWindow.ViewModel;
 
 namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Data
 {
-    public class CodeQueryDataService<T> : IQueryDataService<CSharpQuery> where T: BaseIndexerValue
+    public class CodeQueryDataService : IQueryDataService<CSharpQuery>
     {
         public List<ExpressionResult> GetResultsForGenericQueries(string queryResult, NamespaceHandlingType namespaceHandlingLogic)
         {
@@ -27,14 +27,25 @@ namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Data
             return genericResult;
         }
 
-        public List<IndexerKey> GetStatmentKeys(string queryResult, NamespaceHandlingType namespaceHandlingLogic)
+        public List<KeyValuePair<IndexerKey, List<CSharpQuery>>> GetKeyStatmentPairs(string queryResult, NamespaceHandlingType namespaceHandlingLogicType)
         {
-            return PackageStorage.CodeQueries.GetKeysByQueryId(queryResult, namespaceHandlingLogic);
+            var keys = GetStatmentKeys(queryResult, namespaceHandlingLogicType);
+            return keys.Select(e => new KeyValuePair<IndexerKey, List<CSharpQuery>>(e, GetSingleStatmentFromKey(e))).ToList();
+        }
+
+        public List<IndexerKey> GetStatmentKeys(string queryResult, NamespaceHandlingType namespaceHandlingLogicType)
+        {
+            return PackageStorage.CodeQueries.GetKeysByQueryId(queryResult, namespaceHandlingLogicType);
         }
 
         public List<CSharpQuery> GetStatmentsFromKeys(List<IndexerKey> keys)
         {
             return keys.Select(PackageStorage.CodeQueries.GetValue).SelectMany(x => x).ToList();
+        }
+
+        public List<CSharpQuery> GetSingleStatmentFromKey(IndexerKey key)
+        {
+            return PackageStorage.CodeQueries.GetValueOrNull(key);
         }
 
         public List<ResultWindowViewModel> PrepareViewModels(List<ExpressionResult> genericResults, ExpressionResult expressionResult, List<CSharpQuery> nonGenericResults)
@@ -55,6 +66,11 @@ namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Data
                FilePath = x.QueryFilePath,
                Namespace = MapNamespaceHelper.DetermineMapNamespaceQueryPairFromCodeInput(x.QueryId).Item1,
            })).ToList();
+        }
+
+        public void Rename(IndexerKey key, string value)
+        {
+            PackageStorage.CodeQueries.RenameQuery(key, value);
         }
     }
 }
