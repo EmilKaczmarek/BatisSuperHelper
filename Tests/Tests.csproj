@@ -114,9 +114,9 @@
     <EmbeddedResource Include="Resources\FieldAssignedByCtor.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\VSIXProject5\iBatisSuperHelper.csproj">
+    <ProjectReference Include="..\Extension\Extension.csproj">
       <Project>{b06a0ae7-66b0-423c-9523-2e312019fec7}</Project>
-      <Name>iBatisSuperHelper</Name>
+      <Name>Extension</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
