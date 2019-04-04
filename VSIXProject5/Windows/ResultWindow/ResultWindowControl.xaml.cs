@@ -77,7 +77,10 @@
         private void NavigateToSelected(object sender)
         {
             var selectedItem = (sender as ListView).SelectedItem as ResultWindowViewModel;
-            DocumentNavigationInstance.instance.OpenDocumentAndHighlightLine(selectedItem.FilePath, selectedItem.Line);
+            if (selectedItem != null)
+            {
+                DocumentNavigationInstance.instance.OpenDocumentAndHighlightLine(selectedItem.FilePath, selectedItem.Line);
+            }
         }
     }
 }

@@ -93,19 +93,21 @@ namespace IBatisSuperHelper
 
         #region Package Members
         //Event related fields
-        private IVsSolution _solution;
         private SolutionEventsHandler _solutionEventsHandler;
         private uint _solutionEventsCookie;
         private Events2 _envDteEvents;
         private ProjectItemsEvents _envDteProjectItemsEvents;
+        private EnvDTE.BuildEvents _buildEvents;
         //Public fields
-        public DTE2 EnvDTE;
+        public IVsSolution Solution;
+        public static DTE2 EnvDTE;
         public IVsTextManager TextManager;
         public IVsEditorAdaptersFactoryService EditorAdaptersFactory;
         public IVsStatusbar IStatusBar;
         public ToolWindowPane ResultWindow;
         public Window SolutionExplorer;
         public VisualStudioWorkspace Workspace;
+        public static GotoAsyncPackage Instance; 
 
         protected override async System.Threading.Tasks.Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
@@ -123,7 +125,7 @@ namespace IBatisSuperHelper
             EditorAdaptersFactory = componentModel.GetService<IVsEditorAdaptersFactoryService>();
             ResultWindow = FindToolWindow(typeof(ResultWindow), 0, true);
 
-            DocumentNavigationInstance.InjectDTE(this.EnvDTE);
+            DocumentNavigationInstance.InjectDTE(GotoAsyncPackage.EnvDTE);
             //Prepare package events
             Workspace = componentModel.GetService<VisualStudioWorkspace>();
             Workspace.WorkspaceChanged += WorkspaceEvents.WorkspaceChanged;
@@ -147,6 +149,11 @@ namespace IBatisSuperHelper
                 _envDteProjectItemsEvents.ItemAdded += projectItemEvents.ItemAdded;
                 _envDteProjectItemsEvents.ItemRemoved += projectItemEvents.ItemRemoved;
                 _envDteProjectItemsEvents.ItemRenamed += projectItemEvents.ItemRenamed;
+
+                EventHandlers.BuildEvents buildEvents = new EventHandlers.BuildEvents();
+                _buildEvents = _envDteEvents.BuildEvents;
+                _buildEvents.OnBuildBegin += buildEvents.OnBuildBegin;
+                
             }
 
             OutputWindowLogger.Init(await GetServiceAsync(typeof(SVsOutputWindow)) as SVsOutputWindow);
@@ -155,15 +162,17 @@ namespace IBatisSuperHelper
 
             IStatusBar = await GetServiceAsync(typeof(SVsStatusbar)) as IVsStatusbar;
 
-            _solution = await GetServiceAsync(typeof(SVsSolution)) as IVsSolution;
+            Solution = await GetServiceAsync(typeof(SVsSolution)) as IVsSolution;
             _solutionEventsHandler = new SolutionEventsHandler(
-                new Action<EventConstats.VS.SolutionLoad>(HandleSolutionEvent)
+                new Action<EventConstats.VS.SolutionLoad>(HandleSolutionEvent),
+                Solution
             );
-            _solution.AdviseSolutionEvents(_solutionEventsHandler, out _solutionEventsCookie);
+            Solution.AdviseSolutionEvents(_solutionEventsHandler, out _solutionEventsCookie);
 
             Goto.Initialize(this);
             RenameModalWindowCommand.Initialize(this);
             RenameCommand.Initialize(this);
+            Instance = this;
         }
 
         internal void HandleSolutionEvent(EventConstats.VS.SolutionLoad eventNumber)

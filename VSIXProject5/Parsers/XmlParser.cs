@@ -75,6 +75,36 @@ namespace IBatisSuperHelper.Parsers
             }).ToList();
         }
 
+        public List<XmlQuery> GetMapFileStatmentsWithIdAttributeColumnInfo()
+        {
+            var statementChildNodes = GetChildNodesOfParentByXPath(IBatisConstants.StatementsRootElementXPath);
+            return statementChildNodes.Where(e => IBatisHelper.IsIBatisStatment(e.Name)).Select(e => new XmlQuery
+            {
+                XmlLine = e.Attributes.FirstOrDefault(x => x.Name == "id")?.Line,
+                XmlLineColumn = e.Attributes.FirstOrDefault(x=>x.Name == "id")?.LinePosition,
+                QueryFileName = _fileName,
+                QueryFilePath = _filePath,
+                QueryId = e.Id,
+                FullyQualifiedQuery = IsUsingStatementNamespaces ? MapNamespaceHelper.CreateFullQueryString(MapNamespace, e.Id) : e.Id,
+                QueryLineNumber = e.Line,
+                QueryVsProjectName = _fileProjectName,
+                MapNamespace = MapNamespace
+            }).ToList();
+        }
+
+        public string GetQueryAtLineOrNull(int lineNumber, bool forceNoNamespace)
+        {
+            if (forceNoNamespace)
+            {
+                var nodes = _xmlDocument.DocumentNode.Descendants();
+                var lineNode = GetFirstStatmentNodeForLineOrNull(nodes, lineNumber);
+
+                return lineNode?.Id;
+            }
+
+            return GetQueryAtLineOrNull(lineNumber);
+        }
+
         public string GetQueryAtLineOrNull(int lineNumber)
         {
             var nodes = _xmlDocument.DocumentNode.Descendants();

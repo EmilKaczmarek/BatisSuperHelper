@@ -102,6 +102,7 @@
     <Compile Include="Actions\ActionValidators\FunctionBasedActionValidator.cs" />
     <Compile Include="Actions\ActionValidators\IActionValidator.cs" />
     <Compile Include="Actions\BaseAction.cs" />
+    <Compile Include="Actions\FinalActions\BaseFinalEventActionsExecutor.cs" />
     <Compile Include="Actions\DocumentProcessors\CSharpDocumentProcessor.cs" />
     <Compile Include="Actions\DocumentProcessors\Factory\CSharpDocumentProcessorFactory.cs" />
     <Compile Include="Actions\DocumentProcessors\Factory\DocumentProcessorFactory.cs" />
@@ -111,19 +112,23 @@
     <Compile Include="Actions\FinalActions\Factory\CSharpFinalActionFactory.cs" />
     <Compile Include="Actions\FinalActions\Factory\IFinalActionFactory.cs" />
     <Compile Include="Actions\FinalActions\Factory\XmlFinalActionFactory.cs" />
-    <Compile Include="Actions\FinalActions\FinalEventActionsExecutor.cs" />
+    <Compile Include="Actions\FinalActions\GoToQueryFinalEventActionsExecutor.cs" />
+    <Compile Include="Actions\FinalActions\RenameFinalActionsExecutor.cs" />
     <Compile Include="Actions\FinalActions\SubActions\Data\CodeQueryDataService.cs" />
     <Compile Include="Actions\FinalActions\SubActions\Data\IQueryDataService.cs" />
     <Compile Include="Actions\FinalActions\SubActions\Data\XmlQueryDataService.cs" />
-    <Compile Include="Actions\FinalActions\SubActions\Logic\CodeLogicHandler.cs" />
-    <Compile Include="Actions\FinalActions\SubActions\Logic\BaseLogicHandler.cs" />
-    <Compile Include="Actions\FinalActions\SubActions\Logic\XmlLogicHandler.cs" />
+    <Compile Include="Actions\FinalActions\SubActions\Logic\GoToQuery\GoToCodeLogicHandler.cs" />
+    <Compile Include="Actions\FinalActions\SubActions\Logic\GoToQuery\GoToBaseLogicHandler.cs" />
+    <Compile Include="Actions\FinalActions\SubActions\Logic\GoToQuery\GoToXmlLogicHandler.cs" />
+    <Compile Include="Actions\FinalActions\SubActions\Logic\Rename\RenameCodeLogicHandler.cs" />
+    <Compile Include="Actions\FinalActions\SubActions\Logic\Rename\RenameXmlLogicHandler.cs" />
     <Compile Include="Actions\GoToQueryActions.cs" />
     <Compile Include="Actions\FinalActions\IFinalAction.cs" />
     <Compile Include="Actions\TextProviders\IDocumentPropertiesProvider.cs" />
     <Compile Include="Actions\TextProviders\TextManagerPropertiesProvider.cs" />
     <Compile Include="Actions\QueryRenameActions.cs" />
     <Compile Include="Constants\EventConstats.cs" />
+    <Compile Include="EventHandlers\BuildEvents.cs" />
     <Compile Include="EventHandlers\ProjectItemEvents.cs" />
     <Compile Include="EventHandlers\VSSolutionEventsHandler.cs" />
     <Compile Include="EventHandlers\WorkspaceEvents.cs" />
@@ -163,10 +168,26 @@
     <Compile Include="Storage\Base\GenericStorage.cs" />
     <Compile Include="Storage\Base\IProvider.cs" />
     <Compile Include="Storage\PackageStorage.cs" />
+    <Compile Include="Validation\Helpers\QuerySearchHelp.cs" />
+    <Compile Include="Validation\QueryNotExists.cs" />
+    <Compile Include="Validation\QueryNotExistsCodeFixProvider.cs" />
+    <Compile Include="Validation\XmlValidators\IBufferValidator.cs" />
+    <Compile Include="Validation\XmlValidators\IBuildDocumentValidator.cs" />
+    <Compile Include="Validation\XmlValidators\IXmlValidator.cs" />
+    <Compile Include="Validation\XmlValidators\MapNotEmbedded.cs" />
+    <Compile Include="Validation\XmlValidators\QueryUnused.cs" />
+    <Compile Include="Validation\XmlValidators\XmlValidatorsAggregator.cs" />
+    <Compile Include="VSIntegration\BatisFilesTextViewIntegration\BatisMapErrorTagger.cs" />
+    <Compile Include="VSIntegration\BatisFilesTextViewIntegration\BatisMapErrorTaggerProvider.cs" />
+    <Compile Include="VSIntegration\BatisFilesTextViewIntegration\XmlTextViewCreationListener.cs" />
     <Compile Include="VSIntegration\DocumentChanges\Actions\CSharpFileContentOnChange.cs" />
     <Compile Include="VSIntegration\DocumentChanges\Actions\IOnFileContentChange.cs" />
     <Compile Include="VSIntegration\DocumentChanges\Actions\XmlFileContentOnChange.cs" />
     <Compile Include="VSIntegration\DocumentChanges\DocumentChangesTextViewCreationListener.cs" />
+    <Compile Include="VSIntegration\ErrorList\BatisError.cs" />
+    <Compile Include="VSIntegration\ErrorList\SinkManager.cs" />
+    <Compile Include="VSIntegration\ErrorList\TableDataSource.cs" />
+    <Compile Include="VSIntegration\ErrorList\TableEntriesSnapshot.cs" />
     <Compile Include="VSIntegration\Navigation\DocumentNavigation.cs" />
     <Compile Include="VSIntegration\Navigation\DocumentNavigationInstance.cs" />
     <Compile Include="Windows\DebugConsole\BatisSHelperTestConsole.cs" />
@@ -294,10 +315,14 @@
     <PackageReference Include="NLog">
       <Version>4.5.11</Version>
     </PackageReference>
+    <PackageReference Include="Ruzzie.FuzzyStrings">
+      <Version>3.0.0.23</Version>
+    </PackageReference>
     <PackageReference Include="System.Reactive">
       <Version>4.1.2</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
   <PropertyGroup>
@@ -310,6 +335,7 @@
       <VSIXSourceItem Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)' == 'MiniProfiler'" />
       <VSIXSourceItem Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)' == 'MiniProfiler.Shared'" />
       <VSIXSourceItem Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)' == 'HtmlAgilityPack'" />
+      <VSIXSourceItem Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)' == 'Ruzzie.FuzzyStrings'" />
     </ItemGroup>
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

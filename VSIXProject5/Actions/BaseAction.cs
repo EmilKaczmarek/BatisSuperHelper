@@ -17,41 +17,40 @@ namespace IBatisSuperHelper.Actions
 {
     public abstract class BaseActions
     {
-        private static Logger _log = LogManager.GetCurrentClassLogger();
-
-        internal GotoAsyncPackage package { get; set; }
+        internal GotoAsyncPackage Package { get; set; }
         public abstract void MenuItemCallback(object sender, EventArgs e);
 
         private IVsTextManager _textManager;
         private IVsEditorAdaptersFactoryService _editorAdaptersFactory;
-        private StatusBarIntegration _statusBar;
 
+        internal StatusBarIntegration _statusBar;
         internal IDocumentPropertiesProvider _documentPropertiesProvider;
         internal IDocumentProcessor _documentProcessor;
-        internal FinalEventActionsExecutor _finalEventActionsExecutor;
+        internal IFinalActionFactory _finalActionFactory;
 
-        internal ToolWindowPane _resultWindow => _resultWindowLazy.Value;
+        internal ToolWindowPane _commandWindow => _commandWindowLazy?.Value;
 
-        private Lazy<ToolWindowPane> _resultWindowLazy;
+        private Lazy<ToolWindowPane> _commandWindowLazy;
 
-        internal BaseActions(IVsTextManager textManager, IVsEditorAdaptersFactoryService editorAdapersFactory, StatusBarIntegration statusBar, ToolWindowPane resultWindow)
+        internal BaseActions(IVsTextManager textManager, IVsEditorAdaptersFactoryService editorAdapersFactory, StatusBarIntegration statusBar, ToolWindowPane commandWindow)
+            : this(textManager, editorAdapersFactory, statusBar)
+        {
+            _commandWindowLazy = new Lazy<ToolWindowPane>(() => commandWindow);
+        }
+
+        internal BaseActions(IVsTextManager textManager, IVsEditorAdaptersFactoryService editorAdapersFactory, StatusBarIntegration statusBar)
         {
             _textManager = textManager;
             _editorAdaptersFactory = editorAdapersFactory;
             _statusBar = statusBar;
-            _resultWindowLazy = new Lazy<ToolWindowPane>(()=> resultWindow);
         }
+
         public virtual async void BeforeQuery(object sender, EventArgs e)
         {
             var profiler = MiniProfiler.StartNew(nameof(BeforeQuery));
             profiler.Storage = new NLogStorage(LogManager.GetLogger("profiler"));
             using (profiler.Step("Event start"))
             {
-                OleMenuCommand menuCommand = sender as OleMenuCommand;
-                menuCommand.Text = "Go to Query";
-                menuCommand.Visible = false;
-                menuCommand.Enabled = false;
-
                 _documentPropertiesProvider = new TextManagerPropertiesProvider(_textManager, _editorAdaptersFactory);
                 string contentType;
                 using (profiler.Step("GetContentType"))
@@ -60,7 +59,6 @@ namespace IBatisSuperHelper.Actions
                 }
                     
                 DocumentProcessorFactory processorFactory;
-                IFinalActionFactory finalActionFactory;
 
                 switch (contentType)
                 {
@@ -68,13 +66,14 @@ namespace IBatisSuperHelper.Actions
                         processorFactory = new CSharpDocumentProcessorFactory();
                         //This is not mistake. When working on CSharp document, the result
                         //we are looking for is xml statment.
-                        finalActionFactory = new XmlFinalActionFactory();
+                        _finalActionFactory = new CSharpFinalActionFactory();
+                        
                         break;
                     case "XML":
                         processorFactory = new XmlDocumentProcessorFactory();
                         //This is not mistake. When working on xml document, the result
                         //we are looking for is code statment.
-                        finalActionFactory = new CSharpFinalActionFactory();
+                        _finalActionFactory = new XmlFinalActionFactory();
                         break;
                     default:
                         return;
@@ -83,20 +82,6 @@ namespace IBatisSuperHelper.Actions
                 processorFactory
                     .GetProcessorAsync(_documentPropertiesProvider.GetDocumentRepresentation(), _documentPropertiesProvider.GetSelectionLineNumber())
                     .ContinueWith((t) => _documentProcessor = t.Result).Wait();//Only fully working solution found that works for all processors...
-
-                _finalEventActionsExecutor = finalActionFactory.GetFinalEventActionsExecutor(_statusBar, _resultWindow);
-
-
-                var validator = _documentProcessor.GetValidator();
-                bool validationResult;
-
-                using (profiler.Step("GetValidationResult"))
-                {
-                    validationResult = validator.CanJumpToQueryInLine(_documentPropertiesProvider.GetSelectionLineNumber());
-                }
-
-                menuCommand.Visible = validationResult;
-                menuCommand.Enabled = validationResult;
             }
             profiler.Stop();
         }

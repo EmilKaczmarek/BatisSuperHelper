@@ -58,5 +58,22 @@ namespace IBatisSuperHelper.VSIntegration
                 HighlightLineInActiveDocument(lineNumber);
             }
         }
+
+        /// <summary>
+        /// Opens file and moves caret to specific line and offset
+        /// </summary>
+        /// <param name="filePath">File Path</param>
+        /// <param name="lineNumber">Line Number</param>
+        /// <param name="offset">Offset</param>
+        public void OpenDocumentAndMoveCaret(string filePath, int lineNumber, int offset)
+        {
+            if (OpenDocument(filePath))
+            {
+                TextSelection sel = (TextSelection)_dte.ActiveDocument.Selection;
+                TextPoint pnt = sel.ActivePoint;
+                sel.MoveToLineAndOffset(lineNumber, offset);
+            }
+        }
+
     }
 }

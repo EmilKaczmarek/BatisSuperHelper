@@ -120,7 +120,7 @@
   </Commands>
   
   <KeyBindings>
-    <KeyBinding guid="guidCommand1PackageCmdSet" id="GoToId" editor="guidVSStd97" key1="x" mod1="Control" mod2="Shift" />
+    <KeyBinding guid="guidCommand1PackageCmdSet" id="GoToId" editor="guidVSStd97" key1="VK_OEM_PLUS" mod1="Control Shift"/>
   </KeyBindings>
   
   <Symbols>

@@ -1,9 +1,9 @@
-﻿using Microsoft.VisualStudio;
+﻿using IBatisSuperHelper.Loggers;
+using IBatisSuperHelper.VSIntegration.ErrorList;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
+using NLog;
 using System;
-using System.Threading.Tasks;
-using IBatisSuperHelper.Constants;
-using Microsoft.VisualStudio.Shell;
 using static IBatisSuperHelper.Constants.EventConstats.VS;
 
 namespace IBatisSuperHelper.Events
@@ -13,7 +13,8 @@ namespace IBatisSuperHelper.Events
         internal class SolutionEventsHandler : IVsSolutionLoadEvents, IVsSolutionEvents
         {
             private Action<SolutionLoad> _handler;
-            public SolutionEventsHandler(Action<SolutionLoad> handlerAction)
+
+            public SolutionEventsHandler(Action<SolutionLoad> handlerAction, IVsSolution solution)
             {
                 if (handlerAction == null)
                     throw new Exception("Event handler action is null");
@@ -47,8 +48,16 @@ namespace IBatisSuperHelper.Events
 
             public int OnAfterBackgroundSolutionLoadComplete()
             {
-                 _handler(SolutionLoad.SolutionLoadComplete);
-                //Load Xml files from indexer
+                try
+                {
+                    //Load Xml files from indexer
+                    _handler(SolutionLoad.SolutionLoadComplete);
+                }
+                catch (Exception ex)
+                {
+                    LogManager.GetLogger("error").Error(ex, "SolutionEventsHandler.OnAfterBackgroundSolutionLoadComplete");
+                    OutputWindowLogger.WriteLn($"Exception occured during SolutionEventsHandler.OnAfterBackgroundSolutionLoadComplete: { ex.Message}");
+                }
                 return VSConstants.S_OK;
             }
 
@@ -89,8 +98,18 @@ namespace IBatisSuperHelper.Events
 
             public int OnQueryCloseSolution(object pUnkReserved, ref int pfCancel)
             {
-                //Remove everything from indexer instance
-                _handler(SolutionLoad.SolutionOnClose);
+                try
+                {
+                    //Remove everything from indexer instance
+                    _handler(SolutionLoad.SolutionOnClose);
+                    //Remove Errors
+                    TableDataSource.Instance.CleanAllErrors();
+                }
+                catch (Exception ex)
+                {
+                    LogManager.GetLogger("error").Error(ex, "SolutionEventsHandler.OnQueryCloseSolution");
+                    OutputWindowLogger.WriteLn($"Exception occured during SolutionEventsHandler.OnQueryCloseSolution: { ex.Message}");
+                }
                 return 1;
             }
 

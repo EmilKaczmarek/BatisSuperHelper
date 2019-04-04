@@ -9,6 +9,8 @@ namespace IBatisSuperHelper.Storage.Interfaces
 {
     public interface IProvider<T, T1>
     {
+        List<T1> GetAllValues();
+        List<T> GetAllKeys();
         T1 GetValue(T key);
         T1 GetValueOrNull(T key);
         List<T> GetKeysByQueryId(string queryId, NamespaceHandlingType handlingType);

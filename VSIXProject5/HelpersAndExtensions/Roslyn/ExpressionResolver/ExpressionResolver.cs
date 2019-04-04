@@ -29,20 +29,23 @@ namespace IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver
               };
 
         private int _maxCallStackNum;
+        private int _maxCallStackNumAtStart;
 
         public ExpressionResolver()
         {
-            _maxCallStackNum = 1000;
+            _maxCallStackNum = 100;
+            _maxCallStackNumAtStart = _maxCallStackNum;
         }
         public ExpressionResolver(int maxCallStack)
         {
             _maxCallStackNum = maxCallStack;
+            _maxCallStackNumAtStart = _maxCallStackNum;
         }
         private int _callStackNum = 1;
 
         private MethodInfo ResolveToClassAndMethodNames(SyntaxNode node, SemanticModel semModel)
         {
-            var analyzeNode = node as SyntaxNode;
+            var analyzeNode = node;
             while (analyzeNode != null && !analyzeNode.IsKind(SyntaxKind.MethodDeclaration))
             {   
                 analyzeNode = analyzeNode.Parent;
@@ -65,76 +68,106 @@ namespace IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver
             return null;
         }
 
-        public ExpressionResult GetStringValueOfExpression(Document document, ExpressionSyntax expressionSyntax, IEnumerable<SyntaxNode> nodes, SemanticModel semanticModel)
+        private ExpressionResult GetResultForCallStackExtended(Document document)
         {
-            _callStackNum++;
-            if (_callStackNum >= _maxCallStackNum)
-                return new ExpressionResult
-                {
-                    IsSolved = false,
-                    UnresolvableReason = "Call stack extended",
-                    CallsNeeded = _callStackNum,
-                    TextResult = "",
-                }
-                .WithNodeInfo(new NodeInfo
-                {
-                    FileName = Path.GetFileName(document.FilePath),
-                    ProjectName = document.Project.Name,
-                    FilePath = document.FilePath,
-                    DocumentId = document.Id,
-                });
-
-            if (expressionSyntax == null)
-                return new ExpressionResult
-                {
-                    IsSolved = false,
-                    UnresolvableReason = "Provided expression is null",
-                    CallsNeeded = _callStackNum,
-                    TextResult = "",
-                }
-                .WithNodeInfo(new NodeInfo
-                {
-                    FileName = Path.GetFileName(document.FilePath),
-                    ProjectName = document.Project.Name,
-                    FilePath = document.FilePath,
-                    DocumentId = document.Id,
-                });
-
-            if (_strategies.TryGetValue(expressionSyntax.Kind(), out var strategy))
+            ExpressionResult result = new ExpressionResult
             {
-                //var allSymbolsForSpan = nodes.Select(e => semanticModel.GetSymbolInfo(e)).Where(e=>e.Symbol !=null).ToList();
-                var symbolInfo = semanticModel.GetSymbolInfo(expressionSyntax.Parent);
-
-                return strategy.Resolve(document, expressionSyntax, nodes, semanticModel, this)
-                    .WithNodeInfo(new NodeInfo
-                    {
-                        MethodInfo = ResolveToClassAndMethodNames(expressionSyntax, semanticModel),
-                        FileName = Path.GetFileName(document.FilePath),
-                        LineNumber = expressionSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
-                        ProjectName = document.Project.Name,
-                        FilePath = document.FilePath,
-                        DocumentId = document.Id,
-                    })
-                .WithCallStackNumber(_callStackNum);
+                IsSolved = false,
+                UnresolvableReason = "Call stack extended",
+                CallsNeeded = _callStackNum,
+                TextResult = "",
             }
+            .WithCallStackNumber(_callStackNum);
 
-            return new ExpressionResult
+            return document != null
+                ? result.WithNodeInfo(new NodeInfo
+                {
+                    FileName = Path.GetFileName(document.FilePath),
+                    ProjectName = document.Project.Name,
+                    FilePath = document.FilePath,
+                    DocumentId = document.Id,
+                })
+                : result;
+        }
+
+        private ExpressionResult GetResultForNullExpression(Document document)
+        {
+            ExpressionResult result = new ExpressionResult
+            {
+                IsSolved = false,
+                UnresolvableReason = "Provided expression is null",
+                CallsNeeded = _callStackNum,
+                TextResult = "",
+            }
+            .WithCallStackNumber(_callStackNum);
+
+            return document !=null
+               ? result.WithNodeInfo(new NodeInfo
+               {
+                   FileName = Path.GetFileName(document.FilePath),
+                   ProjectName = document.Project.Name,
+                   FilePath = document.FilePath,
+                   DocumentId = document.Id,
+               })
+               : result;
+        }
+
+        private ExpressionResult GetResultForKindNotSupported(Document document, ExpressionSyntax expressionSyntax, SemanticModel semanticModel)
+        {
+            var result = new ExpressionResult
             {
                 IsSolved = false,
                 UnresolvableReason = "Not supported SyntaxKind",
                 CallsNeeded = _callStackNum,
                 TextResult = "",
             }
-            .WithNodeInfo(new NodeInfo
-            {
-                MethodInfo = ResolveToClassAndMethodNames(expressionSyntax, semanticModel),
-                FileName = Path.GetFileName(document.FilePath),
-                LineNumber = expressionSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
-                ProjectName = document.Project.Name,
-                FilePath = document.FilePath,
-                DocumentId = document.Id,
-            })
             .WithCallStackNumber(_callStackNum);
+            return document != null || expressionSyntax !=null || semanticModel !=null
+              ? result.WithNodeInfo(new NodeInfo
+              {
+                  MethodInfo = ResolveToClassAndMethodNames(expressionSyntax, semanticModel),
+                  FileName = Path.GetFileName(document.FilePath),
+                  LineNumber = expressionSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
+                  ProjectName = document.Project.Name,
+                  FilePath = document.FilePath,
+                  DocumentId = document.Id,
+              })
+              : result;
+        }
+
+        public ExpressionResult GetStringValueOfExpression(ExpressionSyntax expressionSyntax, SemanticModel semanticModel)
+        {
+            return GetStringValueOfExpression(null, expressionSyntax, semanticModel.SyntaxTree.GetRoot().DescendantNodes(), semanticModel);
+        }
+
+        public ExpressionResult GetStringValueOfExpression(Document document, ExpressionSyntax expressionSyntax, IEnumerable<SyntaxNode> nodes, SemanticModel semanticModel)
+        {
+            _callStackNum++;
+            if (_callStackNum >= _maxCallStackNum)
+                return GetResultForCallStackExtended(document);
+
+            if (expressionSyntax == null)
+                return GetResultForNullExpression(document);
+
+            if (_strategies.TryGetValue(expressionSyntax.Kind(), out var strategy))
+            {
+                _maxCallStackNum = expressionSyntax.IsKind(SyntaxKind.IdentifierName)? 10 : _maxCallStackNumAtStart;
+
+                var result = strategy.Resolve(document, expressionSyntax, nodes, semanticModel, this).WithCallStackNumber(_callStackNum);
+                return document != null
+                    ?result.WithNodeInfo(new NodeInfo
+                        {
+                            MethodInfo = ResolveToClassAndMethodNames(expressionSyntax, semanticModel),
+                            FileName = Path.GetFileName(document.FilePath),
+                            LineNumber = expressionSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
+                            ProjectName = document.Project.Name,
+                            FilePath = document.FilePath,
+                            DocumentId = document.Id,
+                        })
+                    :result;
+            }
+
+            return GetResultForKindNotSupported(document, expressionSyntax, semanticModel);
         }  
     }
 }
