@@ -1,0 +1,18 @@
+{
+  "Validators": {
+    "Validators": [
+      "Validators/IB001",
+      "Validators/IB002",
+      "Validators/IB003"
+    ]
+  },
+  "Features": {
+    "Go To Query":[
+      "Features/GoToQueryFromCode",
+      "Features/GoToQueryFromXml",
+      "Features/ResultWindow",
+      "Features/VariableQuery",
+      "Features/Validators"
+    ]
+  }
+}
