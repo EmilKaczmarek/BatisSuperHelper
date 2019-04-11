@@ -12,13 +12,11 @@ namespace IBatisSuperHelper.Events
     {
         internal class SolutionEventsHandler : IVsSolutionLoadEvents, IVsSolutionEvents
         {
-            private Action<SolutionLoad> _handler;
+            private readonly Action<SolutionLoad> _handler;
 
             public SolutionEventsHandler(Action<SolutionLoad> handlerAction, IVsSolution solution)
             {
-                if (handlerAction == null)
-                    throw new Exception("Event handler action is null");
-                _handler = handlerAction;
+                _handler = handlerAction ?? throw new ArgumentNullException(nameof(handlerAction));
             }
             public int OnBeforeOpenSolution(string pszSolutionFilename)
             {

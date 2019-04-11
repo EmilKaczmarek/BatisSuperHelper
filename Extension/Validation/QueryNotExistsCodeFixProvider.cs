@@ -27,7 +27,6 @@ namespace IBatisSuperHelper.Validation
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(QueryNotExistsCodeFixProvider)), Shared]
     public class QueryNotExistsCodeFixProvider : CodeFixProvider
     {
-        private string titleFormat = $"Change query name to {0}";
         public override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(QueryNotExists.DiagnosticId);
 
         public override async Task RegisterCodeFixesAsync(CodeFixContext context)
@@ -50,14 +49,14 @@ namespace IBatisSuperHelper.Validation
                     context.RegisterCodeFix(
                    CodeAction.Create(
                        title: $"Change to: {newQuery.QueryId} in: {newQuery.MapNamespace}",
-                       createChangedDocument: c => SwitchQuery(context.Document, stringLiteral, newQuery, c),
+                       createChangedDocument: c => SwitchQueryAsync(context.Document, stringLiteral, newQuery, c),
                        equivalenceKey: $"Change to: {newQuery.QueryId} in: {newQuery.MapNamespace}"),
                    diagnostic);
                 }
             }
         }
 
-        private async Task<Document> SwitchQuery(Document document, LiteralExpressionSyntax stringLiteralExpression, XmlQuery newQuery, CancellationToken cancellationToken)
+        private async Task<Document> SwitchQueryAsync(Document document, LiteralExpressionSyntax stringLiteralExpression, XmlQuery newQuery, CancellationToken cancellationToken)
         {
             var editor = await DocumentEditor.CreateAsync(document, cancellationToken);
             editor.ReplaceNode(stringLiteralExpression,

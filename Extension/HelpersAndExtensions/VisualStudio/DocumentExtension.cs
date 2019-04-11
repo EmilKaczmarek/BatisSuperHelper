@@ -21,11 +21,12 @@ namespace IBatisSuperHelper.Helpers
         /// <returns>EnvDTE Document, or null</returns>
         public static EnvDTE.Document GetDocumentOrDefault(this ProjectItem projectItem)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             try
             {
                 return projectItem.Document;
             }
-            catch (System.Runtime.InteropServices.COMException)
+            catch (COMException)
             {
                 return null;
             }
@@ -39,6 +40,7 @@ namespace IBatisSuperHelper.Helpers
         /// <returns>Env DTE Document, or null on exception.</returns>
         public static Document GetUsableDocumentFromProjectItemNonNested(this ProjectItem projectItem)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             try
             {
                 if (projectItem.Document == null)
@@ -55,7 +57,7 @@ namespace IBatisSuperHelper.Helpers
 
                 return projectItem.Document;
             }
-            catch (System.Runtime.InteropServices.COMException)
+            catch (COMException)
             {
                 return null;
             }
@@ -63,11 +65,14 @@ namespace IBatisSuperHelper.Helpers
 
         public static List<ProjectItem> GetXmlProjectItems(List<ProjectItem> projectItems)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+
             List<ProjectItem> items = new List<ProjectItem>();
 
             var filteredProjectItems = projectItems
-               .Where(x => x.Kind == EnvDTE.Constants.vsProjectItemKindPhysicalFile)
-               .Where(x => x.FileCount == 1)
+#pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
+               .Where(x => x.Kind == EnvDTE.Constants.vsProjectItemKindPhysicalFile && x.FileCount == 1)
+#pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
                .ToList();
 
             foreach (var item in filteredProjectItems)
@@ -79,9 +84,9 @@ namespace IBatisSuperHelper.Helpers
                         items.Add(item);
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-
+                    //Ignore item
                 }
             }
 
@@ -90,11 +95,15 @@ namespace IBatisSuperHelper.Helpers
 
         public static List<XmlFileInfo> GetXmlFiles(List<ProjectItem> projectItems)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+
             var xmlFilesList = new List<XmlFileInfo>();
             var filteredProjectItems = projectItems
-                .Where(x => x.Kind == EnvDTE.Constants.vsProjectItemKindPhysicalFile)
-                .Where(x => x.FileCount == 1)
+#pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
+                .Where(x => x.Kind == EnvDTE.Constants.vsProjectItemKindPhysicalFile && x.FileCount == 1)
+#pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
                 .ToList();
+
             foreach (var item in filteredProjectItems)
             {
                 string fileName = null;
@@ -108,13 +117,9 @@ namespace IBatisSuperHelper.Helpers
                             ProjectName = item.ContainingProject.Name,
                         });
                 }
-                catch (ArgumentException ex)
+                catch(Exception)
                 {
-                    Debug.WriteLine(ex.Message);
-                }
-                catch(Exception ex)
-                {
-                    System.Diagnostics.Debugger.Break();
+                    //Ignore item
                 }
             }
             return xmlFilesList;

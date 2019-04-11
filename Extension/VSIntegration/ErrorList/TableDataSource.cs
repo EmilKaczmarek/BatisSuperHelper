@@ -1,7 +1,9 @@
-﻿using Microsoft.VisualStudio.ComponentModelHost;
+﻿using Microsoft;
+using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.TableControl;
 using Microsoft.VisualStudio.Shell.TableManager;
+using Microsoft.VisualStudio.Threading;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -26,7 +28,7 @@ namespace IBatisSuperHelper.VSIntegration.ErrorList
             }
         }
 
-        private SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
         private static TableDataSource _instance;
         private readonly List<SinkManager> _sinkManagers = new List<SinkManager>();
         private static Dictionary<string, TableEntriesSnapshot> _snapshots = new Dictionary<string, TableEntriesSnapshot>();
@@ -37,7 +39,11 @@ namespace IBatisSuperHelper.VSIntegration.ErrorList
 
         private TableDataSource()
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             var compositionService = ServiceProvider.GlobalProvider.GetService(typeof(SComponentModel)) as IComponentModel;
+            Assumes.Present(compositionService);
+
             compositionService.DefaultCompositionService.SatisfyImportsOnce(this);
 
             var manager = TableManagerProvider.GetTableManager(StandardTables.ErrorsTable);
@@ -55,7 +61,6 @@ namespace IBatisSuperHelper.VSIntegration.ErrorList
             if (errors == null || !errors.Any())
                 return;
 
-            //var cleanErrors = errors.Where(e => e != null && !string.IsNullOrEmpty(e.FileName));
             foreach (var error in errors.GroupBy(t => t.Document))
             {
                 var snapshot = new TableEntriesSnapshot(error.Key, error);
@@ -141,7 +146,7 @@ namespace IBatisSuperHelper.VSIntegration.ErrorList
         public void RemoveSinkManager(SinkManager sinkManager)
         {
             _semaphore.Wait();
-            _sinkManagers.Add(sinkManager);
+            _sinkManagers.Remove(sinkManager);
             _semaphore.Release();
         }
 

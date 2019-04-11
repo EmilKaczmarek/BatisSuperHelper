@@ -10,14 +10,14 @@ namespace IBatisSuperHelper.VSIntegration
 {
     public class DocumentNavigation
     {
-        private DTE2 _dte;
+        private readonly DTE2 _dte;
         /// <summary>
         /// Ctor
         /// </summary>
         /// <param name="dte">Not null dte.</param>
         public DocumentNavigation(DTE2 dte)
         {
-            _dte = dte ?? throw new ArgumentNullException(nameof(DTE2), "Passing null DTE2 is forbidden.");
+            _dte = dte ?? throw new ArgumentNullException(nameof(dte), "Passing null DTE2 is forbidden.");
         }
         /// <summary>
         /// Opens tab with file content.
@@ -26,6 +26,7 @@ namespace IBatisSuperHelper.VSIntegration
         /// <returns></returns>
         public bool OpenDocument(string filePath)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             try
             {
                 _dte.ItemOperations.OpenFile(filePath);
@@ -42,8 +43,8 @@ namespace IBatisSuperHelper.VSIntegration
         /// <param name="lineNumber">Line number</param>
         public void HighlightLineInActiveDocument(int lineNumber)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             TextSelection sel = (TextSelection)_dte.ActiveDocument.Selection;
-            TextPoint pnt = sel.ActivePoint;
             sel.GotoLine(lineNumber, true);
         }
         /// <summary>
@@ -67,10 +68,10 @@ namespace IBatisSuperHelper.VSIntegration
         /// <param name="offset">Offset</param>
         public void OpenDocumentAndMoveCaret(string filePath, int lineNumber, int offset)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             if (OpenDocument(filePath))
             {
                 TextSelection sel = (TextSelection)_dte.ActiveDocument.Selection;
-                TextPoint pnt = sel.ActivePoint;
                 sel.MoveToLineAndOffset(lineNumber, offset);
             }
         }

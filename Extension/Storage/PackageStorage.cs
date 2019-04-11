@@ -25,47 +25,26 @@ namespace IBatisSuperHelper.Storage
 
         public static GenericStorage<MethodInfo, ExpressionResult> GenericMethods = new GenericStorage<MethodInfo, ExpressionResult>();
 
-        public static GenericStorage<string, object> RuntimeConfiguration = new GenericStorage<string, object>
+        public static readonly GenericStorage<string, object> RuntimeConfiguration = new GenericStorage<string, object>
         {
             new KeyValuePair<string, object>("HybridNamespaceEnabled", true),
         };
         
-        public static void AnalyzeAndStore(List<XmlFileInfo> xmlFiles)
-        {
-            var xmlResults = XmlFileAnalyzer.BuildIndexerAsync(xmlFiles);
-            XmlQueries.AddMultipleWithoutKey(xmlResults);
-        }
-
-        public static void AnalyzeAndStore(List<Document> documents)
-        {
-            var codeResults = CodeFileAnalyzer.BuildIndexerAsync(documents).Result;
-            CodeQueries.AddMultipleWithoutKey(codeResults.Select(e=>e.Queries).ToList());
-            GenericMethods.AddMultiple(codeResults.SelectMany(e => e.Generics).Select(e=> new KeyValuePair<MethodInfo, ExpressionResult>(e.NodeInformation.MethodInfo, e)));
-        }
-
         public static async Task AnalyzeAndStoreAsync(List<Document> documents)
         {
-            using (MiniProfiler.Current.Step(nameof(AnalyzeAndStore)))
+            using (MiniProfiler.Current.Step(nameof(AnalyzeAndStoreAsync)))
             {
-                var codeResults = CodeFileAnalyzer.BuildIndexerAsync(documents).Result;
+                var codeResults = await CodeFileAnalyzer.BuildIndexerAsync(documents);
                 var generics = codeResults.SelectMany(e => e.Generics).Select(e => new KeyValuePair<MethodInfo, ExpressionResult>(e.NodeInformation.MethodInfo, e));
                 await GenericMethods.AddMultipleAsync(generics);
                 CodeQueries.AddMultipleWithoutKey(codeResults.Select(e => e.Queries).ToList());
             }
-               
         }
 
         public static void AnalyzeAndStoreSingle(XmlFileInfo xmlFile)
         {
             var xmlFileResult = XmlFileAnalyzer.ParseSingleFile(xmlFile);
             XmlQueries.AddMultipleWithoutKey(xmlFileResult);
-        }
-
-        public static void AnalyzeAndStoreSingle(Document document)
-        {
-            var codeResult = CodeFileAnalyzer.BuildFromDocumentAsync(document).Result;
-            CodeQueries.AddWithoutKey(codeResult.Queries);
-            GenericMethods.AddMultiple(codeResult.Generics.Select(e => new KeyValuePair<MethodInfo, ExpressionResult>(e.NodeInformation.MethodInfo, e)));
         }
 
         public static async Task AnalyzeAndStoreSingleAsync(Document document)

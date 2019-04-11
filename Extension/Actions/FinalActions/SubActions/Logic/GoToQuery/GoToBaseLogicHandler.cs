@@ -43,6 +43,7 @@ namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Logic
 
         public virtual void ShowResults(List<ResultWindowViewModel> windowViewModels)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
             if (windowViewModels != null)
             {
                 var windowContent = (ResultWindowControl)ToolWindowPane.Content;

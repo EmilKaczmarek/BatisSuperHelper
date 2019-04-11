@@ -43,6 +43,7 @@ using IBatisSuperHelper.Storage;
 using IBatisSuperHelper.VSIntegration.Navigation;
 using IBatisSuperHelper.Windows.RenameWindow;
 using static IBatisSuperHelper.Events.VSSolutionEventsHandler;
+using Microsoft;
 
 namespace IBatisSuperHelper
 {
@@ -118,14 +119,17 @@ namespace IBatisSuperHelper
             logger.Info("Extension initalizing");
 
             EnvDTE = await GetServiceAsync(typeof(DTE)) as DTE2;
+            Assumes.Present(EnvDTE);
+
             var componentModel = await GetServiceAsync(typeof(SComponentModel)) as IComponentModel;
+            Assumes.Present(componentModel);
 
             //Initialize public components, initialize instances that are dependent on any component
             TextManager = await GetServiceAsync(typeof(SVsTextManager)) as IVsTextManager;
             EditorAdaptersFactory = componentModel.GetService<IVsEditorAdaptersFactoryService>();
             ResultWindow = FindToolWindow(typeof(ResultWindow), 0, true);
 
-            DocumentNavigationInstance.InjectDTE(GotoAsyncPackage.EnvDTE);
+            DocumentNavigationInstance.InjectDTE(EnvDTE);
             //Prepare package events
             Workspace = componentModel.GetService<VisualStudioWorkspace>();
             Workspace.WorkspaceChanged += WorkspaceEvents.WorkspaceChanged;
@@ -163,6 +167,8 @@ namespace IBatisSuperHelper
             IStatusBar = await GetServiceAsync(typeof(SVsStatusbar)) as IVsStatusbar;
 
             Solution = await GetServiceAsync(typeof(SVsSolution)) as IVsSolution;
+            Assumes.Present(Solution);
+
             _solutionEventsHandler = new SolutionEventsHandler(
                 new Action<EventConstats.VS.SolutionLoad>(HandleSolutionEvent),
                 Solution
@@ -185,7 +191,7 @@ namespace IBatisSuperHelper
                     var projectItems = projectItemHelper.GetProjectItemsFromSolutionProjects(EnvDTE.Solution.Projects);
                     XmlIndexer xmlIndexer = new XmlIndexer();
                     var xmlFiles = DocumentHelper.GetXmlFiles(projectItems);
-                    var xmlIndexerResult = xmlIndexer.BuildIndexerAsync(xmlFiles);
+                    var xmlIndexerResult = xmlIndexer.BuildIndexer(xmlFiles);
                     PackageStorage.XmlQueries.AddMultipleWithoutKey(xmlIndexerResult);
                     break;
                 case EventConstats.VS.SolutionLoad.SolutionOnClose:

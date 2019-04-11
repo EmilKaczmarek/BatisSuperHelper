@@ -20,29 +20,29 @@ namespace IBatisSuperHelper.Actions
         internal GotoAsyncPackage Package { get; set; }
         public abstract void MenuItemCallback(object sender, EventArgs e);
 
-        private IVsTextManager _textManager;
-        private IVsEditorAdaptersFactoryService _editorAdaptersFactory;
+        private readonly IVsTextManager _textManager;
+        private readonly IVsEditorAdaptersFactoryService _editorAdaptersFactory;
 
-        internal StatusBarIntegration _statusBar;
+        internal StatusBarIntegration StatusBar;
         internal IDocumentPropertiesProvider _documentPropertiesProvider;
         internal IDocumentProcessor _documentProcessor;
         internal IFinalActionFactory _finalActionFactory;
 
         internal ToolWindowPane _commandWindow => _commandWindowLazy?.Value;
 
-        private Lazy<ToolWindowPane> _commandWindowLazy;
+        private readonly Lazy<ToolWindowPane> _commandWindowLazy;
 
-        internal BaseActions(IVsTextManager textManager, IVsEditorAdaptersFactoryService editorAdapersFactory, StatusBarIntegration statusBar, ToolWindowPane commandWindow)
+        protected BaseActions(IVsTextManager textManager, IVsEditorAdaptersFactoryService editorAdapersFactory, StatusBarIntegration statusBar, ToolWindowPane commandWindow)
             : this(textManager, editorAdapersFactory, statusBar)
         {
             _commandWindowLazy = new Lazy<ToolWindowPane>(() => commandWindow);
         }
 
-        internal BaseActions(IVsTextManager textManager, IVsEditorAdaptersFactoryService editorAdapersFactory, StatusBarIntegration statusBar)
+        protected BaseActions(IVsTextManager textManager, IVsEditorAdaptersFactoryService editorAdapersFactory, StatusBarIntegration statusBar)
         {
             _textManager = textManager;
             _editorAdaptersFactory = editorAdapersFactory;
-            _statusBar = statusBar;
+            StatusBar = statusBar;
         }
 
         public virtual async void BeforeQuery(object sender, EventArgs e)

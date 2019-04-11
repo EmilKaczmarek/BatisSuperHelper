@@ -19,8 +19,6 @@ namespace IBatisSuperHelper.VSIntegration.BatisFilesTextViewIntegration
     [TagType(typeof(ErrorTag))]
     public class BatisMapErrorTaggerProvider : ITaggerProvider
     {
-        private IWpfTextView _view;
-
         [Import]
         private ITextDocumentFactoryService TextDocumentFactoryService { get; set; }
 

@@ -15,11 +15,6 @@ namespace IBatisSuperHelper.VSIntegration.DocumentChanges
     [TextViewRole(PredefinedTextViewRoles.Document)]
     internal sealed class DocumentChangesTextViewCreationListener : IWpfTextViewCreationListener
     {
-        [Export(typeof(AdornmentLayerDefinition))]
-        [Name("Document Scanner")]
-        [Order(After = PredefinedAdornmentLayers.Selection, Before = PredefinedAdornmentLayers.Text)]
-        private AdornmentLayerDefinition editorAdornmentLayer;
-
         public void TextViewCreated(IWpfTextView textView)
         {
             if (textView?.Caret?.Position == null)

@@ -12,6 +12,7 @@ using IBatisSuperHelper.Indexers;
 using IBatisSuperHelper.Loggers;
 using IBatisSuperHelper.Logging.MiniProfiler;
 using IBatisSuperHelper.Storage;
+using Microsoft.VisualStudio.Threading;
 
 namespace IBatisSuperHelper.Events
 {
@@ -43,7 +44,7 @@ namespace IBatisSuperHelper.Events
         {
             foreach(var documentId in removedDocumentsIds)
             {
-                PackageStorage.CodeQueries.RemoveStatmentsByDefinedObject(documentId);
+                await Task.Run(() => PackageStorage.CodeQueries.RemoveStatmentsByDefinedObject(documentId));
             }
         }
 

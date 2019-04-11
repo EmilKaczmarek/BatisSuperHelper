@@ -16,7 +16,7 @@ namespace IBatisSuperHelper.Indexers
 {
     public class XmlIndexer
     {
-        public List<XmlQuery> BuildIndexerAsync(List<XmlFileInfo> solutionXmlDocuments)
+        public List<XmlQuery> BuildIndexer(List<XmlFileInfo> solutionXmlDocuments)
         {
             var result = new List<XmlQuery>();
             Stopwatch sw = new Stopwatch();

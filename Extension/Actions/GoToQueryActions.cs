@@ -45,7 +45,7 @@ namespace IBatisSuperHelper.Actions
                 {
                     _documentProcessor.TryResolveQueryValueAtCurrentSelectedLine(out ExpressionResult expressionResult, out string queryValue);
                     _finalActionFactory
-                        .GetFinalGoToQueryActionsExecutor(_statusBar, _commandWindow)
+                        .GetFinalGoToQueryActionsExecutor(StatusBar, _commandWindow)
                         .Execute(queryValue, expressionResult);
                 }
             }

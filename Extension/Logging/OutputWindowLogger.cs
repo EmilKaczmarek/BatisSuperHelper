@@ -19,6 +19,7 @@ namespace IBatisSuperHelper.Loggers
 
         public static void WriteLn(string logMessage)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             if (EnsurePane())
             {
                 _outputWindowPane.OutputString($"{logMessage}{Environment.NewLine}");
@@ -27,6 +28,7 @@ namespace IBatisSuperHelper.Loggers
 
         private static bool EnsurePane()
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             if (_outputWindowPane == null)
             {
                 Guid guid = Guid.NewGuid();

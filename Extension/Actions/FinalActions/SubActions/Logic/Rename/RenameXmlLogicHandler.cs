@@ -36,9 +36,10 @@ namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Logic.Rename
 
                 textSelection.Insert(line, (int)vsInsertFlags.vsInsertFlagsContainNewText);
                 projectItem.Document.Save();
+
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
