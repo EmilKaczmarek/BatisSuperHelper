@@ -18,6 +18,7 @@ namespace IBatisSuperHelper.HelpersAndExtensions.VisualStudio
         /// <param name="oldEndOffset"></param>
         private static void RedoMarker(TextPoint point, TextSelection selection, int oldBeginOffset, int oldEndOffset)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             selection.MoveToLineAndOffset(point.Line, oldBeginOffset);
             selection.MoveToLineAndOffset(point.Line, oldEndOffset, true);
         }
@@ -28,7 +29,8 @@ namespace IBatisSuperHelper.HelpersAndExtensions.VisualStudio
         /// <returns></returns>
         public static string GetText(this TextSelection selection)
         {
-            TextPoint pnt = (TextPoint)selection.ActivePoint;
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+            TextPoint pnt = selection.ActivePoint;
             int oldLineCharBeginOffset = pnt.LineCharOffset;
             int oldLineCharEndOffset = selection.AnchorPoint.LineCharOffset;
             selection.GotoLine(pnt.Line, true);

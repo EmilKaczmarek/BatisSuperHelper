@@ -23,6 +23,7 @@ namespace IBatisSuperHelper.VSIntegration.DocumentChanges.Actions
         {
             try
             {
+                Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
                 var profiler = MiniProfiler.StartNew(nameof(HandleChange));
                 profiler.Storage = new NLogStorage(LogManager.GetLogger("profiler"));
                 using (profiler.Step("HandleChangeXml"))

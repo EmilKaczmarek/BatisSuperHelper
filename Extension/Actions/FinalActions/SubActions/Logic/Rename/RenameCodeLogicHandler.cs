@@ -8,7 +8,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.VisualStudio.LanguageServices;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Logic.Rename
 {

@@ -8,15 +8,12 @@ using System.Threading.Tasks;
 
 namespace IBatisSuperHelper.Helpers
 {
-    //TODO: rewrote, maybe add some thing like generic recurvice scope?
     public class ProjectItemHelper
     {
         private readonly List<ProjectItem> _projectItems = new List<ProjectItem>();
-        //max occurences of recursive method call. 
         private readonly int maxDepth = 10000;
         private int currentRecursiveCall = 1;
 
-        //No, there is no better way than using recursive :(
         /// <summary>
         /// Get file from Project Item, recursive if needed.
         /// </summary>
@@ -24,6 +21,8 @@ namespace IBatisSuperHelper.Helpers
         /// <returns></returns>
         private ProjectItem GetFiles(ProjectItem projectItem)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+
             if (projectItem.ProjectItems == null)
                 return projectItem;
 
@@ -45,8 +44,10 @@ namespace IBatisSuperHelper.Helpers
         /// </summary>
         /// <param name="projects"></param>
         /// <returns></returns>
-        public List<ProjectItem> GetProjectItemsFromSolutionProjects(EnvDTE.Projects projects)
+        public List<ProjectItem> GetProjectItemsFromSolutionProjects(Projects projects)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+
             var enumerator = projects.GetEnumerator();
             while (enumerator.MoveNext())
             {

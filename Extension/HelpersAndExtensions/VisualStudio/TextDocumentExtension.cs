@@ -16,6 +16,7 @@ namespace IBatisSuperHelper.Helpers
         /// <returns></returns>
         public static string GetText(this TextDocument document)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             var editPoint = document.StartPoint.CreateEditPoint();
             return editPoint.GetText(document.EndPoint);
         }

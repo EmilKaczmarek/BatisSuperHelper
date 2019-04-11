@@ -40,7 +40,7 @@ namespace IBatisSuperHelper.HelpersAndExtensions
             {
                 return xmlIndexerResult.QueryId.Replace($"{xmlIndexerResult.MapNamespace}.", "");
             }
-            return xmlIndexerResult.QueryId;
+            return string.Empty;
         }
     }
 }

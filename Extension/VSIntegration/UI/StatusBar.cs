@@ -9,13 +9,14 @@ namespace IBatisSuperHelper.VSIntegration
 {
     public class StatusBarIntegration
     {
-        private IVsStatusbar _statusBar;
+        private readonly IVsStatusbar _statusBar;
         public StatusBarIntegration(IVsStatusbar statusBar)
         {
             _statusBar = statusBar;
         }
         public void ShowText(string text)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             if (string.IsNullOrEmpty(text))
                 return;
 

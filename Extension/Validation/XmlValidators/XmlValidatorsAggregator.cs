@@ -20,14 +20,6 @@ namespace IBatisSuperHelper.Validation.XmlValidators
         public static XmlValidatorsAggregator Create => new XmlValidatorsAggregator();
         private readonly List<IXmlValidator> _validators = new List<IXmlValidator>();
 
-        private IClassifier _classifier;
-        private SnapshotSpan _span;
-        private ITextDocument _document;
-        private IWpfTextView _view;
-        private ITextBuffer _buffer;
-
-        private string _filePath;
-
         private XmlValidatorsAggregator()
         {
             _validators.Clear();
@@ -35,24 +27,16 @@ namespace IBatisSuperHelper.Validation.XmlValidators
 
         public XmlValidatorsAggregator AllValidatorsForBuffer(IClassifier classifier, SnapshotSpan span, ITextDocument document, IWpfTextView view, ITextBuffer buffer)
         {
-            _classifier = classifier;
-            _span = span;
-            _document = document;
-            _view = view;
-            _buffer = buffer;
-
-            _validators.Add(new QueryUnused(_classifier, _span, _document, _buffer));
-            _validators.Add(new MapNotEmbedded(_classifier, _span, _document, _buffer));
+            _validators.Add(new QueryUnused(classifier, span, document, buffer));
+            _validators.Add(new MapNotEmbedded(classifier, span, document, buffer));
 
             return this;
         }
 
         public XmlValidatorsAggregator AllValidatorsForBuild(string filePath)
         {
-            _filePath = filePath;
-
-            _validators.Add(new QueryUnused(_filePath));
-            _validators.Add(new MapNotEmbedded(_filePath));
+            _validators.Add(new QueryUnused(filePath));
+            _validators.Add(new MapNotEmbedded(filePath));
 
             return this;
         }
@@ -67,11 +51,11 @@ namespace IBatisSuperHelper.Validation.XmlValidators
 
         public List<BatisError> Errors => GetErrorsFromValidators();
 
-        public void OnChange(SnapshotSpan span)
+        public void OnChange(SnapshotSpan newSpan)
         {
             foreach (var validator in _validators)
             {
-                validator.OnChange(span);
+                validator.OnChange(newSpan);
             }
         }
 

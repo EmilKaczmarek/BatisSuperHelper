@@ -26,6 +26,15 @@ namespace IBatisSuperHelper.Indexers
                    StatmentFullyQualifiedName == key.StatmentFullyQualifiedName;
         }
 
+        public override int GetHashCode()
+        {
+            var hashCode = 1782398838;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(StatmentName);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(VsProjectName);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(StatmentFullyQualifiedName);
+            return hashCode;
+        }
+
         public static bool operator ==(IndexerKey key1, IndexerKey key2)
         {
             return EqualityComparer<IndexerKey>.Default.Equals(key1, key2);

@@ -20,8 +20,8 @@ namespace IBatisSuperHelper.VSIntegration.BatisFilesTextViewIntegration
     {
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
-        private IBufferValidator _validator;
-        private ITextBuffer _buffer;
+        private readonly IBufferValidator _validator;
+        private readonly ITextBuffer _buffer;
 
         private ITextSnapshot _currentSnapshot;
 

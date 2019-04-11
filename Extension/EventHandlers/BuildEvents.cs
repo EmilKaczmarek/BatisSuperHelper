@@ -20,7 +20,7 @@ namespace IBatisSuperHelper.EventHandlers
         {
             try
             {
-
+                ThreadHelper.ThrowIfNotOnUIThread();
                 var projectItemHelper = new ProjectItemHelper();
                 var projectItems = projectItemHelper.GetProjectItemsFromSolutionProjects(GotoAsyncPackage.EnvDTE.Solution.Projects);
 

@@ -9,9 +9,9 @@ namespace IBatisSuperHelper.VSIntegration.ErrorList
 {
     public class SinkManager : IDisposable
     {
-        private TableDataSource _errorList;
-        private ITableDataSink _sink;
-        private List<TableEntriesSnapshot> _snapshots = new List<TableEntriesSnapshot>();
+        private readonly TableDataSource _errorList;
+        private readonly ITableDataSink _sink;
+        private readonly List<TableEntriesSnapshot> _snapshots = new List<TableEntriesSnapshot>();
 
         public SinkManager(TableDataSource errorList, ITableDataSink sink)
         {
@@ -62,7 +62,7 @@ namespace IBatisSuperHelper.VSIntegration.ErrorList
 
         public void Dispose()
         {
-            //throw new NotImplementedException();
+            _errorList.RemoveSinkManager(this);
         }
     }
 }

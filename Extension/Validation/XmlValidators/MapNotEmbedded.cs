@@ -15,26 +15,24 @@ namespace IBatisSuperHelper.Validation.XmlValidators
 {
     public class MapNotEmbedded : IXmlValidator, IBufferValidator, IBuildDocumentValidator
     {
-        private bool _isRunning = false;
         public bool IsRunning => _isRunning;
-
-        private readonly List<BatisError> _errors = new List<BatisError>();
+        private bool _isRunning = false;
+        
         public List<BatisError> Errors => _errors;
+        private readonly List<BatisError> _errors = new List<BatisError>();
 
-        private IClassifier _classifier;
+        private readonly IClassifier _classifier;
         private SnapshotSpan _span;
-        private ITextDocument _document;
-        private ITextBuffer _buffer;
+        private readonly ITextDocument _document;
 
-        private string _filePath;
-        private XmlParser _xmlParser;
+        private readonly string _filePath;
+        private readonly XmlParser _xmlParser;
 
         public MapNotEmbedded(IClassifier classifier, SnapshotSpan span, ITextDocument document, ITextBuffer buffer)
         {
             _classifier = classifier;
             _span = span;
             _document = document;
-            _buffer = buffer;
          
             ValidateAllSpans();
         }
@@ -45,15 +43,16 @@ namespace IBatisSuperHelper.Validation.XmlValidators
             _xmlParser = new XmlParser().WithFileInfo(_filePath, "").Load();
         }
 
-        public void OnChange(SnapshotSpan newSpans)
+        public void OnChange(SnapshotSpan newSpan)
         {
             _errors.Clear();
-            _span = newSpans;
+            _span = newSpan;
             ValidateAllSpans();
         }
 
         public void ValidateBuildDocument()
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
             _isRunning = true;
             if (IsDocumentSupportedForValidation())
             {
@@ -72,6 +71,7 @@ namespace IBatisSuperHelper.Validation.XmlValidators
 
         public void ValidateAllSpans()
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
             _isRunning = true;
             var classificationSpans = _classifier.GetClassificationSpans(_span);
             var isBatisMapFileCSpan = classificationSpans.FirstOrDefault(e => e.ClassificationType.Classification == "XML Attribute Value" && e.Span.GetText().Equals(IBatisConstants.SqlMapNamespace));

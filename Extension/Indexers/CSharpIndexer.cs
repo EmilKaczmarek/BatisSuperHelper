@@ -40,7 +40,7 @@ namespace IBatisSuperHelper.Indexers
             {
                 if (!Regex.IsMatch(document.FilePath, @"(\\service|\\TemporaryGeneratedFile_.*|\\assemblyinfo|\\assemblyattributes|\.(g\.i|g|designer|generated|assemblyattributes))\.(cs|vb)$"))
                 {
-                    results.Add(BuildFromDocumentAsync(document).Result);
+                    results.Add(await BuildFromDocumentAsync(document));
                 }          
             }
             sw.Stop();
@@ -52,7 +52,7 @@ namespace IBatisSuperHelper.Indexers
         {
             using (MiniProfiler.Current.Step(nameof(BuildFromDocumentAsync)))
             {
-                SemanticModel semModel = document.GetSemanticModelAsync().Result;
+                SemanticModel semModel = await document.GetSemanticModelAsync();
                 return Build(semModel, document);
             }
 

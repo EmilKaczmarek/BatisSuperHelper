@@ -20,6 +20,7 @@ namespace IBatisSuperHelper.EventHandlers
         {
             try
             {
+                Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
                 PackageStorage.CodeQueries.RenameStatmentsForFile(OldName, ProjectItem.Name);
                 PackageStorage.XmlQueries.RenameStatmentsForFile(OldName, ProjectItem.Name);
             }
@@ -34,6 +35,7 @@ namespace IBatisSuperHelper.EventHandlers
         {
             try
             {
+                Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
                 string fileName = ProjectItem.Name;
                 PackageStorage.XmlQueries.RemoveStatmentsForFilePath(fileName);
                 PackageStorage.CodeQueries.RemoveStatmentsForFilePath(fileName);
@@ -49,6 +51,7 @@ namespace IBatisSuperHelper.EventHandlers
         {
             try
             {
+                Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
                 string projectItemExtension = Path.GetExtension(ProjectItem.Name);
                 if (projectItemExtension == ".xml")
                 {
