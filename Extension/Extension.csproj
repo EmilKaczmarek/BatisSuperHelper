@@ -162,6 +162,8 @@
     <Compile Include="Logging\OutputWindowLogger.cs" />
     <Compile Include="Models\XmlFileInfo.cs" />
     <Compile Include="Parsers\XmlParser.cs" />
+    <Compile Include="Parsers\BatisXmlConfigParser.cs" />
+    <Compile Include="Parsers\BatisXmlMapParser.cs" />
     <Compile Include="RenameCommand.cs" />
     <Compile Include="Storage\Providers\CodeQueryProvider.cs" />
     <Compile Include="Storage\Providers\NamespaceHandlingType.cs" />

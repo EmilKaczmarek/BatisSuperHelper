@@ -25,7 +25,7 @@ namespace IBatisSuperHelper.Validation.XmlValidators
         private SnapshotSpan _span;
         private ITextDocument _document;
         private ITextBuffer _buffer;
-        private XmlParser _xmlParser;
+        private BatisXmlMapParser _xmlParser;
 
         private string _filePath;
 
@@ -41,21 +41,21 @@ namespace IBatisSuperHelper.Validation.XmlValidators
             _span = span;
             _document = document;
             _buffer = buffer;
-            _xmlParser = new XmlParser().WithStringReader(new StringReader(span.Snapshot.GetText())).Load();
+            _xmlParser = new BatisXmlMapParser().WithStringReader(new StringReader(span.Snapshot.GetText())).Load();
             ValidateAllSpans();
         }
 
         public QueryUnused(string filePath)
         {
             _filePath = filePath;
-            _xmlParser = new XmlParser().WithFileInfo(_filePath, "").Load();
+            _xmlParser = new BatisXmlMapParser().WithFileInfo(_filePath, "").Load();
         }
 
         public void OnChange(SnapshotSpan newSpans)
         {
             ClearErrors();
             _span = newSpans;
-            _xmlParser = new XmlParser().WithStringReader(new StringReader(newSpans.Snapshot.GetText())).Load();
+            _xmlParser = new BatisXmlMapParser().WithStringReader(new StringReader(newSpans.Snapshot.GetText())).Load();
             ValidateAllSpans();
         }
 
