@@ -48,6 +48,7 @@ namespace IBatisSuperHelper.Parsers
 
         public void Load()
         {
+            InitializeEmpty();
             if (_stringReader != null)
             {
                 _xmlDocument.Load(_stringReader);
@@ -60,6 +61,7 @@ namespace IBatisSuperHelper.Parsers
 
         public IEnumerable<HtmlNode> GetChildNodesOfParentByXPath(string xPath)
         {
+            var test = _xmlDocument.DocumentNode.DescendantNodes();
             var statementRootNode = GetSingleNode(xPath);
 
             if (statementRootNode == null)

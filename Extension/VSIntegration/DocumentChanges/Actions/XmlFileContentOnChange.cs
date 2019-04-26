@@ -1,19 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using NLog;
 using StackExchange.Profiling;
-using IBatisSuperHelper.Constants;
-using IBatisSuperHelper.Indexers;
 using IBatisSuperHelper.Loggers;
 using IBatisSuperHelper.Logging.MiniProfiler;
 using IBatisSuperHelper.Parsers;
 using IBatisSuperHelper.Storage;
+using IBatisSuperHelper.Constants.BatisConstants;
 
 namespace IBatisSuperHelper.VSIntegration.DocumentChanges.Actions
 {
@@ -35,7 +30,7 @@ namespace IBatisSuperHelper.VSIntegration.DocumentChanges.Actions
                     {
                         var project = GotoAsyncPackage.EnvDTE.Solution.FindProjectItem(textDoc.FilePath).ContainingProject.Name;
                         BatisXmlMapParser parser = new BatisXmlMapParser().WithStringReader(stringReader).WithFileInfo(textDoc.FilePath, project).Load();
-                        if (parser.XmlNamespace == IBatisConstants.SqlMapNamespace)
+                        if (parser.XmlNamespace == XmlMapConstants.SqlMapNamespace)
                         {
                             var newStatments = parser.GetMapFileStatments();
                             PackageStorage.XmlQueries.UpdateStatmentForFileWihoutKey(newStatments);

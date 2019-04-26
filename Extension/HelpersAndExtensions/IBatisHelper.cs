@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using IBatisSuperHelper.Constants;
+﻿using System.Linq;
+using IBatisSuperHelper.Constants.BatisConstants;
 
 namespace IBatisSuperHelper.Helpers
 {
@@ -11,7 +7,7 @@ namespace IBatisSuperHelper.Helpers
     {
         public static bool IsIBatisStatment(string statment)
         {
-            return IBatisConstants.StatementNames.Any(e => e == statment);
+            return XmlMapConstants.StatementNames.Any(e => e == statment);
         }
     }
 }
