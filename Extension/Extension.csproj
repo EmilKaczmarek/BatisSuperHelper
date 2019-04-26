@@ -127,6 +127,8 @@
     <Compile Include="Actions\TextProviders\IDocumentPropertiesProvider.cs" />
     <Compile Include="Actions\TextProviders\TextManagerPropertiesProvider.cs" />
     <Compile Include="Actions\QueryRenameActions.cs" />
+    <Compile Include="Constants\BatisConstants\XmlConfigConstants.cs" />
+    <Compile Include="Constants\BatisConstants\XmlMapConstants.cs" />
     <Compile Include="Constants\EventConstats.cs" />
     <Compile Include="EventHandlers\BuildEvents.cs" />
     <Compile Include="EventHandlers\ProjectItemEvents.cs" />
@@ -161,6 +163,11 @@
     <Compile Include="Logging\NLogConfigurationService.cs" />
     <Compile Include="Logging\OutputWindowLogger.cs" />
     <Compile Include="Models\XmlFileInfo.cs" />
+    <Compile Include="Parsers\Models\XmlConfig\Setting.cs" />
+    <Compile Include="Parsers\Models\XmlConfig\SqlMap\ResourceSqlMap.cs" />
+    <Compile Include="Parsers\Models\XmlConfig\SqlMap\SqlMap.cs" />
+    <Compile Include="Parsers\Models\XmlConfig\SqlMap\EmbeddedSqlMap.cs" />
+    <Compile Include="Parsers\Models\XmlConfig\SqlMap\UriSqlMap.cs" />
     <Compile Include="Parsers\XmlParser.cs" />
     <Compile Include="Parsers\BatisXmlConfigParser.cs" />
     <Compile Include="Parsers\BatisXmlMapParser.cs" />

@@ -50,6 +50,7 @@
     <Compile Include="GenericStorageTests.cs" />
     <Compile Include="IndexerTests.cs" />
     <Compile Include="NodeHelperTests.cs" />
+    <Compile Include="ParsersTests\BatisConfigParserTests.cs" />
     <Compile Include="Playground\RoslynPlayground.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MapNamespaceHelperTests.cs" />

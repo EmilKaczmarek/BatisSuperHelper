@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 using IBatisSuperHelper.Constants;
+using IBatisSuperHelper.Constants.BatisConstants;
 using IBatisSuperHelper.Helpers;
 using IBatisSuperHelper.HelpersAndExtensions;
 using IBatisSuperHelper.Indexers.Models;
@@ -19,8 +20,7 @@ namespace IBatisSuperHelper.Parsers
         private Lazy<string> _mapNamespace => new Lazy<string>(GetDocumentMapNamespace);
         public string MapNamespace =>_mapNamespace.Value;
 
-        private Lazy<bool> _useStatementNamespaces => new Lazy<bool>(IsFileUsingStatementNamespaces);
-        public bool IsUsingStatementNamespaces => _useStatementNamespaces.Value;
+        public bool IsUsingStatementNamespaces => false; //TODO: Too much dependencies to remove this now.
 
         private XmlParser _parser;
 
@@ -49,7 +49,7 @@ namespace IBatisSuperHelper.Parsers
 
         public List<XmlQuery> GetMapFileStatments()
         {
-            var statementChildNodes = _parser.GetChildNodesOfParentByXPath(IBatisConstants.StatementsRootElementXPath);
+            var statementChildNodes = _parser.GetChildNodesOfParentByXPath(XmlMapConstants.StatementsRootElementXPath);
             return statementChildNodes.Where(e => IBatisHelper.IsIBatisStatment(e.Name)).Select(e => new XmlQuery
             {
                 QueryFileName = _parser.FileName,
@@ -64,7 +64,7 @@ namespace IBatisSuperHelper.Parsers
 
         public List<XmlQuery> GetMapFileStatmentsWithIdAttributeColumnInfo()
         {
-            var statementChildNodes = _parser.GetChildNodesOfParentByXPath(IBatisConstants.StatementsRootElementXPath);
+            var statementChildNodes = _parser.GetChildNodesOfParentByXPath(XmlMapConstants.StatementsRootElementXPath);
             return statementChildNodes.Where(e => IBatisHelper.IsIBatisStatment(e.Name)).Select(e => new XmlQuery
             {
                 XmlLine = e.Attributes.FirstOrDefault(x => x.Name == "id")?.Line,
@@ -102,7 +102,7 @@ namespace IBatisSuperHelper.Parsers
 
         public List<int> GetStatmentElementsLineNumber()
         {
-            var statementChildNodes = _parser.GetChildNodesOfParentByXPath(IBatisConstants.StatementsRootElementXPath);
+            var statementChildNodes = _parser.GetChildNodesOfParentByXPath(XmlMapConstants.StatementsRootElementXPath);
             return statementChildNodes.Where(e => e.Name != "#text").Select(e => e.Line).ToList();
         }
 
@@ -111,7 +111,7 @@ namespace IBatisSuperHelper.Parsers
             var nodes = _parser.GetAllDescendantsNodes();
             var line = GetFirstStatmentNodeForLineOrNull(nodes, lineNumber);
 
-            return line?.Name != null && IBatisConstants.StatementNames.Contains(line.Name);          
+            return line?.Name != null && XmlMapConstants.StatementNames.Contains(line.Name);          
         }
 
         private HtmlNode GetFirstStatmentNodeForLineOrNull(IEnumerable<HtmlNode> nodes, int lineNumber)
@@ -121,7 +121,7 @@ namespace IBatisSuperHelper.Parsers
 
             while (line != null)
             {
-                if (IBatisConstants.StatementNames.Contains(line.Name))
+                if (XmlMapConstants.StatementNames.Contains(line.Name))
                 {
                     return line;
                 }
@@ -151,19 +151,8 @@ namespace IBatisSuperHelper.Parsers
 
         private HtmlNode GetMapDocumentRootNode()
         {
-            return _parser.GetSingleNode(IBatisConstants.MapFileRootElementXPath);
+            return _parser.GetSingleNode(XmlMapConstants.MapFileRootElementXPath);
         }
 
-        private bool IsFileUsingStatementNamespaces()
-        {
-            var useStatmentNamespaceNodes = _parser.GetChildNodesOfParentByXPath(IBatisConstants.SettingRootElementXPath)?.FirstOrDefault(e => e.Name != "#text");
-            
-            if (useStatmentNamespaceNodes != null)
-            {
-                return useStatmentNamespaceNodes.GetAttributeValue(IBatisConstants.UseStatmentNameSpaceSettingAttributeName, false);
-            }
-         
-            return false;
-        }
     }
 }

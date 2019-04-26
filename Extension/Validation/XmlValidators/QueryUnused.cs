@@ -1,5 +1,6 @@
 ﻿using EnvDTE;
 using IBatisSuperHelper.Constants;
+using IBatisSuperHelper.Constants.BatisConstants;
 using IBatisSuperHelper.Helpers;
 using IBatisSuperHelper.Indexers.Models;
 using IBatisSuperHelper.Parsers;
@@ -66,7 +67,7 @@ namespace IBatisSuperHelper.Validation.XmlValidators
 
         public bool IsDocumentSupportedForValidation()
         {
-            return _xmlParser.XmlNamespace == IBatisConstants.SqlMapNamespace;
+            return _xmlParser.XmlNamespace == XmlMapConstants.SqlMapNamespace;
         }
 
         public void ValidateAllSpans()
@@ -77,7 +78,7 @@ namespace IBatisSuperHelper.Validation.XmlValidators
             foreach (var cSpan in classificationSpans)
             {
                 if (cSpan.ClassificationType.Classification == "XML Name" &&
-                    IBatisConstants.StatementNames.Contains(cSpan.Span.GetText())
+                    XmlMapConstants.StatementNames.Contains(cSpan.Span.GetText())
                     && cSpan.Span.Start.GetContainingLine().Extent.GetText().Contains("id"))
                 {
                     var line = cSpan.Span.Start.GetContainingLine();
