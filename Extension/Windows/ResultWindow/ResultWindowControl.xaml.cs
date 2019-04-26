@@ -15,7 +15,7 @@
     /// </summary>
     public partial class ResultWindowControl : UserControl
     {
-        private static double _lastColumnInitialWidth;
+        private readonly double _lastColumnInitialWidth;
         /// <summary>
         /// Initializes a new instance of the <see cref="ResultWindowControl"/> class.
         /// </summary>

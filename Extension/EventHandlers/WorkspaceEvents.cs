@@ -18,6 +18,8 @@ namespace IBatisSuperHelper.Events
 {
     public static class WorkspaceEvents
     {
+        private static ProjectIndexingQueue _indexingQueue = new ProjectIndexingQueue();
+
         public static async Task BuildIndexerWithCSharpResultsAsync(Solution solution)
         {
             var solutionFiles = solution.Projects.SelectMany(x => x.Documents).ToList();
@@ -48,8 +50,6 @@ namespace IBatisSuperHelper.Events
             }
         }
 
-        private static List<ProjectId> _projectsAlreadyAdded = new List<ProjectId>();
-
         public static async void WorkspaceChanged(object sender, WorkspaceChangeEventArgs e)
         {
             var profiler = MiniProfiler.StartNew(nameof(WorkspaceChanged));
@@ -62,9 +62,7 @@ namespace IBatisSuperHelper.Events
                     {
                         using (profiler.Step(WorkspaceChangeKind.SolutionAdded.ToString()))
                         {
-                            var solution = e.NewSolution.Projects.Any() ? e.NewSolution : workspace.CurrentSolution;
-                            _projectsAlreadyAdded = new List<ProjectId>(solution.ProjectIds);
-                            BuildIndexerWithCSharpResultsAsync(e.NewSolution.Projects.Any() ? e.NewSolution : workspace.CurrentSolution);
+                            await _indexingQueue.EnqueueMultipleAsync(e.NewSolution.Projects.Any() ? e.NewSolution.Projects : workspace.CurrentSolution.Projects);
                         }
                     }
                     catch (Exception ex)
@@ -86,24 +84,7 @@ namespace IBatisSuperHelper.Events
                     {
                         using (profiler.Step(WorkspaceChangeKind.SolutionAdded.ToString()))
                         {
-                            if (!_projectsAlreadyAdded.Any())
-                            {
-                                _projectsAlreadyAdded = new List<ProjectId>(e.NewSolution.ProjectIds);
-                                Loggers.OutputWindowLogger.WriteLn($"Adding {string.Join(",", e.NewSolution.Projects.Select(x => x.Name))} to indexer");
-                                BuildIndexerWithCSharpResultsAsync(e.NewSolution);
-                            }
-                            else
-                            {
-                                foreach (var project in e.NewSolution.Projects)
-                                {
-                                    if (!_projectsAlreadyAdded.Contains(project.Id))
-                                    {
-                                        _projectsAlreadyAdded.Add(project.Id);
-                                        Loggers.OutputWindowLogger.WriteLn($"Adding {project.Name} to indexer");
-                                        BuildIndexerUsingProjectWithCSharpResultsAsync(project);
-                                    }
-                                }
-                            }
+                            await _indexingQueue.EnqueueMultipleAsync(e.NewSolution.Projects);
                         }
                     }
                     catch (Exception ex)

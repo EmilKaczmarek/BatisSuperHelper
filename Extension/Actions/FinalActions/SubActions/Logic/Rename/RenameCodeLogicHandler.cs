@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.VisualStudio.LanguageServices;
+using Microsoft.VisualStudio.Shell;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -19,7 +20,7 @@ namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Logic.Rename
             foreach (var file in codeKeyValuePair.Value.GroupBy(x => x.DocumentId, x => x))
             {
                 var doc = workspace.CurrentSolution.GetDocument(file.Key);
-                SemanticModel semModel = doc.GetSemanticModelAsync().Result;
+                SemanticModel semModel = ThreadHelper.JoinableTaskFactory.Run(async () => await doc.GetSemanticModelAsync());
                 NodeHelpers helper = new NodeHelpers(semModel);
                 doc.TryGetSyntaxTree(out SyntaxTree synTree);
                 var root = (CompilationUnitSyntax)synTree.GetRoot();

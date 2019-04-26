@@ -45,7 +45,7 @@ namespace IBatisSuperHelper.Actions
             StatusBar = statusBar;
         }
 
-        public virtual async void BeforeQuery(object sender, EventArgs e)
+        public virtual void BeforeQuery(object sender, EventArgs e)
         {
             var profiler = MiniProfiler.StartNew(nameof(BeforeQuery));
             profiler.Storage = new NLogStorage(LogManager.GetLogger("profiler"));
@@ -64,24 +64,21 @@ namespace IBatisSuperHelper.Actions
                 {
                     case "CSharp":
                         processorFactory = new CSharpDocumentProcessorFactory();
-                        //This is not mistake. When working on CSharp document, the result
-                        //we are looking for is xml statment.
                         _finalActionFactory = new CSharpFinalActionFactory();
                         
                         break;
                     case "XML":
                         processorFactory = new XmlDocumentProcessorFactory();
-                        //This is not mistake. When working on xml document, the result
-                        //we are looking for is code statment.
                         _finalActionFactory = new XmlFinalActionFactory();
                         break;
                     default:
                         return;
                 }
 
-                processorFactory
-                    .GetProcessorAsync(_documentPropertiesProvider.GetDocumentRepresentation(), _documentPropertiesProvider.GetSelectionLineNumber())
-                    .ContinueWith((t) => _documentProcessor = t.Result).Wait();//Only fully working solution found that works for all processors...
+                _documentProcessor = ThreadHelper.JoinableTaskFactory.Run(async () => await processorFactory.GetProcessorAsync(
+                      _documentPropertiesProvider.GetDocumentRepresentation(),
+                      _documentPropertiesProvider.GetSelectionLineNumber()
+                      ));
             }
             profiler.Stop();
         }

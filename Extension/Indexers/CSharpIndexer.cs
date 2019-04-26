@@ -75,6 +75,14 @@ namespace IBatisSuperHelper.Indexers
             return false;
         }
 
+        public async Task<CSharpIndexerResult> BuildAsync(Document document)
+        {
+            using (var timing = MiniProfiler.Current.Step(nameof(BuildAsync)))
+            {
+                return Build(await document.GetSemanticModelAsync(), document);
+            }
+        }
+
         private CSharpIndexerResult Build(SemanticModel semModel, Document document)
         {
             using (MiniProfiler.Current.Step(nameof(Build)))

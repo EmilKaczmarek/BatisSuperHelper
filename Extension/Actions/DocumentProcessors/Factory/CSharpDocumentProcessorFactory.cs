@@ -9,10 +9,10 @@ namespace IBatisSuperHelper.Actions.DocumentProcessors.Factory
 {
     public class CSharpDocumentProcessorFactory : DocumentProcessorFactory
     {
-        public override Task<IDocumentProcessor> GetProcessorAsync(object documentContent, int selectedLineNumber)
+        public override async Task<IDocumentProcessor> GetProcessorAsync(object documentContent, int selectedLineNumber)
         {
             var documentProcessor = new CSharpDocumentProcessor(documentContent, selectedLineNumber);
-            return documentProcessor.InitializeAsync();
+            return await documentProcessor.InitializeAsync();
         }
     }
 }

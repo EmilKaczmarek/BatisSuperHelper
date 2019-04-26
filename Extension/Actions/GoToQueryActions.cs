@@ -9,6 +9,7 @@ using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 using IBatisSuperHelper.Loggers;
 using IBatisSuperHelper.Logging.MiniProfiler;
 using IBatisSuperHelper.VSIntegration;
+using IBatisSuperHelper.Storage;
 
 namespace IBatisSuperHelper.Actions
 {
@@ -41,7 +42,7 @@ namespace IBatisSuperHelper.Actions
             {
                 var profiler = MiniProfiler.StartNew($"{nameof(GoToQueryActions2)}.{nameof(MenuItemCallback)}");
                 profiler.Storage = new NLogStorage(LogManager.GetLogger("profiler"));
-                using (profiler.Step("Event start"))
+                using (profiler.Step("Event start"))   
                 {
                     _documentProcessor.TryResolveQueryValueAtCurrentSelectedLine(out ExpressionResult expressionResult, out string queryValue);
                     _finalActionFactory
