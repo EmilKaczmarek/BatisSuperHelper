@@ -18,7 +18,7 @@ namespace IBatisSuperHelper.Actions.DocumentProcessors
     {
         private IActionValidator _validator { get; set; }
         private readonly string _documentContent;
-        private XmlParser _parser;
+        private BatisXmlMapParser _parser;
         private readonly int _selectedLineNumber;
 
         public XmlDocumentProcessor(object documentContent, int selectedLineNumber) : this(documentContent, selectedLineNumber, new FunctionBasedActionValidator())
@@ -44,7 +44,7 @@ namespace IBatisSuperHelper.Actions.DocumentProcessors
         {
             using (var stringReader = new StringReader(_documentContent))
             {
-                _parser = new XmlParser().WithStringReader(stringReader).Load();
+                _parser = new BatisXmlMapParser().WithStringReader(stringReader).Load();
             }
 
             return this;

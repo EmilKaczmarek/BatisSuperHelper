@@ -34,7 +34,7 @@ namespace IBatisSuperHelper.VSIntegration.DocumentChanges.Actions
                     using (var stringReader = new StringReader(snapshot.GetText()))
                     {
                         var project = GotoAsyncPackage.EnvDTE.Solution.FindProjectItem(textDoc.FilePath).ContainingProject.Name;
-                        XmlParser parser = new XmlParser().WithStringReader(stringReader).WithFileInfo(textDoc.FilePath, project).Load();
+                        BatisXmlMapParser parser = new BatisXmlMapParser().WithStringReader(stringReader).WithFileInfo(textDoc.FilePath, project).Load();
                         if (parser.XmlNamespace == IBatisConstants.SqlMapNamespace)
                         {
                             var newStatments = parser.GetMapFileStatments();

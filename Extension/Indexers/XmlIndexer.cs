@@ -23,7 +23,7 @@ namespace IBatisSuperHelper.Indexers
             sw.Start();
             foreach (var xmlSolutionDocument in solutionXmlDocuments)
             {
-                XmlParser parser = new XmlParser().WithFileInfo(xmlSolutionDocument.FilePath, xmlSolutionDocument.ProjectName).Load();
+                BatisXmlMapParser parser = new BatisXmlMapParser().WithFileInfo(xmlSolutionDocument.FilePath, xmlSolutionDocument.ProjectName).Load();
 
                 bool isIBatisQueryXmlFile = parser.XmlNamespace == @"http://ibatis.apache.org/mapping";
                 if (isIBatisQueryXmlFile)
@@ -38,7 +38,7 @@ namespace IBatisSuperHelper.Indexers
 
         public List<XmlQuery> ParseSingleFile(XmlFileInfo xmlDocument)
         {
-            XmlParser parser = new XmlParser().WithFileInfo(xmlDocument.FilePath, xmlDocument.ProjectName).Load();
+            BatisXmlMapParser parser = new BatisXmlMapParser().WithFileInfo(xmlDocument.FilePath, xmlDocument.ProjectName).Load();
 
             bool isIBatisQueryXmlFile = parser.XmlNamespace == @"http://ibatis.apache.org/mapping";
             if (isIBatisQueryXmlFile)

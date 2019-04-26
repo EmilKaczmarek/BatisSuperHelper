@@ -26,7 +26,7 @@ namespace IBatisSuperHelper.Validation.XmlValidators
         private readonly ITextDocument _document;
 
         private readonly string _filePath;
-        private readonly XmlParser _xmlParser;
+        private readonly BatisXmlMapParser _xmlParser;
 
         public MapNotEmbedded(IClassifier classifier, SnapshotSpan span, ITextDocument document, ITextBuffer buffer)
         {
@@ -40,7 +40,7 @@ namespace IBatisSuperHelper.Validation.XmlValidators
         public MapNotEmbedded(string filePath)
         {
             _filePath = filePath;
-            _xmlParser = new XmlParser().WithFileInfo(_filePath, "").Load();
+            _xmlParser = new BatisXmlMapParser().WithFileInfo(_filePath, "").Load();
         }
 
         public void OnChange(SnapshotSpan newSpan)
