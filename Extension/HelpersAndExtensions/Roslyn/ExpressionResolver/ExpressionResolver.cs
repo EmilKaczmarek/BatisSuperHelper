@@ -29,7 +29,7 @@ namespace IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver
               };
 
         private int _maxCallStackNum;
-        private int _maxCallStackNumAtStart;
+        private readonly int _maxCallStackNumAtStart;
 
         public ExpressionResolver()
         {
@@ -43,7 +43,7 @@ namespace IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver
         }
         private int _callStackNum = 1;
 
-        private MethodInfo ResolveToClassAndMethodNames(SyntaxNode node, SemanticModel semModel)
+        private MethodInfo ResolveToClassAndMethodNames(SyntaxNode node)
         {
             var analyzeNode = node;
             while (analyzeNode != null && !analyzeNode.IsKind(SyntaxKind.MethodDeclaration))
@@ -122,10 +122,10 @@ namespace IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver
                 TextResult = "",
             }
             .WithCallStackNumber(_callStackNum);
-            return document != null || expressionSyntax !=null || semanticModel !=null
+            return document != null && expressionSyntax !=null && semanticModel !=null
               ? result.WithNodeInfo(new NodeInfo
               {
-                  MethodInfo = ResolveToClassAndMethodNames(expressionSyntax, semanticModel),
+                  MethodInfo = ResolveToClassAndMethodNames(expressionSyntax),
                   FileName = Path.GetFileName(document.FilePath),
                   LineNumber = expressionSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
                   ProjectName = document.Project.Name,
@@ -157,7 +157,7 @@ namespace IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver
                 return document != null
                     ?result.WithNodeInfo(new NodeInfo
                         {
-                            MethodInfo = ResolveToClassAndMethodNames(expressionSyntax, semanticModel),
+                            MethodInfo = ResolveToClassAndMethodNames(expressionSyntax),
                             FileName = Path.GetFileName(document.FilePath),
                             LineNumber = expressionSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
                             ProjectName = document.Project.Name,

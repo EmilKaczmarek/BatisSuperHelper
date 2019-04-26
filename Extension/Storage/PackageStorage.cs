@@ -12,6 +12,7 @@ using IBatisSuperHelper.Indexers.Models;
 using IBatisSuperHelper.Models;
 using IBatisSuperHelper.Storage.Domain;
 using IBatisSuperHelper.Storage.Interfaces;
+using Microsoft.VisualStudio.Shell;
 
 namespace IBatisSuperHelper.Storage
 {
@@ -30,7 +31,7 @@ namespace IBatisSuperHelper.Storage
             new KeyValuePair<string, object>("HybridNamespaceEnabled", true),
         };
         
-        public static async Task AnalyzeAndStoreAsync(List<Document> documents)
+        public static async System.Threading.Tasks.Task AnalyzeAndStoreAsync(List<Document> documents)
         {
             using (MiniProfiler.Current.Step(nameof(AnalyzeAndStoreAsync)))
             {
@@ -47,21 +48,24 @@ namespace IBatisSuperHelper.Storage
             XmlQueries.AddMultipleWithoutKey(xmlFileResult);
         }
 
-        public static async Task AnalyzeAndStoreSingleAsync(Document document)
-        {
-            var codeResult = await CodeFileAnalyzer.BuildFromDocumentAsync(document);
-            await GenericMethods.AddMultipleAsync(codeResult.Generics.Select(e => new KeyValuePair<MethodInfo, ExpressionResult>(e.NodeInformation.MethodInfo, e)));
-            CodeQueries.AddWithoutKey(codeResult.Queries);
-        }
-
         public static void AnalyzeAndUpdateSingle(Document document)
         {
-            var codeResult = CodeFileAnalyzer.BuildFromDocumentAsync(document).Result;
+            var codeResult = ThreadHelper.JoinableTaskFactory.Run(async () => await CodeFileAnalyzer.BuildFromDocumentAsync(document));
             CodeQueries.UpdateStatmentForFileWihoutKey(new List<List<CSharpQuery>> { codeResult.Queries });
             foreach (var generic in codeResult.Generics)
             {
                 GenericMethods.Update(generic.NodeInformation.MethodInfo, generic);
             }  
+        }
+
+        public static async System.Threading.Tasks.Task AnalyzeAndStoreSingleAsync(Document document)
+        {
+            using (MiniProfiler.Current.Step(nameof(AnalyzeAndStoreSingleAsync)))
+            {
+                var codeResult = await CodeFileAnalyzer.BuildAsync(document);
+                await GenericMethods.AddMultipleAsync(codeResult.Generics.Select(e => new KeyValuePair<MethodInfo, ExpressionResult>(e.NodeInformation.MethodInfo, e)));
+                CodeQueries.AddWithoutKey(codeResult.Queries);
+            }
         }
     }
 }

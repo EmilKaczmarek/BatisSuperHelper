@@ -9,10 +9,10 @@ namespace IBatisSuperHelper.Actions.DocumentProcessors.Factory
 {
     public class XmlDocumentProcessorFactory : DocumentProcessorFactory
     {
-        public override Task<IDocumentProcessor> GetProcessorAsync(object documentContent, int selectedLineNumber)
+        public async override Task<IDocumentProcessor> GetProcessorAsync(object documentContent, int selectedLineNumber)
         {
             var documentProcessor = new XmlDocumentProcessor(documentContent, selectedLineNumber);
-            return documentProcessor.InitializeAsync();
+            return await documentProcessor.InitializeAsync();
         }
     }
 }

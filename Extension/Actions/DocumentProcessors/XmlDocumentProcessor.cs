@@ -17,9 +17,9 @@ namespace IBatisSuperHelper.Actions.DocumentProcessors
     public class XmlDocumentProcessor : IDocumentProcessor
     {
         private IActionValidator _validator { get; set; }
-        private string _documentContent;
+        private readonly string _documentContent;
         private XmlParser _parser;
-        private int _selectedLineNumber;
+        private readonly int _selectedLineNumber;
 
         public XmlDocumentProcessor(object documentContent, int selectedLineNumber) : this(documentContent, selectedLineNumber, new FunctionBasedActionValidator())
         {
@@ -50,9 +50,9 @@ namespace IBatisSuperHelper.Actions.DocumentProcessors
             return this;
         }
 
-        public Task<IDocumentProcessor> InitializeAsync()
+        public async Task<IDocumentProcessor> InitializeAsync()
         {
-            return Task.Run(() => this.Initialize());
+            return await Task.Run(() => this.Initialize());
         }
 
         private string GetLineText(int selectedLineNumber)

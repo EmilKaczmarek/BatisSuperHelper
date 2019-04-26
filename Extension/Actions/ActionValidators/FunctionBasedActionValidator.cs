@@ -8,7 +8,7 @@ namespace IBatisSuperHelper.Actions.ActionValidators
 {
     public class FunctionBasedActionValidator : IActionValidator
     {
-        Dictionary<string, List<Func<int, bool>>> _toExecute = new Dictionary<string, List<Func<int, bool>>>();
+        private readonly Dictionary<string, List<Func<int, bool>>> _toExecute = new Dictionary<string, List<Func<int, bool>>>();
 
         public FunctionBasedActionValidator()
         {
