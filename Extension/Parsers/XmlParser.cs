@@ -1,4 +1,5 @@
 ﻿using HtmlAgilityPack;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,6 +8,7 @@ namespace IBatisSuperHelper.Parsers
 {
     public class XmlParser
     {
+        public string XmlNamespace => IsLazy ? _xmlNamespaceLazy.Value : GetXmlNamespace();
         public string FilePath { get; private set; }
         public string FileName { get; private set; }
         public string FileProjectName { get; private set; }
@@ -14,6 +16,9 @@ namespace IBatisSuperHelper.Parsers
         private StringReader _stringReader;
         private HtmlDocument _xmlDocument;
 
+        private Lazy<string> _xmlNamespaceLazy;
+        protected bool IsLazy = false;//I am...
+        
         public XmlParser()
         {
             InitializeEmpty();
@@ -46,6 +51,12 @@ namespace IBatisSuperHelper.Parsers
             FileProjectName = fileProjectName;
         }
 
+        public void LazyLoading()
+        {
+            IsLazy = true;
+            _xmlNamespaceLazy = new Lazy<string>(() => GetXmlNamespace());
+        }
+
         public void Load()
         {
             InitializeEmpty();
@@ -61,7 +72,7 @@ namespace IBatisSuperHelper.Parsers
 
         public IEnumerable<HtmlNode> GetChildNodesOfParentByXPath(string xPath)
         {
-            var test = _xmlDocument.DocumentNode.DescendantNodes();
+            var test = _xmlDocument.DocumentNode.DescendantNodes();//TODO: Remove after tests.
             var statementRootNode = GetSingleNode(xPath);
 
             if (statementRootNode == null)
@@ -79,6 +90,11 @@ namespace IBatisSuperHelper.Parsers
         public HtmlNode GetSingleNode(string xpath)
         {
             return _xmlDocument.DocumentNode.SelectSingleNode(xpath);
+        }
+
+        public string GetXmlNamespace()
+        {
+            return _xmlDocument.DocumentNode.ChildNodes.Count != 2 ? null :_xmlDocument.DocumentNode.ChildNodes.Last().GetAttributeValue("xmlns", null);
         }
 
     }

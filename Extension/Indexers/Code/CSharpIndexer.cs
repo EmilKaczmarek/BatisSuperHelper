@@ -22,15 +22,10 @@ using IBatisSuperHelper.Indexers.Models;
 using IBatisSuperHelper.Loggers;
 using IBatisSuperHelper.Models;
 
-namespace IBatisSuperHelper.Indexers
+namespace IBatisSuperHelper.Indexers.Code
 {
     public class CSharpIndexer
     {
-        public CSharpIndexer()
-        {
-
-        }
-
         public async Task<List<CSharpIndexerResult>> BuildIndexerAsync(List<Document> documents)
         {
             var results = new List<CSharpIndexerResult>();

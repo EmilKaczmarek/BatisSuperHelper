@@ -44,6 +44,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConfigurationFilesHelperTests.cs" />
     <Compile Include="ExpressionResolverCrashTests.cs" />
     <Compile Include="ExpressionResolverGeneralTests.cs" />
     <Compile Include="GenericQueryHandlingTests.cs" />

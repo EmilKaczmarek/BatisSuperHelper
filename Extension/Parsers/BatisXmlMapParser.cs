@@ -12,7 +12,7 @@ using IBatisSuperHelper.Indexers.Models;
 
 namespace IBatisSuperHelper.Parsers
 {
-    public class BatisXmlMapParser
+    public class BatisXmlMapParser : XmlParser
     {
         private Lazy<string> _xmlNamespace => new Lazy<string>(GetDocumentXmlNamespace);
         public string XmlNamespace => _xmlNamespace.Value;
@@ -22,59 +22,57 @@ namespace IBatisSuperHelper.Parsers
 
         public bool IsUsingStatementNamespaces => false; //TODO: Too much dependencies to remove this now.
 
-        private XmlParser _parser;
-
         public BatisXmlMapParser()
         {
-            _parser = new XmlParser();
+            InitializeEmpty();
         }
 
         public BatisXmlMapParser WithStringReader(StringReader stringReader)
         {
-            _parser = new XmlParser(stringReader);
+            InitializeWithStringReader(stringReader);
             return this;
         }
 
         public BatisXmlMapParser WithFileInfo(string filePath, string fileProjectName)
         {
-            _parser = new XmlParser(filePath, fileProjectName);
+            InitializeWithFilePathAndProjectName(filePath, fileProjectName);
             return this;
         }
 
         public new BatisXmlMapParser Load()
         {
-            _parser.Load();
+            base.Load();
             return this;
         }
 
         public List<XmlQuery> GetMapFileStatments()
         {
-            var statementChildNodes = _parser.GetChildNodesOfParentByXPath(XmlMapConstants.StatementsRootElementXPath);
+            var statementChildNodes = GetChildNodesOfParentByXPath(XmlMapConstants.StatementsRootElementXPath);
             return statementChildNodes.Where(e => IBatisHelper.IsIBatisStatment(e.Name)).Select(e => new XmlQuery
             {
-                QueryFileName = _parser.FileName,
-                QueryFilePath = _parser.FilePath,
+                QueryFileName = FileName,
+                QueryFilePath = FilePath,
                 QueryId = e.Id,
                 FullyQualifiedQuery = IsUsingStatementNamespaces ? MapNamespaceHelper.CreateFullQueryString(MapNamespace, e.Id) : e.Id,
                 QueryLineNumber = e.Line,
-                QueryVsProjectName = _parser.FileProjectName,
+                QueryVsProjectName = FileProjectName,
                 MapNamespace = MapNamespace
             }).ToList();
         }
 
         public List<XmlQuery> GetMapFileStatmentsWithIdAttributeColumnInfo()
         {
-            var statementChildNodes = _parser.GetChildNodesOfParentByXPath(XmlMapConstants.StatementsRootElementXPath);
+            var statementChildNodes = GetChildNodesOfParentByXPath(XmlMapConstants.StatementsRootElementXPath);
             return statementChildNodes.Where(e => IBatisHelper.IsIBatisStatment(e.Name)).Select(e => new XmlQuery
             {
                 XmlLine = e.Attributes.FirstOrDefault(x => x.Name == "id")?.Line,
                 XmlLineColumn = e.Attributes.FirstOrDefault(x=>x.Name == "id")?.LinePosition,
-                QueryFileName = _parser.FileName,
-                QueryFilePath = _parser.FilePath,
+                QueryFileName = FileName,
+                QueryFilePath = FilePath,
                 QueryId = e.Id,
                 FullyQualifiedQuery = IsUsingStatementNamespaces ? MapNamespaceHelper.CreateFullQueryString(MapNamespace, e.Id) : e.Id,
                 QueryLineNumber = e.Line,
-                QueryVsProjectName = _parser.FileProjectName,
+                QueryVsProjectName = FileProjectName,
                 MapNamespace = MapNamespace
             }).ToList();
         }
@@ -83,7 +81,7 @@ namespace IBatisSuperHelper.Parsers
         {
             if (forceNoNamespace)
             {
-                var nodes = _parser.GetAllDescendantsNodes();
+                var nodes = GetAllDescendantsNodes();
                 var lineNode = GetFirstStatmentNodeForLineOrNull(nodes, lineNumber);
 
                 return lineNode?.Id;
@@ -94,7 +92,7 @@ namespace IBatisSuperHelper.Parsers
 
         public string GetQueryAtLineOrNull(int lineNumber)
         {
-            var nodes = _parser.GetAllDescendantsNodes();
+            var nodes = GetAllDescendantsNodes();
             var lineNode = GetFirstStatmentNodeForLineOrNull(nodes, lineNumber);
 
             return IsUsingStatementNamespaces? MapNamespaceHelper.CreateFullQueryString(MapNamespace, lineNode?.Id):lineNode?.Id;
@@ -102,13 +100,13 @@ namespace IBatisSuperHelper.Parsers
 
         public List<int> GetStatmentElementsLineNumber()
         {
-            var statementChildNodes = _parser.GetChildNodesOfParentByXPath(XmlMapConstants.StatementsRootElementXPath);
+            var statementChildNodes = GetChildNodesOfParentByXPath(XmlMapConstants.StatementsRootElementXPath);
             return statementChildNodes.Where(e => e.Name != "#text").Select(e => e.Line).ToList();
         }
 
         public bool HasSelectedLineValidQuery(int lineNumber)
         {
-            var nodes = _parser.GetAllDescendantsNodes();
+            var nodes = GetAllDescendantsNodes();
             var line = GetFirstStatmentNodeForLineOrNull(nodes, lineNumber);
 
             return line?.Name != null && XmlMapConstants.StatementNames.Contains(line.Name);          
@@ -151,7 +149,7 @@ namespace IBatisSuperHelper.Parsers
 
         private HtmlNode GetMapDocumentRootNode()
         {
-            return _parser.GetSingleNode(XmlMapConstants.MapFileRootElementXPath);
+            return GetSingleNode(XmlMapConstants.MapFileRootElementXPath);
         }
 
     }

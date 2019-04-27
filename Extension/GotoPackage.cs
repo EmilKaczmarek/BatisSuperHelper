@@ -44,6 +44,9 @@ using IBatisSuperHelper.VSIntegration.Navigation;
 using IBatisSuperHelper.Windows.RenameWindow;
 using static IBatisSuperHelper.Events.VSSolutionEventsHandler;
 using Microsoft;
+using IBatisSuperHelper.Indexers.Xml;
+using IBatisSuperHelper.HelpersAndExtensions;
+using IBatisSuperHelper.EventHandlers.SolutionEventsActions;
 
 namespace IBatisSuperHelper
 {
@@ -148,13 +151,13 @@ namespace IBatisSuperHelper
             _envDteEvents = EnvDTE.Events as Events2;
             if (_envDteEvents != null)
             {
-                ProjectItemEventsEx projectItemEvents = new ProjectItemEventsEx();
+                ProjectItemEventsActions projectItemEvents = new ProjectItemEventsActions();
                 _envDteProjectItemsEvents = _envDteEvents.ProjectItemsEvents;
                 _envDteProjectItemsEvents.ItemAdded += projectItemEvents.ItemAdded;
                 _envDteProjectItemsEvents.ItemRemoved += projectItemEvents.ItemRemoved;
                 _envDteProjectItemsEvents.ItemRenamed += projectItemEvents.ItemRenamed;
 
-                EventHandlers.BuildEvents buildEvents = new EventHandlers.BuildEvents();
+                EventHandlers.BuildEventsActions buildEvents = new EventHandlers.BuildEventsActions();
                 _buildEvents = _envDteEvents.BuildEvents;
                 _buildEvents.OnBuildBegin += buildEvents.OnBuildBegin;
                 
@@ -169,38 +172,13 @@ namespace IBatisSuperHelper
             Solution = await GetServiceAsync(typeof(SVsSolution)) as IVsSolution;
             Assumes.Present(Solution);
 
-            _solutionEventsHandler = new SolutionEventsHandler(
-                new Action<EventConstats.VS.SolutionLoad>(HandleSolutionEvent),
-                Solution
-            );
+            _solutionEventsHandler = new SolutionEventsHandler(new VSSolutionEventsActions(EnvDTE, new XmlIndexer()));
             Solution.AdviseSolutionEvents(_solutionEventsHandler, out _solutionEventsCookie);
 
             Goto.Initialize(this);
             RenameModalWindowCommand.Initialize(this);
             RenameCommand.Initialize(this);
             Instance = this;
-        }
-
-        internal void HandleSolutionEvent(EventConstats.VS.SolutionLoad eventNumber)
-        {
-            switch (eventNumber)
-            {
-                case EventConstats.VS.SolutionLoad.SolutionLoadComplete:
-                    ThreadHelper.ThrowIfNotOnUIThread();
-                    var projectItemHelper = new ProjectItemHelper();
-                    var projectItems = projectItemHelper.GetProjectItemsFromSolutionProjects(EnvDTE.Solution.Projects);
-                    XmlIndexer xmlIndexer = new XmlIndexer();
-                    var xmlFiles = DocumentHelper.GetXmlFiles(projectItems);
-                    var xmlIndexerResult = xmlIndexer.BuildIndexer(xmlFiles);
-                    PackageStorage.XmlQueries.AddMultipleWithoutKey(xmlIndexerResult);
-                    break;
-                case EventConstats.VS.SolutionLoad.SolutionOnClose:
-                    PackageStorage.CodeQueries.Clear();
-                    PackageStorage.XmlQueries.Clear();
-                    break;
-                default:
-                    break;
-            }
         }
         #endregion
     }

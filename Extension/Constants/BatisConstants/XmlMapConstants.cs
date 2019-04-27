@@ -8,7 +8,7 @@ namespace IBatisSuperHelper.Constants.BatisConstants
 {
     public static class XmlMapConstants
     {
-        public const string SqlMapNamespace = @"http://ibatis.apache.org/mapping";
+        public const string XmlNamespace = @"http://ibatis.apache.org/mapping";
 
         public static readonly List<string> StatementNames = new List<string>
         {
