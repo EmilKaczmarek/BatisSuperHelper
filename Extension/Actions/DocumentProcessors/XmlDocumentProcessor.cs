@@ -11,6 +11,7 @@ using IBatisSuperHelper.HelpersAndExtensions.Roslyn;
 using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 using IBatisSuperHelper.Parsers;
 using static IBatisSuperHelper.HelpersAndExtensions.XmlHelper;
+using IBatisSuperHelper.Constants.BatisConstants;
 
 namespace IBatisSuperHelper.Actions.DocumentProcessors
 {
@@ -27,7 +28,7 @@ namespace IBatisSuperHelper.Actions.DocumentProcessors
                 .WithFunctionList("jump", new List<Func<int, bool>>
                 {
                     (selectionLineNum) => !XmlStringLine.IsIgnored(GetLineText(selectionLineNum + 1)),
-                    (selectionLineNum) => _parser.XmlNamespace == @"http://ibatis.apache.org/mapping",
+                    (selectionLineNum) => _parser.XmlNamespace == XmlMapConstants.XmlNamespace,
                     (selectionLineNum) => _parser.HasSelectedLineValidQuery(selectionLineNum + 1)
                 })
                 .WithFunctionList("rename", new List<Func<int, bool>>());

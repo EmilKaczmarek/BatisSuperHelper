@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace IBatisSuperHelper.Helpers
 {
-    public class ProjectItemHelper
+    public class ProjectItemRetreiver
     {
         private readonly List<ProjectItem> _projectItems = new List<ProjectItem>();
         private readonly int maxDepth = 10000;

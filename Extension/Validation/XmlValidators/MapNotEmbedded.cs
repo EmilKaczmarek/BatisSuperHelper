@@ -75,7 +75,7 @@ namespace IBatisSuperHelper.Validation.XmlValidators
             ThreadHelper.ThrowIfNotOnUIThread();
             _isRunning = true;
             var classificationSpans = _classifier.GetClassificationSpans(_span);
-            var isBatisMapFileCSpan = classificationSpans.FirstOrDefault(e => e.ClassificationType.Classification == "XML Attribute Value" && e.Span.GetText().Equals(XmlMapConstants.SqlMapNamespace));
+            var isBatisMapFileCSpan = classificationSpans.FirstOrDefault(e => e.ClassificationType.Classification == "XML Attribute Value" && e.Span.GetText().Equals(XmlMapConstants.XmlNamespace));
             if (isBatisMapFileCSpan != null)
             {
                 var projectItem = GotoAsyncPackage.EnvDTE.Solution.FindProjectItem(_document.FilePath);
@@ -136,7 +136,7 @@ namespace IBatisSuperHelper.Validation.XmlValidators
 
         public bool IsDocumentSupportedForValidation()
         {
-            return _xmlParser.XmlNamespace == XmlMapConstants.SqlMapNamespace;
+            return _xmlParser.XmlNamespace == XmlMapConstants.XmlNamespace;
         }
 
         public void AddToErrorList()

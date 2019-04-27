@@ -14,14 +14,14 @@ using System.Threading.Tasks;
 
 namespace IBatisSuperHelper.EventHandlers
 {
-    public class BuildEvents
+    public class BuildEventsActions
     {
         public void OnBuildBegin(vsBuildScope Scope, vsBuildAction Action)
         {
             try
             {
                 ThreadHelper.ThrowIfNotOnUIThread();
-                var projectItemHelper = new ProjectItemHelper();
+                var projectItemHelper = new ProjectItemRetreiver();
                 var projectItems = projectItemHelper.GetProjectItemsFromSolutionProjects(GotoAsyncPackage.EnvDTE.Solution.Projects);
 
                 foreach (var xmlFile in DocumentHelper.GetXmlFiles(projectItems))

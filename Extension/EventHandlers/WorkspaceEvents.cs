@@ -4,15 +4,13 @@ using NLog;
 using StackExchange.Profiling;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using IBatisSuperHelper.Indexers;
 using IBatisSuperHelper.Loggers;
 using IBatisSuperHelper.Logging.MiniProfiler;
 using IBatisSuperHelper.Storage;
 using Microsoft.VisualStudio.Threading;
+using IBatisSuperHelper.Indexers.Code;
 
 namespace IBatisSuperHelper.Events
 {

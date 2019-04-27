@@ -3,8 +3,6 @@ using StackExchange.Profiling;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.Model;
 using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 using IBatisSuperHelper.Indexers;
@@ -13,6 +11,9 @@ using IBatisSuperHelper.Models;
 using IBatisSuperHelper.Storage.Domain;
 using IBatisSuperHelper.Storage.Interfaces;
 using Microsoft.VisualStudio.Shell;
+using IBatisSuperHelper.Parsers.XmlConfig.Models;
+using IBatisSuperHelper.Indexers.Xml;
+using IBatisSuperHelper.Indexers.Code;
 
 namespace IBatisSuperHelper.Storage
 {
@@ -30,7 +31,14 @@ namespace IBatisSuperHelper.Storage
         {
             new KeyValuePair<string, object>("HybridNamespaceEnabled", true),
         };
-        
+
+        public static Settings BatisSettings { get; private set; }
+
+        public static void SetBatisSettings(Settings batisSettings)
+        {
+            BatisSettings = batisSettings;
+        }
+
         public static async System.Threading.Tasks.Task AnalyzeAndStoreAsync(List<Document> documents)
         {
             using (MiniProfiler.Current.Step(nameof(AnalyzeAndStoreAsync)))

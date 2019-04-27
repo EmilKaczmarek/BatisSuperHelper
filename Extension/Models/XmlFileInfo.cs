@@ -11,5 +11,13 @@ namespace IBatisSuperHelper.Models
     {
         public string FilePath { get; set; }
         public string ProjectName { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            var info = obj as XmlFileInfo;
+            return info != null &&
+                   FilePath == info.FilePath &&
+                   ProjectName == info.ProjectName;
+        }
     }
 }

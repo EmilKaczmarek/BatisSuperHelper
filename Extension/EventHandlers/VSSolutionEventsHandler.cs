@@ -1,4 +1,7 @@
-﻿using IBatisSuperHelper.Loggers;
+﻿using IBatisSuperHelper.EventHandlers;
+using IBatisSuperHelper.EventHandlers.SolutionEventsActions;
+using IBatisSuperHelper.Indexers.Workflow;
+using IBatisSuperHelper.Loggers;
 using IBatisSuperHelper.VSIntegration.ErrorList;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -12,12 +15,13 @@ namespace IBatisSuperHelper.Events
     {
         internal class SolutionEventsHandler : IVsSolutionLoadEvents, IVsSolutionEvents
         {
-            private readonly Action<SolutionLoad> _handler;
+            private readonly IVSSolutionEventsActions _actions;
 
-            public SolutionEventsHandler(Action<SolutionLoad> handlerAction, IVsSolution solution)
+            public SolutionEventsHandler(IVSSolutionEventsActions actions)
             {
-                _handler = handlerAction ?? throw new ArgumentNullException(nameof(handlerAction));
+                _actions = actions;
             }
+
             public int OnBeforeOpenSolution(string pszSolutionFilename)
             {
                 return VSConstants.S_OK;
@@ -49,7 +53,7 @@ namespace IBatisSuperHelper.Events
                 try
                 {
                     //Load Xml files from indexer
-                    _handler(SolutionLoad.SolutionLoadComplete);
+                    _actions.OnSolutionLoadComplete();
                 }
                 catch (Exception ex)
                 {
@@ -99,7 +103,7 @@ namespace IBatisSuperHelper.Events
                 try
                 {
                     //Remove everything from indexer instance
-                    _handler(SolutionLoad.SolutionOnClose);
+                    _actions.SolutionOnClose();
                     //Remove Errors
                     TableDataSource.Instance.CleanAllErrors();
                 }

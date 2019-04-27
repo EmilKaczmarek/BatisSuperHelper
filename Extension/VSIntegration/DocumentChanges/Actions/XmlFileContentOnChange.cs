@@ -30,7 +30,7 @@ namespace IBatisSuperHelper.VSIntegration.DocumentChanges.Actions
                     {
                         var project = GotoAsyncPackage.EnvDTE.Solution.FindProjectItem(textDoc.FilePath).ContainingProject.Name;
                         BatisXmlMapParser parser = new BatisXmlMapParser().WithStringReader(stringReader).WithFileInfo(textDoc.FilePath, project).Load();
-                        if (parser.XmlNamespace == XmlMapConstants.SqlMapNamespace)
+                        if (parser.XmlNamespace == XmlMapConstants.XmlNamespace)
                         {
                             var newStatments = parser.GetMapFileStatments();
                             PackageStorage.XmlQueries.UpdateStatmentForFileWihoutKey(newStatments);

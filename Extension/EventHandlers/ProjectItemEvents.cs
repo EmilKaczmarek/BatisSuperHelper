@@ -14,7 +14,7 @@ using IBatisSuperHelper.Loggers;
 
 namespace IBatisSuperHelper.EventHandlers
 {
-    public class ProjectItemEventsEx
+    public class ProjectItemEventsActions
     {
         public void ItemRenamed(ProjectItem ProjectItem, string OldName)
         {

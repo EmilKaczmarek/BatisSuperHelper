@@ -1,5 +1,6 @@
 ﻿using IBatisSuperHelper.Constants;
 using IBatisSuperHelper.Constants.BatisConstants;
+using IBatisSuperHelper.Parsers.Models;
 using IBatisSuperHelper.Parsers.Models.XmlConfig.SqlMap;
 using IBatisSuperHelper.Parsers.XmlConfig.Models;
 using System;
@@ -11,40 +12,62 @@ using System.Threading.Tasks;
 
 namespace IBatisSuperHelper.Parsers
 {
-    public class BatisXmlConfigParser
+    public class BatisXmlConfigParser : XmlParser
     {
-        public Settings Setting => GetSetting();
-        public IReadOnlyList<SqlMap> SqlMaps => GetSqlMaps();
+        public SqlMapConfig Result => IsLazy ? _sqlMapConfigLazy.Value : GetFull();
 
-        private XmlParser _parser;
+        public Settings Settings => IsLazy ? _settingsLazy.Value : GetSetting();
+        public IReadOnlyList<SqlMap> SqlMaps => IsLazy ? _sqlMapsLazy.Value : GetSqlMaps();
+
+        private Lazy<Settings> _settingsLazy;
+        private Lazy<IReadOnlyList<SqlMap>> _sqlMapsLazy;
+        private Lazy<SqlMapConfig> _sqlMapConfigLazy;
 
         public BatisXmlConfigParser()
         {
-            _parser = new XmlParser();
+            InitializeEmpty();
         }
 
         public BatisXmlConfigParser WithStringReader(StringReader stringReader)
         {
-            _parser = new XmlParser(stringReader);
+            InitializeWithStringReader(stringReader);
             return this;
         }
 
         public BatisXmlConfigParser WithFileInfo(string filePath, string fileProjectName)
         {
-            _parser = new XmlParser(filePath, fileProjectName);
+            InitializeWithFilePathAndProjectName(filePath, fileProjectName);
             return this;
         }
 
         public new BatisXmlConfigParser Load()
         {
-            _parser.Load();
+            base.Load();
             return this;
+        }
+
+        public new void LazyLoading()
+        {
+            base.LazyLoading();
+            _settingsLazy = new Lazy<Settings>(() => GetSetting());
+            _sqlMapsLazy = new Lazy<IReadOnlyList<SqlMap>>(() => GetSqlMaps());
+            _sqlMapConfigLazy = new Lazy<SqlMapConfig>(() => GetFull());
+        }
+
+        private SqlMapConfig GetFull()
+        {
+            return new SqlMapConfig
+            {
+                Settings = Settings,
+                Maps = SqlMaps,
+                ParsedSuccessfully = true,
+            };
         }
 
         private Settings GetSetting()
         {
             var configSetting = new Settings();
-            var settingNode = _parser.GetChildNodesOfParentByXPath(XmlConfigConstants.SettingXPath).Where(e => e.Name != "#text");
+            var settingNode = GetChildNodesOfParentByXPath(XmlConfigConstants.SettingXPath).Where(e => e.Name != "#text");
             foreach (var setting in settingNode)
             {
                 if (setting.HasAttributes && setting.Attributes.Count == 1)
@@ -59,7 +82,7 @@ namespace IBatisSuperHelper.Parsers
         private IReadOnlyList<SqlMap> GetSqlMaps()
         {
             var sqlMaps = new List<SqlMap>();
-            var sqlMapsNode = _parser.GetChildNodesOfParentByXPath(XmlConfigConstants.SqlMapXPath).Where(e => e.Name != "#text");
+            var sqlMapsNode = GetChildNodesOfParentByXPath(XmlConfigConstants.SqlMapXPath).Where(e => e.Name != "#text");
             foreach (var sqlMap in sqlMapsNode)
             {
                 if (sqlMap.HasAttributes && sqlMap.Attributes.Count == 1)

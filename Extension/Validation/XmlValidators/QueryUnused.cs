@@ -67,7 +67,7 @@ namespace IBatisSuperHelper.Validation.XmlValidators
 
         public bool IsDocumentSupportedForValidation()
         {
-            return _xmlParser.XmlNamespace == XmlMapConstants.SqlMapNamespace;
+            return _xmlParser.XmlNamespace == XmlMapConstants.XmlNamespace;
         }
 
         public void ValidateAllSpans()

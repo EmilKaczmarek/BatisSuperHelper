@@ -93,7 +93,17 @@ namespace IBatisSuperHelper.Helpers
             return items;
         }
 
-        public static List<XmlFileInfo> GetXmlFiles(List<ProjectItem> projectItems)
+        public static IEnumerable<XmlFileInfo> GetXmlFiles(IEnumerable<ProjectItem> projectItems)
+        {
+            return GetFilesByExtension(projectItems, ".xml");
+        }
+
+        public static IEnumerable<XmlFileInfo> GetXmlConfigFiles(IEnumerable<ProjectItem> projectItems)
+        {
+            return GetFilesByExtension(projectItems, ".config");
+        }
+
+        private static List<XmlFileInfo> GetFilesByExtension(IEnumerable<ProjectItem> projectItems, string extension)
         {
             Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 
@@ -110,14 +120,14 @@ namespace IBatisSuperHelper.Helpers
                 try
                 {
                     fileName = item.FileNames[0];
-                    if (Path.GetExtension(fileName).Equals(".xml", StringComparison.CurrentCultureIgnoreCase))
+                    if (Path.GetExtension(fileName).Equals(extension, StringComparison.CurrentCultureIgnoreCase))
                         xmlFilesList.Add(new XmlFileInfo
                         {
                             FilePath = (string)item.Properties.Item("FullPath").Value,
                             ProjectName = item.ContainingProject.Name,
                         });
                 }
-                catch(Exception)
+                catch (Exception)
                 {
                     //Ignore item
                 }
