@@ -1,16 +1,12 @@
 ﻿using EnvDTE;
+using IBatisSuperHelper.CoreAutomation.ProjectItems;
 using IBatisSuperHelper.Helpers;
 using IBatisSuperHelper.Loggers;
 using IBatisSuperHelper.Validation.XmlValidators;
 using IBatisSuperHelper.VSIntegration.ErrorList;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Text;
 using NLog;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace IBatisSuperHelper.EventHandlers
 {
@@ -21,8 +17,8 @@ namespace IBatisSuperHelper.EventHandlers
             try
             {
                 ThreadHelper.ThrowIfNotOnUIThread();
-                var projectItemHelper = new ProjectItemRetreiver();
-                var projectItems = projectItemHelper.GetProjectItemsFromSolutionProjects(GotoAsyncPackage.EnvDTE.Solution.Projects);
+                var projectItemHelper = new ProjectItemRetreiver(GotoAsyncPackage.EnvDTE);
+                var projectItems = projectItemHelper.GetProjectItemsFromSolutionProjects();
 
                 foreach (var xmlFile in DocumentHelper.GetXmlFiles(projectItems))
                 {

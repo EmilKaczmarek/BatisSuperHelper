@@ -9,7 +9,7 @@
 //    [TestClass]
 //    public class IndexerTests
 //    {
-//        [TestMethod]
+//        [Fact]
 //        public void ShouldAddXmlStatmentWithoutErrors()
 //        {
 //            var xmlIndexerResult = new XmlIndexerResult
@@ -23,17 +23,17 @@
 //            List<XmlIndexerResult> list = new List<XmlIndexerResult> { xmlIndexerResult};
 //            Indexer.BuildFromXml(list);
 //            var instanceCopy = Indexer.statmentInfo;
-//            Assert.AreEqual(instanceCopy.Count, 1);
+//            Assert.Equal(instanceCopy.Count, 1);
 //            var key = IndexerKey.ConvertToKey(xmlIndexerResult.QueryId, xmlIndexerResult.QueryVsProjectName);
-//            Assert.AreEqual(instanceCopy[key].XmlInfo.LineNumer, xmlIndexerResult.QueryLineNumber);
+//            Assert.Equal(instanceCopy[key].XmlInfo.LineNumer, xmlIndexerResult.QueryLineNumber);
 //        }
-//        [TestMethod]
+//        [Fact]
 //        public void ShouldRemoveAllStatments()
 //        {
 //            Indexer.statmentInfo.Clear();
-//            Assert.AreEqual(Indexer.statmentInfo.Count, 0);
+//            Assert.Equal(Indexer.statmentInfo.Count, 0);
 //        }
-//        [TestMethod]
+//        [Fact]
 //        public void ShouldRenameStatmentFromXmlWithoutErrors()
 //        {
 //            Indexer.statmentInfo.Clear();
@@ -47,11 +47,11 @@
 //            };
 //            List<XmlIndexerResult> list = new List<XmlIndexerResult> { xmlIndexerResult };
 //            Indexer.BuildFromXml(list);
-//            Assert.AreEqual(Indexer.statmentInfo.Count, 1);
+//            Assert.Equal(Indexer.statmentInfo.Count, 1);
 //            Indexer.UpdateStatmentFile("TestMethod1.xml", "TestMethodRenamed.xml", false);
-//            Assert.AreEqual(Indexer.statmentInfo[IndexerKey.ConvertToKey("TestQuery1", "TestProject")].XmlInfo.StatmentFile, "TestMethodRenamed.xml");
+//            Assert.Equal(Indexer.statmentInfo[IndexerKey.ConvertToKey("TestQuery1", "TestProject")].XmlInfo.StatmentFile, "TestMethodRenamed.xml");
 //        }
-//        [TestMethod]
+//        [Fact]
 //        public void ShouldRemoveStatmentFile()
 //        {
 //            Indexer.statmentInfo.Clear();
@@ -65,11 +65,11 @@
 //            };
 //            List<XmlIndexerResult> list = new List<XmlIndexerResult> { xmlIndexerResult };
 //            Indexer.BuildFromXml(list);
-//            Assert.AreEqual(Indexer.statmentInfo.Count, 1);
+//            Assert.Equal(Indexer.statmentInfo.Count, 1);
 //            Indexer.RemoveStatmentFile("TestMethod1.xml",false);
 //            Assert.IsNull(Indexer.statmentInfo[IndexerKey.ConvertToKey("TestQuery1", "TestProject")].XmlInfo);
 //        }
-//        [TestMethod]
+//        [Fact]
 //        public void ShouldCombineXmlAndCodeStatments()
 //        {
 //            Indexer.statmentInfo.Clear();

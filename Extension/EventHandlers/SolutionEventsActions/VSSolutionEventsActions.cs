@@ -1,5 +1,6 @@
 ﻿using EnvDTE80;
 using IBatisSuperHelper.Constants;
+using IBatisSuperHelper.CoreAutomation.ProjectItems;
 using IBatisSuperHelper.Helpers;
 using IBatisSuperHelper.HelpersAndExtensions;
 using IBatisSuperHelper.Indexers.Xml;
@@ -27,8 +28,8 @@ namespace IBatisSuperHelper.EventHandlers.SolutionEventsActions
         public void OnSolutionLoadComplete()
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-            var projectItemHelper = new ProjectItemRetreiver();
-            var projectItems = projectItemHelper.GetProjectItemsFromSolutionProjects(_dte.Solution.Projects);
+            var projectItemHelper = new ProjectItemRetreiver(_dte);
+            var projectItems = projectItemHelper.GetProjectItemsFromSolutionProjects();
             XmlIndexer xmlIndexer = new XmlIndexer();
 
             var configFiles = ConfigurationFilesHelper.GetBatisMapConfigFiles(DocumentHelper.GetXmlConfigFiles(projectItems));

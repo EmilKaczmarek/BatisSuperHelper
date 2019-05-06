@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using IBatisSuperHelper.Helpers;
+using Xunit;
 
 namespace Tests
 {
-    [TestClass]
     public class NodeHelperTests
     {
-        [TestMethod]
+        [Fact]
         public void GenericClassNameOneLiner()
         {
             var code = @"using System;
@@ -43,10 +40,10 @@ class C
             var nodeHelperInstance = new NodeHelpers(model);
             var genericName = nodeHelperInstance.GetClassNameUsedAsGenericParameter(lineNodes, allNodes);
 
-            Assert.AreEqual("int", genericName);
+            Assert.Equal("int", genericName);
         }
 
-        [TestMethod]
+        [Fact]
         public void GenericClassNameWithoutDirectGenericNameSyntaxInLine()
         {
             var code = @"using System;
@@ -78,7 +75,7 @@ class C
             var nodeHelperInstance = new NodeHelpers(model);
             var genericName = nodeHelperInstance.GetClassNameUsedAsGenericParameter(lineNodes, allNodes);
 
-            Assert.AreEqual("Int32", genericName);
+            Assert.Equal("Int32", genericName);
         }
 
     }

@@ -36,5 +36,15 @@ namespace IBatisSuperHelper.Parsers.XmlConfig.Models
                    ValidateSqlMap == setting.ValidateSqlMap &&
                    UseReflectionOptimizer == setting.UseReflectionOptimizer;
         }
+
+        public override int GetHashCode()
+        {
+            var hashCode = -242495466;
+            hashCode = hashCode * -1521134295 + UseStatementNamespaces.GetHashCode();
+            hashCode = hashCode * -1521134295 + CacheModelsEnabled.GetHashCode();
+            hashCode = hashCode * -1521134295 + ValidateSqlMap.GetHashCode();
+            hashCode = hashCode * -1521134295 + UseReflectionOptimizer.GetHashCode();
+            return hashCode;
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using IBatisSuperHelper.Constants.BatisConstants;
+using System.Collections.Generic;
 using System.Linq;
 using static IBatisSuperHelper.Constants.BatisConstants.XmlConfigConstants;
 
@@ -62,6 +63,15 @@ namespace IBatisSuperHelper.Parsers.Models.XmlConfig.SqlMap
                    RawValue == map.RawValue &&
                    FileName == map.FileName &&
                    ResourceType == map.ResourceType;
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = -814287421;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(RawValue);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(FileName);
+            hashCode = hashCode * -1521134295 + ResourceType.GetHashCode();
+            return hashCode;
         }
     }
 }

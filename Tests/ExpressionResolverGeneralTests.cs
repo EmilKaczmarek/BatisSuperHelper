@@ -6,13 +6,12 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using IBatisSuperHelper.HelpersAndExtensions.Roslyn;
 using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver;
+using Xunit;
 
 namespace Tests
 {
-    [TestClass()]
     public class ExpressionResolverGeneralTests
     {
         private string _documentCSharpCode;
@@ -22,8 +21,7 @@ namespace Tests
         private IEnumerable<SyntaxNode> _documentNodes;
         private Document _document;
 
-        [TestInitialize]
-        public void Initialize()
+        public ExpressionResolverGeneralTests()
         {
             _documentCSharpCode =
                 @"using System;
@@ -160,266 +158,266 @@ namespace Tests
             return nodesAtLine.OfType<ArgumentSyntax>().FirstOrDefault();
         }
 
-        [TestMethod]
+        [Fact]
         public void C01LiteralString()
         {
             var testNode = GetNodeFromSource(11);
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C02AddExpressionWithDotAtSecoundExpression()
         {
             var testNode = GetNodeFromSource(12);
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C03AddExpressionWithDotAtFirstExpression()
         {
             var testNode = GetNodeFromSource(13);
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C04AddExpressionWithMultipleAddExpressionsNested()
         {
             var testNode = GetNodeFromSource(14);
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C05StringIdentifier()
         {
             var testNode = GetNodeFromSource(15);
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C06AddExpressionThatContainsStringIdentifiers()
         {
             var testNode = GetNodeFromSource(16);
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C07InterpolationWithLeftLiteralAndRightIdentifier()
         {
             var testNode = GetNodeFromSource(17);
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C08InterpolationWithLeftIdentifierAndRightLiteral()
         {
             var testNode = GetNodeFromSource(18);
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C09InterpolationWithOnlyIdentifier()
         {
             var testNode = GetNodeFromSource(19);
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C10InterpolationWithOnlyLiterals()
         {
             var testNode = GetNodeFromSource(20);
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C11LiteralConstantNameOfExpression()
         {
             var testNode = GetNodeFromSource(21);
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C12IndentifierWithInterpolation()
         {
             var testNode = GetNodeFromSource(22);
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C13ConstantIdentifierWithLiteralExpression()
         {
             var testNode = GetNodeFromSource(23);
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C14ConstantIdentifierWithNameOfExpression()
         {
             var testNode = GetNodeFromSource(24);
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C15LiteralStringFormat()
         {
             var testNode = GetNodeFromSource(25);
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C16LiteralStringFormatWithTwoLiterals()
         {
             var testNode = GetNodeFromSource(26);
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C17LiteralStringFormatWithOneLiteralAndOneIdentifier()
         {
             var testNode = GetNodeFromSource(27);
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C18LiteralStringFormatWithTwoIdentifiers()
         {
             var testNode = GetNodeFromSource(28);
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C19LiteralConstantTypeOfNameExpression()
         {
             var testNode = GetNodeFromSource(29);
             Trace.WriteLine(testNode.GetText());
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C20ConstantIdentifierWithTypeOfNameExpression()
         {
             var testNode = GetNodeFromSource(30);
             Trace.WriteLine(testNode.GetText());
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C21PublicIndentifierOutsideMethod()
         {
             var testNode = GetNodeFromSource(31);
             Trace.WriteLine(testNode.GetText());
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C22PrivateIndentifierOutsideMethod()
         {
             var testNode = GetNodeFromSource(32);
             Trace.WriteLine(testNode.GetText());
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C23PublicIndentifierWithLambdaOutsideMethod()
         {
             var testNode = GetNodeFromSource(33);
             Trace.WriteLine(testNode.GetText());
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C24PrivateIndentifierWithLambdaOutsideMethod()
         {
             var testNode = GetNodeFromSource(34);
             Trace.WriteLine(testNode.GetText());
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C25PublicIndentifierWithGetterOutsideMethod()
         {
             var testNode = GetNodeFromSource(35);
             Trace.WriteLine(testNode.GetText());
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C26PrivateIndentifierWithGetterOutsideMethod()
         {
             var testNode = GetNodeFromSource(36);
             Trace.WriteLine(testNode.GetText());
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C27PublicIndentifierWithGetterOutsideMethodNonDirectReturn()
         {
             var testNode = GetNodeFromSource(37);
             Trace.WriteLine(testNode.GetText());
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void C28PrivateIndentifierWithGetterOutsideMethodNonDirectReturn()
         {
             var testNode = GetNodeFromSource(38);
             Trace.WriteLine(testNode.GetText());
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
     }
 }
