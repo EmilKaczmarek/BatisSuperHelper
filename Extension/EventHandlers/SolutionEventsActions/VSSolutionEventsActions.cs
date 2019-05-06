@@ -35,18 +35,18 @@ namespace IBatisSuperHelper.EventHandlers.SolutionEventsActions
             var configFiles = ConfigurationFilesHelper.GetBatisMapConfigFiles(DocumentHelper.GetXmlConfigFiles(projectItems));
             if (configFiles.Any())
             {
-                PackageStorage.SetBatisSettings(_xmlIndexer.ParseSingleConfigFile(configFiles.First()).Settings);
+                GotoAsyncPackage.Storage.SetBatisSettings(_xmlIndexer.ParseSingleConfigFile(configFiles.First()).Settings);
             }
 
             var xmlFiles = DocumentHelper.GetXmlFiles(projectItems);
             var xmlIndexerResult = xmlIndexer.BuildIndexer(xmlFiles);
-            PackageStorage.XmlQueries.AddMultipleWithoutKey(xmlIndexerResult);
+            GotoAsyncPackage.Storage.XmlQueries.AddMultipleWithoutKey(xmlIndexerResult);
         }
 
         public void SolutionOnClose()
         {
-            PackageStorage.CodeQueries.Clear();
-            PackageStorage.XmlQueries.Clear();
+            GotoAsyncPackage.Storage.CodeQueries.Clear();
+            GotoAsyncPackage.Storage.XmlQueries.Clear();
         }
     }
 }

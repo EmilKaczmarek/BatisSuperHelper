@@ -45,7 +45,7 @@ namespace IBatisSuperHelper.Validation
             {
                 foreach (var proposition in new QuerySearchHelper().GetPropositionsByStatmentName(queryName))
                 {
-                    var newQuery = PackageStorage.XmlQueries.GetValueOrNull(proposition);
+                    var newQuery = GotoAsyncPackage.Storage.XmlQueries.GetValueOrNull(proposition);
                     context.RegisterCodeFix(
                    CodeAction.Create(
                        title: $"Change to: {newQuery.QueryId} in: {newQuery.MapNamespace}",

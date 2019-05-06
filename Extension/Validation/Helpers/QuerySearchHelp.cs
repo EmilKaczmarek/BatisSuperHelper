@@ -14,7 +14,7 @@ namespace IBatisSuperHelper.Validation.Helpers
     {
         public List<IndexerKey> GetPropositionsByStatmentName(string statment)
         {
-            var keys = PackageStorage.XmlQueries.GetAllKeys();
+            var keys = GotoAsyncPackage.Storage.XmlQueries.GetAllKeys();
 
             var coefficiencyValuePairs = keys.Select(e => new {
                 coefficiency = statment.DiceCoefficientUncached(e.StatmentName),

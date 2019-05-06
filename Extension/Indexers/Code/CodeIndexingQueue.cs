@@ -78,7 +78,7 @@ namespace IBatisSuperHelper.Indexers.Code
         private System.Threading.Tasks.Task CreateIndexingTask(ProjectId projectId, DocumentId documentId)
         {
             var document = _projects[projectId].Value.GetDocument(documentId);
-            return PackageStorage.AnalyzeAndStoreSingleAsync(document);
+            return GotoAsyncPackage.Storage.AnalyzeAndStoreSingleAsync(document);
         }
 
         #region IDisposable Support

@@ -219,7 +219,7 @@ namespace IBatisSuperHelper.Helpers
                     var oneArgumentSyntaxParent = allArgumentSyntaxes.First().Parent;
                     var resolveResult = GetMethodInfoForNode(oneArgumentSyntaxParent, _semanticModel);
 
-                    var genericExists = PackageStorage.GenericMethods.TryGetValue(resolveResult, out ExpressionResult result);
+                    var genericExists = GotoAsyncPackage.Storage.GenericMethods.TryGetValue(resolveResult, out ExpressionResult result);
                     if (genericExists)
                     {
                         return result;

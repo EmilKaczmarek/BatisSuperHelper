@@ -34,7 +34,7 @@ namespace IBatisSuperHelper.VSIntegration.DocumentChanges.Actions
                         return;
                     }
 
-                    PackageStorage.AnalyzeAndUpdateSingle(roslynDocument);
+                    GotoAsyncPackage.Storage.AnalyzeAndUpdateSingle(roslynDocument);
                 }
             }
             catch (Exception ex)

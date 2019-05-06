@@ -17,7 +17,7 @@ namespace IBatisSuperHelper.Indexers.Workflow.Strategies.Storage.Configs
         {
             foreach (var config in _mapConfigs)
             {
-                PackageStorage.SetBatisSettings(config.Settings);
+                GotoAsyncPackage.Storage.SetBatisSettings(config.Settings);
             }
 
             return new ConfigProcessingResult

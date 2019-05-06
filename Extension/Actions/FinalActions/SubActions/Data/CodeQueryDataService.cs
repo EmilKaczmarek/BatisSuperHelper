@@ -19,10 +19,10 @@ namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Data
         {
             var genericResult = new List<ExpressionResult>();
             if (namespaceHandlingLogic == NamespaceHandlingType.WITH_NAMESPACE || namespaceHandlingLogic == NamespaceHandlingType.HYBRID_NAMESPACE)
-                genericResult.AddRange(PackageStorage.GenericMethods.GetByPredictate(e => e.TextResult == queryResult));
+                genericResult.AddRange(GotoAsyncPackage.Storage.GenericMethods.GetByPredictate(e => e.TextResult == queryResult));
 
             if (namespaceHandlingLogic == NamespaceHandlingType.IGNORE_NAMESPACE || namespaceHandlingLogic == NamespaceHandlingType.HYBRID_NAMESPACE)
-                genericResult.AddRange(PackageStorage.GenericMethods.GetByPredictate(e => MapNamespaceHelper.GetQueryWithoutNamespace(e.TextResult) == MapNamespaceHelper.GetQueryWithoutNamespace(queryResult)));
+                genericResult.AddRange(GotoAsyncPackage.Storage.GenericMethods.GetByPredictate(e => MapNamespaceHelper.GetQueryWithoutNamespace(e.TextResult) == MapNamespaceHelper.GetQueryWithoutNamespace(queryResult)));
 
             return genericResult;
         }
@@ -35,17 +35,17 @@ namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Data
 
         public List<IndexerKey> GetStatmentKeys(string queryResult, NamespaceHandlingType namespaceHandlingLogicType)
         {
-            return PackageStorage.CodeQueries.GetKeysByQueryId(queryResult, namespaceHandlingLogicType);
+            return GotoAsyncPackage.Storage.CodeQueries.GetKeysByQueryId(queryResult, namespaceHandlingLogicType);
         }
 
         public List<CSharpQuery> GetStatmentsFromKeys(List<IndexerKey> keys)
         {
-            return keys.Select(PackageStorage.CodeQueries.GetValue).SelectMany(x => x).ToList();
+            return keys.Select(GotoAsyncPackage.Storage.CodeQueries.GetValue).SelectMany(x => x).ToList();
         }
 
         public List<CSharpQuery> GetSingleStatmentFromKey(IndexerKey key)
         {
-            return PackageStorage.CodeQueries.GetValueOrNull(key);
+            return GotoAsyncPackage.Storage.CodeQueries.GetValueOrNull(key);
         }
 
         public List<ResultWindowViewModel> PrepareViewModels(List<ExpressionResult> genericResults, ExpressionResult expressionResult, List<CSharpQuery> nonGenericResults)
@@ -70,7 +70,7 @@ namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Data
 
         public void Rename(IndexerKey key, string value)
         {
-            PackageStorage.CodeQueries.RenameQuery(key, value);
+            GotoAsyncPackage.Storage.CodeQueries.RenameQuery(key, value);
         }
     }
 }

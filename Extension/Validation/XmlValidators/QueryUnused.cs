@@ -85,9 +85,9 @@ namespace IBatisSuperHelper.Validation.XmlValidators
                     var mapNamespace = _xmlParser.MapNamespace;
                     if (_xmlParser.HasSelectedLineValidQuery(line.LineNumber + 1))
                     {
-                        var test = PackageStorage.GenericMethods;
+                        var test = GotoAsyncPackage.Storage.GenericMethods;
                         var query = _xmlParser.GetQueryAtLineOrNull(line.LineNumber + 1, true);
-                        var queryUsages = PackageStorage.CodeQueries.GetKeysByQueryId(query, Storage.Providers.NamespaceHandlingType.HYBRID_NAMESPACE);
+                        var queryUsages = GotoAsyncPackage.Storage.CodeQueries.GetKeysByQueryId(query, Storage.Providers.NamespaceHandlingType.HYBRID_NAMESPACE);
                         if (!queryUsages.Any())
                         {
                             var statmentIdCSpan = classificationSpans.FirstOrDefault(e =>
@@ -110,7 +110,7 @@ namespace IBatisSuperHelper.Validation.XmlValidators
             var parserResults = _xmlParser.GetMapFileStatmentsWithIdAttributeColumnInfo();
             foreach (var result in parserResults)
             {
-                var queryUsages = PackageStorage.CodeQueries.GetKeysByQueryId(result.FullyQualifiedQuery, Storage.Providers.NamespaceHandlingType.HYBRID_NAMESPACE);
+                var queryUsages = GotoAsyncPackage.Storage.CodeQueries.GetKeysByQueryId(result.FullyQualifiedQuery, Storage.Providers.NamespaceHandlingType.HYBRID_NAMESPACE);
                 if (!queryUsages.Any())
                 {
                     AddError(result, $"Query {result.QueryId} is unused.");

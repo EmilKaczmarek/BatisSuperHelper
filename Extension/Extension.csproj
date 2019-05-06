@@ -192,6 +192,7 @@
     <Compile Include="Parsers\BatisXmlConfigParser.cs" />
     <Compile Include="Parsers\BatisXmlMapParser.cs" />
     <Compile Include="RenameCommand.cs" />
+    <Compile Include="Storage\IPackageStorage.cs" />
     <Compile Include="Storage\Providers\CodeQueryProvider.cs" />
     <Compile Include="Storage\Providers\NamespaceHandlingType.cs" />
     <Compile Include="Storage\Providers\XmlQueryProvider.cs" />

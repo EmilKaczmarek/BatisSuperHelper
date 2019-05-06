@@ -21,13 +21,13 @@ namespace IBatisSuperHelper.Events
         public static async Task BuildIndexerWithCSharpResultsAsync(Solution solution)
         {
             var solutionFiles = solution.Projects.SelectMany(x => x.Documents).ToList();
-            await PackageStorage.AnalyzeAndStoreAsync(solutionFiles);
+            await GotoAsyncPackage.Storage.AnalyzeAndStoreAsync(solutionFiles);
         }
 
         public static async Task BuildIndexerUsingProjectWithCSharpResultsAsync(Project project)
         {
             var solutionFiles = project.Documents.ToList();
-            await PackageStorage.AnalyzeAndStoreAsync(solutionFiles);
+            await GotoAsyncPackage.Storage.AnalyzeAndStoreAsync(solutionFiles);
         }
 
         private static async Task DocumentsAddedActionAsync(IEnumerable<Document> addedDocuments)
@@ -37,14 +37,14 @@ namespace IBatisSuperHelper.Events
 
             foreach (var document in addedDocuments)
             {
-                await PackageStorage.AnalyzeAndStoreSingleAsync(document);
+                await GotoAsyncPackage.Storage.AnalyzeAndStoreSingleAsync(document);
             }
         }
         private static async Task DocumentRemovedActionAsync(IEnumerable<DocumentId> removedDocumentsIds)
         {
             foreach(var documentId in removedDocumentsIds)
             {
-                await Task.Run(() => PackageStorage.CodeQueries.RemoveStatmentsByDefinedObject(documentId));
+                await Task.Run(() => GotoAsyncPackage.Storage.CodeQueries.RemoveStatmentsByDefinedObject(documentId));
             }
         }
 
