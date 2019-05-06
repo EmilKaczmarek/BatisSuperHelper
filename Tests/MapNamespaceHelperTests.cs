@@ -1,71 +1,70 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using IBatisSuperHelper.HelpersAndExtensions;
+using Xunit;
 
 namespace Tests
 {
-    [TestClass]
     public class MapNamespaceHelperTests
     {
-        [TestMethod]
+        [Fact]
         public void ShouldCreateProperFullyQualifiedStatmentName()
         {
             var mapNamespace = "namespace";
             var queryId = "Select";
-            Assert.AreEqual("namespace.Select", MapNamespaceHelper.CreateFullQueryString(mapNamespace, queryId));
+            Assert.Equal("namespace.Select", MapNamespaceHelper.CreateFullQueryString(mapNamespace, queryId));
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldCreateProperFullyQualifiedStatmentNameWithEmptyQueryId()
         {
             var mapNamespace = "namespace";
             var queryId = "";
-            Assert.AreEqual("", MapNamespaceHelper.CreateFullQueryString(mapNamespace, queryId));
+            Assert.Equal("", MapNamespaceHelper.CreateFullQueryString(mapNamespace, queryId));
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldCreateProperFullyQualifiedStatmentNameWithEmptyNamespace()
         {
             var mapNamespace = "";
             var queryId = "Select";
-            Assert.AreEqual("Select", MapNamespaceHelper.CreateFullQueryString(mapNamespace, queryId));
+            Assert.Equal("Select", MapNamespaceHelper.CreateFullQueryString(mapNamespace, queryId));
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldCreateProperFullyQualifiedStatmentNameWithNullQueryId()
         {
             string mapNamespace = "namespace";
             string queryId = null;
-            Assert.AreEqual("", MapNamespaceHelper.CreateFullQueryString(mapNamespace, queryId));
+            Assert.Equal("", MapNamespaceHelper.CreateFullQueryString(mapNamespace, queryId));
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldCreateProperFullyQualifiedStatmentNameWithNullNamespace()
         {
             string mapNamespace = null;
             string queryId = "Select";
-            Assert.AreEqual("Select", MapNamespaceHelper.CreateFullQueryString(mapNamespace, queryId));
+            Assert.Equal("Select", MapNamespaceHelper.CreateFullQueryString(mapNamespace, queryId));
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldGetQueryWithoutNamespace()
         {
             string queryId = "namespace.Select";       
-            Assert.AreEqual("Select", MapNamespaceHelper.GetQueryWithoutNamespace(queryId));
+            Assert.Equal("Select", MapNamespaceHelper.GetQueryWithoutNamespace(queryId));
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldGetQueryWithoutNamespaceForNullQueryId()
         {
             string queryId = null;
-            Assert.AreEqual("", MapNamespaceHelper.GetQueryWithoutNamespace(queryId));
+            Assert.Equal("", MapNamespaceHelper.GetQueryWithoutNamespace(queryId));
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldGetQueryWithoutNamespaceForEmptyQueryId()
         {
             string queryId = "";
-            Assert.AreEqual("", MapNamespaceHelper.GetQueryWithoutNamespace(queryId));
+            Assert.Equal("", MapNamespaceHelper.GetQueryWithoutNamespace(queryId));
         }
     }
 }

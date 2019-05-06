@@ -130,6 +130,7 @@
     <Compile Include="Constants\BatisConstants\XmlConfigConstants.cs" />
     <Compile Include="Constants\BatisConstants\XmlMapConstants.cs" />
     <Compile Include="Constants\EventConstats.cs" />
+    <Compile Include="CoreAutomation\ProjectItems\IProjectItemRetreiver.cs" />
     <Compile Include="EventHandlers\BuildEvents.cs" />
     <Compile Include="EventHandlers\ProjectItemEvents.cs" />
     <Compile Include="EventHandlers\SolutionEventsActions\IVSSolutionEventsActions.cs" />
@@ -154,7 +155,7 @@
     <Compile Include="HelpersAndExtensions\Roslyn\ExpressionResolver\ResolveStrategy\SimpleMemberAccessStrategy.cs" />
     <Compile Include="HelpersAndExtensions\Roslyn\ExpressionResolver\ResolveStrategy\StringLiteralStrategy.cs" />
     <Compile Include="HelpersAndExtensions\Roslyn\RoslynSolutionExtension.cs" />
-    <Compile Include="HelpersAndExtensions\VisualStudio\ProjectItemRetreiver.cs" />
+    <Compile Include="CoreAutomation\ProjectItems\ProjectItemRetreiver.cs" />
     <Compile Include="HelpersAndExtensions\VisualStudio\SnapshotExtension.cs" />
     <Compile Include="HelpersAndExtensions\VisualStudio\TextDocumentExtension.cs" />
     <Compile Include="HelpersAndExtensions\VisualStudio\TextSelectionExtension.cs" />
@@ -169,7 +170,14 @@
     <Compile Include="Indexers\Workflow\IndexingWorkflow.cs" />
     <Compile Include="Indexers\Workflow\Options\IndexingWorkflowOptions.cs" />
     <Compile Include="Indexers\Workflow\Options\SqlMapIndexingOprions.cs" />
+    <Compile Include="Indexers\Workflow\Strategies\Config\DefaultConfigStrategy.cs" />
+    <Compile Include="Indexers\Workflow\Strategies\Config\IConfigStrategy.cs" />
     <Compile Include="Indexers\Workflow\Strategies\IWorkflowStrategy.cs" />
+    <Compile Include="Indexers\Workflow\Strategies\Storage\Configs\ConfigStorageStrategyFactory.cs" />
+    <Compile Include="Indexers\Workflow\Strategies\Storage\Configs\IConfigStorageStrategy.cs" />
+    <Compile Include="Indexers\Workflow\Strategies\Storage\Configs\MultipleConfigsStorageStrategy.cs" />
+    <Compile Include="Indexers\Workflow\Strategies\Storage\Configs\SingleConfigStorageStrategy.cs" />
+    <Compile Include="Indexers\Workflow\Strategies\Storage\Configs\SingleDefaultConfigStorageStrategy.cs" />
     <Compile Include="Logging\MiniProfiler\NLogStorage.cs" />
     <Compile Include="Logging\NLogConfigurationService.cs" />
     <Compile Include="Logging\OutputWindowLogger.cs" />

@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using IBatisSuperHelper.HelpersAndExtensions;
 using IBatisSuperHelper.Models;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace Tests
 {
-    [TestClass]
     public class ConfigurationFilesHelperTests
     {
-        [TestMethod]
+        [Fact]
         public void ForSingleKnowConfigFileName()
         {
             var configFiles = new List<XmlFileInfo>
@@ -33,23 +32,23 @@ namespace Tests
             };
             var sqlMapConfigs = ConfigurationFilesHelper.GetBatisMapConfigFiles(configFiles);
 
-            Assert.IsTrue(sqlMapConfigs.Any());
-            Assert.AreEqual(1, sqlMapConfigs.Count);
-            Assert.AreEqual(configFiles.First(), sqlMapConfigs.First());
+            Assert.True(sqlMapConfigs.Any());
+            Assert.Single(sqlMapConfigs);
+            Assert.Equal(configFiles.First(), sqlMapConfigs.First());
         }
 
-        [TestMethod]
+        [Fact]
         public void ForNoConfigFileNames()
         {
             var configFiles = new List<XmlFileInfo>();
 
             var sqlMapConfigs = ConfigurationFilesHelper.GetBatisMapConfigFiles(configFiles);
             
-            Assert.IsFalse(sqlMapConfigs.Any());
+            Assert.False(sqlMapConfigs.Any());
         }
 
 
-        [TestMethod]
+        [Fact]
         public void ForNoKnownConfigFileNameAndOtherConfigs()
         {
             var configFiles = new List<XmlFileInfo> {
@@ -67,7 +66,7 @@ namespace Tests
 
             var sqlMapConfigs = ConfigurationFilesHelper.GetBatisMapConfigFiles(configFiles);
 
-            Assert.IsFalse(sqlMapConfigs.Any());
+            Assert.Empty(sqlMapConfigs);
         }
 
         //TODO: Write test for checking file that doesn't match sqlmap.config patterns, but are valid configs.

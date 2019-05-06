@@ -6,24 +6,21 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn;
 using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver;
 using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using Xunit;
 
 namespace Tests
 {
-    [TestClass]
     public class ExpressionResolverCrashTests
     {
-        private string _codeTemplateP1;
-        private string _codeTemplateP2;
-        private string _codeTemplateP3;
-        private string _codeTemplateP4;
-        private string _codeTemplateP5;
+        private readonly string _codeTemplateP1;
+        private readonly string _codeTemplateP2;
+        private readonly string _codeTemplateP3;
+        private readonly string _codeTemplateP4;
+        private readonly string _codeTemplateP5;
 
-        [AssemblyInitialize]
-        public static void InitializeReferencedAssemblies(TestContext context)
+        public ExpressionResolverCrashTests()
         {
             //Uncomment this dummies if there are issues with loading assemblies.
             //using (var dummy = new Microsoft.CodeAnalysis.AdhocWorkspace())
@@ -32,10 +29,7 @@ namespace Tests
 
             //var dummy2 = new Microsoft.CodeAnalysis.WorkspaceChangeKind();
             //var dummy3 = typeof(Microsoft.CodeAnalysis.CSharp.SyntaxFactory);
-        }
-        [TestInitialize]
-        public void Initialize()
-        {
+
             _codeTemplateP1 = @"using System;
                 using System.Collections;
                 using System.Linq;
@@ -68,10 +62,12 @@ namespace Tests
                     }
                 }";
         }
+
         private string GenerateDocumentCodeFromTemplateUsingVariables(string insideMethodExpressionCode, string insideClassCode, string outsideClassCode, string inReturnUnknowMethodExpression)
         {
             return $"{_codeTemplateP1}{insideMethodExpressionCode}{_codeTemplateP2}{insideClassCode}{_codeTemplateP3}{outsideClassCode}{_codeTemplateP4}{inReturnUnknowMethodExpression}{_codeTemplateP5}";
         }
+
         private void PrepareAnalyzeModel(string documentCode, out Document document, out SemanticModel semanticModel,out IEnumerable<SyntaxNode> nodes, out ArgumentSyntax nodeToTest, bool inReturn = false)
         {
             var projectId = ProjectId.CreateNewId();
@@ -104,6 +100,7 @@ namespace Tests
             nodeToTest = nodesAtLine.OfType<ArgumentSyntax>().FirstOrDefault();
 
         }
+
         private ExpressionResult Execute(string insideCode, string insideClassCode, string outsideClassCode, string inReturnUnknowMethodExpression = "", bool inReturn = false)
         {
             var code = GenerateDocumentCodeFromTemplateUsingVariables(insideCode, insideClassCode, outsideClassCode, inReturnUnknowMethodExpression);
@@ -119,11 +116,11 @@ namespace Tests
             string outsideClassCode = @"public string test = ""unittest""";
 
             var result = Execute(insideMethodCode, insideClassCode, outsideClassCode);
-            Assert.AreNotEqual("", result.TextResult);
-            Assert.AreEqual("unittest", result.TextResult);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
         }
 
-        [TestMethod, TestCategory("Null Handling")]
+        [Fact]
         public void NullDirect()
         {
             string insideMethodCode = @"null";
@@ -131,10 +128,10 @@ namespace Tests
             string outsideClassCode = @"";
 
             var result = Execute(insideMethodCode, insideClassCode, outsideClassCode);
-            Assert.AreEqual("", result.TextResult);
+            Assert.Equal("", result.TextResult);
         }
 
-        [TestMethod, TestCategory("Null Handling")]
+        [Fact]
         public void NullInsideInterpolation()
         {
             string insideMethodCode = @"$""{null}""";
@@ -142,10 +139,10 @@ namespace Tests
             string outsideClassCode = @"";
 
             var result = Execute(insideMethodCode, insideClassCode, outsideClassCode);
-            Assert.AreEqual("", result.TextResult);
+            Assert.Equal("", result.TextResult);
         }
 
-        [TestMethod, TestCategory("Null Handling")]
+        [Fact]
         public void NullInsideStringFormat()
         {
             string insideMethodCode = @"string.Format(""{0}"",null)";
@@ -153,10 +150,10 @@ namespace Tests
             string outsideClassCode = @"";
 
             var result = Execute(insideMethodCode, insideClassCode, outsideClassCode);
-            Assert.AreEqual("", result.TextResult);
+            Assert.Equal("", result.TextResult);
         }
 
-        [TestMethod, TestCategory("Null Handling")]
+        [Fact]
         public void NullInAddExpression()
         {
             string insideMethodCode = @"null+""test""+null";
@@ -164,10 +161,10 @@ namespace Tests
             string outsideClassCode = @"";
 
             var result = Execute(insideMethodCode, insideClassCode, outsideClassCode);
-            Assert.AreEqual("", result.TextResult);
+            Assert.Equal("", result.TextResult);
         }
 
-        [TestMethod, TestCategory("Null Handling")]
+        [Fact]
         public void NullInIdentifier()
         {
             string insideMethodCode = @"identifier";
@@ -175,10 +172,10 @@ namespace Tests
             string outsideClassCode = @"";
 
             var result = Execute(insideMethodCode, insideClassCode, outsideClassCode);
-            Assert.AreEqual("", result.TextResult);
+            Assert.Equal("", result.TextResult);
         }
 
-        [TestMethod, TestCategory("Null Handling")]
+        [Fact]
         public void NullInLambda()
         {
             string insideMethodCode = @"identifier";
@@ -186,10 +183,10 @@ namespace Tests
             string outsideClassCode = @"public string identifier => null";
 
             var result = Execute(insideMethodCode, insideClassCode, outsideClassCode);
-            Assert.AreEqual("", result.TextResult);
+            Assert.Equal("", result.TextResult);
         }
 
-        [TestMethod, TestCategory("Null Handling")]
+        [Fact]
         public void NullInGetter()
         {
             string insideMethodCode = @"identifier";
@@ -204,54 +201,54 @@ namespace Tests
                             }
                         }";
             var result = Execute(insideMethodCode, insideClassCode, outsideClassCode);
-            Assert.AreEqual("", result.TextResult);
+            Assert.Equal("", result.TextResult);
         }
 
-        [TestMethod, TestCategory("Unbuildable code")]
+        [Fact]
         public void TerminatedBySemicolon()
         {
             string insideMethodCode = @";";
             string insideClassCode = @"";
             string outsideClassCode = @"";
             var result = Execute(insideMethodCode, insideClassCode, outsideClassCode);
-            Assert.AreEqual("", result.TextResult);
+            Assert.Equal("", result.TextResult);
         }
 
-        [TestMethod, TestCategory("Unbuildable code")]
+        [Fact]
         public void TerminatedByCurlyBracket()
         {
             string insideMethodCode = @"}";
             string insideClassCode = @"";
             string outsideClassCode = @"";
             var result = Execute(insideMethodCode, insideClassCode, outsideClassCode);
-            Assert.AreEqual("", result.TextResult);
+            Assert.Equal("", result.TextResult);
         }
 
-        [TestMethod, TestCategory("Unbuildable code")]
+        [Fact]
         public void WrongTypeInsideMethod()
         {
             string insideMethodCode = @"variable";
             string insideClassCode = @"int variable = 1;";
             string outsideClassCode = @"";
             var result = Execute(insideMethodCode, insideClassCode, outsideClassCode);
-            Assert.AreEqual("", result.TextResult);
+            Assert.Equal("", result.TextResult);
         }
 
         //Even tho code is unbuildable, the syntax check should still be able to deliver when
         //analyzed portion of code is fine.
-        [TestMethod, TestCategory("Unbuildable code")]
+        [Fact]
         public void BadImplicityConvertion()
         {
             string insideMethodCode = @"""test""";
             string insideClassCode = @"int variable = ""xD"";";
             string outsideClassCode = @"";
             var result = Execute(insideMethodCode, insideClassCode, outsideClassCode);
-            Assert.AreEqual("test", result.TextResult);
+            Assert.Equal("test", result.TextResult);
         }
 
         //If this case is crashing test suite etc. than assume that Assertion failed,
         //no matter of result in window.
-        [TestMethod, TestCategory("Stackoverflow prevention")]
+        [Fact]
         public void CircularAssigment()
         {
             string insideMethodCode = @"var1";
@@ -260,10 +257,10 @@ namespace Tests
             string outsideClassCode = @"";
 
             var result = Execute(insideMethodCode, insideClassCode, outsideClassCode);
-            Assert.AreEqual("", result.TextResult);
+            Assert.Equal("", result.TextResult);
         }
 
-        [TestMethod, TestCategory("Stackoverflow prevention")]
+        [Fact]
         public void Call5Times()
         {
             int i;
@@ -278,11 +275,11 @@ namespace Tests
             string outsideClassCode = @"";
 
             var result = Execute(insideMethodCode, insideClassCode, outsideClassCode);
-            Assert.AreEqual("finally here", result.TextResult);
+            Assert.Equal("finally here", result.TextResult);
         }
 
         //When calls extends ~1000(+-2) than method should return fallback value of ""
-        [TestMethod, TestCategory("Stackoverflow prevention")]
+        [Fact]
         public void Call1001Times()
         {
             int i;
@@ -297,20 +294,20 @@ namespace Tests
             string outsideClassCode = @"";
 
             var result = Execute(insideMethodCode, insideClassCode, outsideClassCode);
-            Assert.AreEqual("", result.TextResult);
+            Assert.Equal("", result.TextResult);
         }
 
-        [TestMethod, TestCategory("General/No category")]
+       [Fact]
         public void UnassignedVariable()
         {
             string insideMethodCode = @"variable";
             string insideClassCode = @"string variable;";
             string outsideClassCode = @"";
             var result = Execute(insideMethodCode, insideClassCode, outsideClassCode);
-            Assert.AreEqual("", result.TextResult);
+            Assert.Equal("", result.TextResult);
         }
 
-        [TestMethod, TestCategory("Null Handling")]
+        [Fact]
         public void NullWhenCallingPropertyIsUnassigned()
         {
             string insideMethodCode = @"";
@@ -318,7 +315,7 @@ namespace Tests
             string outsideClassCode = @"private readonly string variable;";
             string inReturnUnknowMethodExpression = @"$""{variable}.test""";
             var result = Execute(insideMethodCode, insideClassCode, outsideClassCode, inReturnUnknowMethodExpression, true);
-            Assert.AreEqual(".test", result.TextResult);
+            Assert.Equal(".test", result.TextResult);
         }
     }
 }
