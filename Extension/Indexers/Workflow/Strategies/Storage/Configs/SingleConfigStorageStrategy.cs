@@ -22,7 +22,7 @@ namespace IBatisSuperHelper.Indexers.Workflow.Strategies.Storage.Configs
 
         protected ConfigProcessingResult Store(SqlMapConfig config)
         {
-            PackageStorage.SetBatisSettings(config.Settings);
+            GotoAsyncPackage.Storage.SetBatisSettings(config.Settings);
 
             return new ConfigProcessingResult
             {

@@ -18,6 +18,7 @@ namespace IBatisSuperHelper.VSIntegration.DocumentChanges.Actions
         {
             try
             {
+                //Throws
                 Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
                 var profiler = MiniProfiler.StartNew(nameof(HandleChange));
                 profiler.Storage = new NLogStorage(LogManager.GetLogger("profiler"));
@@ -33,7 +34,7 @@ namespace IBatisSuperHelper.VSIntegration.DocumentChanges.Actions
                         if (parser.XmlNamespace == XmlMapConstants.XmlNamespace)
                         {
                             var newStatments = parser.GetMapFileStatments();
-                            PackageStorage.XmlQueries.UpdateStatmentForFileWihoutKey(newStatments);
+                            GotoAsyncPackage.Storage.XmlQueries.UpdateStatmentForFileWihoutKey(newStatments);
                         }
                     }
                 }

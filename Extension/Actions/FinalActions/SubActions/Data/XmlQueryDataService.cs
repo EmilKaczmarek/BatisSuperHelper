@@ -21,17 +21,17 @@ namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Data
 
         public List<IndexerKey> GetStatmentKeys(string query, NamespaceHandlingType namespaceHandlingLogic)
         {
-            return PackageStorage.XmlQueries.GetKeysByQueryId(query, namespaceHandlingLogic);
+            return GotoAsyncPackage.Storage.XmlQueries.GetKeysByQueryId(query, namespaceHandlingLogic);
         }
 
         public List<XmlQuery> GetStatmentsFromKeys(List<IndexerKey> keys)
         {
-            return keys.Select(PackageStorage.XmlQueries.GetValueOrNull).ToList();
+            return keys.Select(GotoAsyncPackage.Storage.XmlQueries.GetValueOrNull).ToList();
         }
 
         public XmlQuery GetSingleStatmentFromKey(IndexerKey key)
         {
-            return PackageStorage.XmlQueries.GetValueOrNull(key);
+            return GotoAsyncPackage.Storage.XmlQueries.GetValueOrNull(key);
         }
 
         public List<ResultWindowViewModel> PrepareViewModels(List<ExpressionResult> genericResults, ExpressionResult expressionResult, List<XmlQuery> nonGenericResults)
@@ -48,7 +48,7 @@ namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Data
 
         public void Rename(IndexerKey key, string value)
         {
-            PackageStorage.XmlQueries.RenameQuery(key, value);
+            GotoAsyncPackage.Storage.XmlQueries.RenameQuery(key, value);
         }
     }
 }

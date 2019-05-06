@@ -1,4 +1,5 @@
-﻿using IBatisSuperHelper.Helpers;
+﻿using IBatisSuperHelper;
+using IBatisSuperHelper.Helpers;
 using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver;
 using IBatisSuperHelper.Storage;
 using Microsoft.CodeAnalysis;
@@ -46,7 +47,7 @@ namespace VSIXProject5.Validation
                     var resolverResult = new ExpressionResolver().GetStringValueOfExpression(expressionSyntax, context.SemanticModel);
                     if (resolverResult.IsSolved)
                     {
-                        var queryKeys = PackageStorage.XmlQueries.GetKeysByQueryId(resolverResult.TextResult, IBatisSuperHelper.Storage.Providers.NamespaceHandlingType.HYBRID_NAMESPACE);
+                        var queryKeys = GotoAsyncPackage.Storage.XmlQueries.GetKeysByQueryId(resolverResult.TextResult, IBatisSuperHelper.Storage.Providers.NamespaceHandlingType.HYBRID_NAMESPACE);
                         if (queryKeys.Count < 1)
                         {
                             context.ReportDiagnostic(Diagnostic.Create(QueryNotExistsRule, expressionSyntax.GetLocation(), resolverResult.TextResult));

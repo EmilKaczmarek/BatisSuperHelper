@@ -111,7 +111,7 @@ namespace IBatisSuperHelper
         public ToolWindowPane ResultWindow;
         public Window SolutionExplorer;
         public VisualStudioWorkspace Workspace;
-        public static GotoAsyncPackage Instance; 
+        public static IPackageStorage Storage { get; private set; }
 
         protected override async System.Threading.Tasks.Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
@@ -123,6 +123,8 @@ namespace IBatisSuperHelper
 
             EnvDTE = await GetServiceAsync(typeof(DTE)) as DTE2;
             Assumes.Present(EnvDTE);
+
+            Storage = new PackageStorage();
 
             var componentModel = await GetServiceAsync(typeof(SComponentModel)) as IComponentModel;
             Assumes.Present(componentModel);
@@ -178,7 +180,7 @@ namespace IBatisSuperHelper
             Goto.Initialize(this);
             RenameModalWindowCommand.Initialize(this);
             RenameCommand.Initialize(this);
-            Instance = this;
+
         }
         #endregion
     }

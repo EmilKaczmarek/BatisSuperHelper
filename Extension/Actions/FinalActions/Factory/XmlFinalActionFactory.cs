@@ -14,7 +14,7 @@ namespace IBatisSuperHelper.Actions.FinalActions.Factory
     {
         public GoToQueryFinalEventActionsExecutor GetFinalGoToQueryActionsExecutor(StatusBarIntegration statusBar, ToolWindowPane toolWindowPane)
         {
-            var isHybridNamespaceHandlingEnabled = (bool)PackageStorage.RuntimeConfiguration.GetValue("HybridNamespaceEnabled");
+            var isHybridNamespaceHandlingEnabled = (bool)GotoAsyncPackage.Storage.RuntimeConfiguration.GetValue("HybridNamespaceEnabled");
             return GoToQueryFinalEventActionsExecutor
                 .Create()
                 .WithLogicHandler(typeof(CSharpQuery), new GoToCodeLogicHandler(statusBar, toolWindowPane))

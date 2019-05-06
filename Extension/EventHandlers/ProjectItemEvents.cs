@@ -21,8 +21,8 @@ namespace IBatisSuperHelper.EventHandlers
             try
             {
                 Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
-                PackageStorage.CodeQueries.RenameStatmentsForFile(OldName, ProjectItem.Name);
-                PackageStorage.XmlQueries.RenameStatmentsForFile(OldName, ProjectItem.Name);
+                GotoAsyncPackage.Storage.CodeQueries.RenameStatmentsForFile(OldName, ProjectItem.Name);
+                GotoAsyncPackage.Storage.XmlQueries.RenameStatmentsForFile(OldName, ProjectItem.Name);
             }
             catch (Exception ex)
             {
@@ -37,8 +37,8 @@ namespace IBatisSuperHelper.EventHandlers
             {
                 Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
                 string fileName = ProjectItem.Name;
-                PackageStorage.XmlQueries.RemoveStatmentsForFilePath(fileName);
-                PackageStorage.CodeQueries.RemoveStatmentsForFilePath(fileName);
+                GotoAsyncPackage.Storage.XmlQueries.RemoveStatmentsForFilePath(fileName);
+                GotoAsyncPackage.Storage.CodeQueries.RemoveStatmentsForFilePath(fileName);
             }
             catch (Exception ex)
             {
@@ -55,7 +55,7 @@ namespace IBatisSuperHelper.EventHandlers
                 string projectItemExtension = Path.GetExtension(ProjectItem.Name);
                 if (projectItemExtension == ".xml")
                 {
-                    PackageStorage.AnalyzeAndStoreSingle(new XmlFileInfo
+                    GotoAsyncPackage.Storage.AnalyzeAndStoreSingle(new XmlFileInfo
                     {
                         FilePath = ProjectItem.FileNames[0],
                         ProjectName = ProjectItem.ContainingProject.Name

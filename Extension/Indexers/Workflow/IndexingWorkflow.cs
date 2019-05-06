@@ -51,7 +51,7 @@ namespace IBatisSuperHelper.Indexers.Workflow
             if (_options.MapsOptions.IndexAllMaps)
             {
                 var indexingResult = _xmlIndexer.BuildIndexer(xmlFiles);
-                PackageStorage.XmlQueries.AddMultipleWithoutKey(indexingResult);
+                GotoAsyncPackage.Storage.XmlQueries.AddMultipleWithoutKey(indexingResult);
                 return new MapProcessingResult
                 {
                     ProcessedFiles = indexingResult.Select(e => e.QueryFileName),
@@ -62,7 +62,7 @@ namespace IBatisSuperHelper.Indexers.Workflow
             {
                 var indexingResult = _xmlIndexer.BuildIndexer(xmlFiles);
                 //TODO: Complete logic for marking unused maps.
-                PackageStorage.XmlQueries.AddMultipleWithoutKey(indexingResult);
+                GotoAsyncPackage.Storage.XmlQueries.AddMultipleWithoutKey(indexingResult);
                 return new MapProcessingResult
                 {
                     ProcessedFiles = indexingResult.Select(e => e.QueryFileName),
@@ -73,7 +73,7 @@ namespace IBatisSuperHelper.Indexers.Workflow
             {
                 var indexingResult = _xmlIndexer.BuildIndexer(xmlFiles);
                 //TODO: Complete logic for filtering unused maps.
-                PackageStorage.XmlQueries.AddMultipleWithoutKey(indexingResult);
+                GotoAsyncPackage.Storage.XmlQueries.AddMultipleWithoutKey(indexingResult);
                 return new MapProcessingResult
                 {
                     ProcessedFiles = indexingResult.Select(e => e.QueryFileName),

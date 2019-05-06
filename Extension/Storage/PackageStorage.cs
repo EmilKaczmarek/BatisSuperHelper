@@ -17,29 +17,51 @@ using IBatisSuperHelper.Indexers.Code;
 
 namespace IBatisSuperHelper.Storage
 {
-    public static class PackageStorage
+    public class PackageStorage : IPackageStorage
     {
-        public static IProvider<IndexerKey, List<CSharpQuery>> CodeQueries = new CodeQueryProvider();
-        public static IProvider<IndexerKey, XmlQuery> XmlQueries = new XmlQueryProvider();
+        public IProvider<IndexerKey, List<CSharpQuery>> CodeQueries { get; private set; }
+        public IProvider<IndexerKey, XmlQuery> XmlQueries { get; private set; }
 
-        public static XmlIndexer XmlFileAnalyzer = new XmlIndexer();
-        public static CSharpIndexer CodeFileAnalyzer = new CSharpIndexer();
+        public XmlIndexer XmlFileAnalyzer { get; private set; }
+        public CSharpIndexer CodeFileAnalyzer { get; private set; }
 
-        public static GenericStorage<MethodInfo, ExpressionResult> GenericMethods = new GenericStorage<MethodInfo, ExpressionResult>();
+        public GenericStorage<MethodInfo, ExpressionResult> GenericMethods { get; private set; }
 
-        public static readonly GenericStorage<string, object> RuntimeConfiguration = new GenericStorage<string, object>
+        public GenericStorage<string, object> RuntimeConfiguration => new GenericStorage<string, object>
         {
             new KeyValuePair<string, object>("HybridNamespaceEnabled", true),
         };
 
-        public static Settings BatisSettings { get; private set; }
+        public PackageStorage()
+        {
+            CodeQueries = new CodeQueryProvider();
+            XmlQueries = new XmlQueryProvider();
+            XmlFileAnalyzer = new XmlIndexer();
+            CodeFileAnalyzer = new CSharpIndexer();
+            GenericMethods = new GenericStorage<MethodInfo, ExpressionResult>();
+            //RuntimeConfiguration = runtimeConfiguration;
+            BatisSettings = new Settings();
+        }
 
-        public static void SetBatisSettings(Settings batisSettings)
+        public PackageStorage(IProvider<IndexerKey, List<CSharpQuery>> codeQueries, IProvider<IndexerKey, XmlQuery> xmlQueries, XmlIndexer xmlFileAnalyzer, CSharpIndexer codeFileAnalyzer, GenericStorage<MethodInfo, ExpressionResult> genericMethods, GenericStorage<string, object> runtimeConfiguration, Settings batisSettings)
+        {
+            CodeQueries = codeQueries;
+            XmlQueries = xmlQueries;
+            XmlFileAnalyzer = xmlFileAnalyzer;
+            CodeFileAnalyzer = codeFileAnalyzer;
+            GenericMethods = genericMethods;
+            //RuntimeConfiguration = runtimeConfiguration;
+            BatisSettings = batisSettings;
+        }
+
+        public Settings BatisSettings { get; private set; }
+
+        public void SetBatisSettings(Settings batisSettings)
         {
             BatisSettings = batisSettings;
         }
 
-        public static async System.Threading.Tasks.Task AnalyzeAndStoreAsync(List<Document> documents)
+        public async System.Threading.Tasks.Task AnalyzeAndStoreAsync(List<Document> documents)
         {
             using (MiniProfiler.Current.Step(nameof(AnalyzeAndStoreAsync)))
             {
@@ -50,13 +72,13 @@ namespace IBatisSuperHelper.Storage
             }
         }
 
-        public static void AnalyzeAndStoreSingle(XmlFileInfo xmlFile)
+        public void AnalyzeAndStoreSingle(XmlFileInfo xmlFile)
         {
             var xmlFileResult = XmlFileAnalyzer.ParseSingleFile(xmlFile);
             XmlQueries.AddMultipleWithoutKey(xmlFileResult);
         }
 
-        public static void AnalyzeAndUpdateSingle(Document document)
+        public void AnalyzeAndUpdateSingle(Document document)
         {
             var codeResult = ThreadHelper.JoinableTaskFactory.Run(async () => await CodeFileAnalyzer.BuildFromDocumentAsync(document));
             CodeQueries.UpdateStatmentForFileWihoutKey(new List<List<CSharpQuery>> { codeResult.Queries });
@@ -66,7 +88,7 @@ namespace IBatisSuperHelper.Storage
             }  
         }
 
-        public static async System.Threading.Tasks.Task AnalyzeAndStoreSingleAsync(Document document)
+        public async System.Threading.Tasks.Task AnalyzeAndStoreSingleAsync(Document document)
         {
             using (MiniProfiler.Current.Step(nameof(AnalyzeAndStoreSingleAsync)))
             {
