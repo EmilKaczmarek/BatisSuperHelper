@@ -14,7 +14,7 @@ namespace IBatisSuperHelper.Storage.Domain
 {
     public class CodeQueryProvider : IQueryProvider<IndexerKey, List<CSharpQuery>>
     {
-        private Dictionary<IndexerKey, List<CSharpQuery>> codeStatments = new Dictionary<IndexerKey, List<CSharpQuery>>();
+        private readonly Dictionary<IndexerKey, List<CSharpQuery>> codeStatments = new Dictionary<IndexerKey, List<CSharpQuery>>();
 
         public void Add(IndexerKey key, List<CSharpQuery> value)
         {
@@ -108,14 +108,6 @@ namespace IBatisSuperHelper.Storage.Domain
             return codeStatments.Values.Where(predictable).ToList();
         }
 
-        //
-        private List<IndexerKey> GetKeysByQueryId(string queryId)
-        {
-            return codeStatments.Keys
-                .Where(e => e.StatmentName == queryId)
-                .ToList();
-        }
-
         private List<IndexerKey> GetKeysByFullyQualifiedName(string queryId)
         {
             return codeStatments.Keys
@@ -126,7 +118,6 @@ namespace IBatisSuperHelper.Storage.Domain
         public List<IndexerKey> GetKeysByQueryId(string queryId, bool useNamespace)
         {
             return GetKeysByFullyQualifiedName(queryId);
-            //return useNamespace? GetKeysByFullyQualifiedName(queryId) : GetKeysByQueryId(queryId);
         }
 
         public void RemoveStatmentByValue(List<CSharpQuery> value)

@@ -26,9 +26,9 @@ namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Data
             return keys.Select(e => new KeyValuePair<IndexerKey, List<CSharpQuery>>(e, GetSingleStatmentFromKey(e))).ToList();
         }
 
-        public List<IndexerKey> GetStatmentKeys(string queryResult, bool useNamespace)
+        public List<IndexerKey> GetStatmentKeys(string query, bool useNamespace)
         {
-            return GotoAsyncPackage.Storage.CodeQueries.GetKeysByQueryId(queryResult, useNamespace);
+            return GotoAsyncPackage.Storage.CodeQueries.GetKeysByQueryId(query, useNamespace);
         }
 
         public List<CSharpQuery> GetStatmentsFromKeys(List<IndexerKey> keys)

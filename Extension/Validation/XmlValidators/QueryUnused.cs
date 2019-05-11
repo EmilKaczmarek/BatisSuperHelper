@@ -22,13 +22,12 @@ namespace IBatisSuperHelper.Validation.XmlValidators
 {
     public class QueryUnused : IXmlValidator, IBufferValidator, IBuildDocumentValidator
     {
-        private IClassifier _classifier;
+        private readonly IClassifier _classifier;
         private SnapshotSpan _span;
-        private ITextDocument _document;
-        private ITextBuffer _buffer;
+        private readonly ITextDocument _document;
         private BatisXmlMapParser _xmlParser;
 
-        private string _filePath;
+        private readonly string _filePath;
 
         private readonly List<BatisError> _errors = new List<BatisError>();
         public List<BatisError> Errors => _errors;
@@ -36,12 +35,11 @@ namespace IBatisSuperHelper.Validation.XmlValidators
         private bool _isRunning = false;
         public bool IsRunning => _isRunning;
 
-        public QueryUnused(IClassifier classifier, SnapshotSpan span, ITextDocument document, ITextBuffer buffer)
+        public QueryUnused(IClassifier classifier, SnapshotSpan span, ITextDocument document)
         {
             _classifier = classifier;
             _span = span;
             _document = document;
-            _buffer = buffer;
             _xmlParser = new BatisXmlMapParser().WithStringReader(new StringReader(span.Snapshot.GetText())).Load();
             ValidateAllSpans();
         }
@@ -52,11 +50,11 @@ namespace IBatisSuperHelper.Validation.XmlValidators
             _xmlParser = new BatisXmlMapParser().WithFileInfo(_filePath, "").Load();
         }
 
-        public void OnChange(SnapshotSpan newSpans)
+        public void OnChange(SnapshotSpan newSpan)
         {
             ClearErrors();
-            _span = newSpans;
-            _xmlParser = new BatisXmlMapParser().WithStringReader(new StringReader(newSpans.Snapshot.GetText())).Load();
+            _span = newSpan;
+            _xmlParser = new BatisXmlMapParser().WithStringReader(new StringReader(newSpan.Snapshot.GetText())).Load();
             ValidateAllSpans();
         }
 
@@ -82,10 +80,8 @@ namespace IBatisSuperHelper.Validation.XmlValidators
                     && cSpan.Span.Start.GetContainingLine().Extent.GetText().Contains("id"))
                 {
                     var line = cSpan.Span.Start.GetContainingLine();
-                    var mapNamespace = _xmlParser.MapNamespace;
                     if (_xmlParser.HasSelectedLineValidQuery(line.LineNumber + 1))
                     {
-                        var test = GotoAsyncPackage.Storage.GenericMethods;
                         var query = _xmlParser.GetQueryAtLineOrNull(line.LineNumber + 1, GotoAsyncPackage.Storage.SqlMapConfigProvider.GetCurrentSettings().UseStatementNamespaces);
                         var queryUsages = GotoAsyncPackage.Storage.CodeQueries.GetKeysByQueryId(query, GotoAsyncPackage.Storage.SqlMapConfigProvider.GetCurrentSettings().UseStatementNamespaces);
                         if (!queryUsages.Any())

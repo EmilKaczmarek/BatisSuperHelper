@@ -89,7 +89,6 @@ namespace IBatisSuperHelper.Parsers
 
         public IEnumerable<HtmlNode> GetChildNodesOfParentByXPath(string xPath)
         {
-            var test = _xmlDocument.DocumentNode.DescendantNodes();//TODO: Remove after tests.
             var statementRootNode = GetSingleNode(xPath);
 
             if (statementRootNode == null)

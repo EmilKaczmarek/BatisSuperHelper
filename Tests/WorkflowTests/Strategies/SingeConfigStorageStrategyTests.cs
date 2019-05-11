@@ -23,6 +23,7 @@ namespace Tests
             };
 
             var storageMock = new Mock<IPackageStorage>();
+            storageMock.Setup(e => e.SqlMapConfigProvider.SetSingleMapConfig(It.IsAny<SqlMapConfig>()));
 
             var instance = new SingleConfigStorageStrategy(maps, storageMock.Object);
             instance.Store();

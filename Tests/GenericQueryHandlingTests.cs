@@ -12,9 +12,9 @@ namespace Tests
 {
     public class GenericIndexingTests
     {
-        private string _directNamespaceText;
-        private string _fieldNamespaceText;
-        private string _fieldNamespaceCtor;
+        private readonly string _directNamespaceText;
+        private readonly string _fieldNamespaceText;
+        private readonly string _fieldNamespaceCtor;
 
         private string GetString(Stream stream)
         {
@@ -52,8 +52,8 @@ namespace Tests
                 .BuildFromDocumentAsync(genericDocument);
 
             Assert.NotNull(results);
-            Assert.Equal(1, results.Generics.Count);
-            Assert.Equal(0, results.Queries.Count);
+            Assert.Single(results.Generics);
+            Assert.Empty(results.Queries);
 
             var indexerResult = results.Generics.FirstOrDefault();
 

@@ -22,8 +22,8 @@ namespace Tests
             {
                 map1, map2
             };
-
             var storageMock = new Mock<IPackageStorage>();
+            storageMock.Setup(e => e.SqlMapConfigProvider.SetMultipleMapConfigs(It.IsAny<IEnumerable<SqlMapConfig>>(), It.IsAny<SqlMapConfig>()));
 
             var instance = new MultipleConfigsStorageStrategy(maps, storageMock.Object);
             instance.Store();

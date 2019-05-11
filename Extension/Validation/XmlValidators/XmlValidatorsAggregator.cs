@@ -27,7 +27,7 @@ namespace IBatisSuperHelper.Validation.XmlValidators
 
         public XmlValidatorsAggregator AllValidatorsForBuffer(IClassifier classifier, SnapshotSpan span, ITextDocument document, IWpfTextView view, ITextBuffer buffer)
         {
-            _validators.Add(new QueryUnused(classifier, span, document, buffer));
+            _validators.Add(new QueryUnused(classifier, span, document));
             _validators.Add(new MapNotEmbedded(classifier, span, document, buffer));
 
             return this;

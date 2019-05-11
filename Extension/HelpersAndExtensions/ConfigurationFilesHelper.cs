@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace IBatisSuperHelper.HelpersAndExtensions
 {
-    public class ConfigurationFilesHelper
+    public static class ConfigurationFilesHelper
     {
         private static readonly IReadOnlyList<string> DotNetCommonConfigNames = new List<string>
         {

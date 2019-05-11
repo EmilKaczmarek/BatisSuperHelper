@@ -39,6 +39,8 @@ namespace IBatisSuperHelper.Indexers.Code
                 }          
             }
             sw.Stop();
+
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             OutputWindowLogger.WriteLn($"Building Queries db from code ended in {sw.ElapsedMilliseconds} ms. Found {results.Count} queries. In {documents.Count} documents.");
             return results;
         }
@@ -47,8 +49,7 @@ namespace IBatisSuperHelper.Indexers.Code
         {
             using (MiniProfiler.Current.Step(nameof(BuildFromDocumentAsync)))
             {
-                SemanticModel semModel = await document.GetSemanticModelAsync();
-                return Build(semModel, document);
+                return await BuildAsync(document);
             }
 
         }

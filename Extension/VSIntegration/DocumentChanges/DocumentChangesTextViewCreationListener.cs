@@ -6,6 +6,7 @@ using IBatisSuperHelper.HelpersAndExtensions.VisualStudio;
 using IBatisSuperHelper.VSIntegration.DocumentChanges.Actions;
 using Microsoft.VisualStudio.Text;
 using System.ComponentModel.Composition;
+using Microsoft.VisualStudio.Shell;
 
 namespace IBatisSuperHelper.VSIntegration.DocumentChanges
 {
@@ -26,9 +27,9 @@ namespace IBatisSuperHelper.VSIntegration.DocumentChanges
                //.Select(e => e.EventArgs.Changes)
                .DistinctUntilChanged()
                .Throttle(TimeSpan.FromMilliseconds(500))
-               .Subscribe(async e =>
+               .Subscribe(e =>
                {
-                   await fileAction.HandleChange(textView);
+                   ThreadHelper.JoinableTaskFactory.RunAsync(async () => await fileAction.HandleChangeAsync(textView));
                });
         }
     }

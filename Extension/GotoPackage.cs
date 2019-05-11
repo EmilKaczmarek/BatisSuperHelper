@@ -91,11 +91,6 @@ namespace IBatisSuperHelper
 
         }
 
-        public GotoAsyncPackage(IPackageStorage storage)
-        {
-            _packageStorage = storage;
-        }
-
         #region Package Members
         //Event related fields
         private SolutionEventsHandler _solutionEventsHandler;
@@ -103,16 +98,18 @@ namespace IBatisSuperHelper
         private Events2 _envDteEvents;
         private ProjectItemsEvents _envDteProjectItemsEvents;
         private EnvDTE.BuildEvents _buildEvents;
+
+
+        public IVsSolution Solution { get; private set; }
+        public IVsTextManager TextManager { get; private set; }
+        public IVsEditorAdaptersFactoryService EditorAdaptersFactory { get; private set; }
+        public IVsStatusbar IStatusBar { get; private set; }
+        public ToolWindowPane ResultWindow { get; private set; }
+        public VisualStudioWorkspace Workspace { get; private set; }
+
+        public static DTE2 EnvDTE { get; private set; }
+
         private static IPackageStorage _packageStorage;
-        //Public fields
-        public IVsSolution Solution;
-        public static DTE2 EnvDTE;
-        public IVsTextManager TextManager;
-        public IVsEditorAdaptersFactoryService EditorAdaptersFactory;
-        public IVsStatusbar IStatusBar;
-        public ToolWindowPane ResultWindow;
-        public Window SolutionExplorer;
-        public VisualStudioWorkspace Workspace;
         public static IPackageStorage Storage {
             get
             {
@@ -135,7 +132,7 @@ namespace IBatisSuperHelper
             EnvDTE = await GetServiceAsync(typeof(DTE)) as DTE2;
             Assumes.Present(EnvDTE);
 
-            _packageStorage = new PackageStorage();
+            Storage = new PackageStorage();
 
             var componentModel = await GetServiceAsync(typeof(SComponentModel)) as IComponentModel;
             Assumes.Present(componentModel);
