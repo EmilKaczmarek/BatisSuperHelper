@@ -15,16 +15,18 @@ namespace IBatisSuperHelper.Parsers
     public class BatisXmlMapParser : XmlParser
     {
         private Lazy<string> _xmlNamespace => new Lazy<string>(GetDocumentXmlNamespace);
-        public string XmlNamespace => _xmlNamespace.Value;
+        public new string XmlNamespace => _xmlNamespace.Value;
 
         private Lazy<string> _mapNamespace => new Lazy<string>(GetDocumentMapNamespace);
         public string MapNamespace =>_mapNamespace.Value;
 
-        public bool IsUsingStatementNamespaces => false; //TODO: Too much dependencies to remove this now.
-
         public BatisXmlMapParser()
         {
             InitializeEmpty();
+        }
+
+        public BatisXmlMapParser(XmlParser parser) : base(parser)
+        {
         }
 
         public BatisXmlMapParser WithStringReader(StringReader stringReader)
@@ -53,7 +55,7 @@ namespace IBatisSuperHelper.Parsers
                 QueryFileName = FileName,
                 QueryFilePath = FilePath,
                 QueryId = e.Id,
-                FullyQualifiedQuery = IsUsingStatementNamespaces ? MapNamespaceHelper.CreateFullQueryString(MapNamespace, e.Id) : e.Id,
+                FullyQualifiedQuery = MapNamespaceHelper.CreateFullQueryString(MapNamespace, e.Id),
                 QueryLineNumber = e.Line,
                 QueryVsProjectName = FileProjectName,
                 MapNamespace = MapNamespace
@@ -70,32 +72,24 @@ namespace IBatisSuperHelper.Parsers
                 QueryFileName = FileName,
                 QueryFilePath = FilePath,
                 QueryId = e.Id,
-                FullyQualifiedQuery = IsUsingStatementNamespaces ? MapNamespaceHelper.CreateFullQueryString(MapNamespace, e.Id) : e.Id,
+                FullyQualifiedQuery = MapNamespaceHelper.CreateFullQueryString(MapNamespace, e.Id),
                 QueryLineNumber = e.Line,
                 QueryVsProjectName = FileProjectName,
                 MapNamespace = MapNamespace
             }).ToList();
         }
 
-        public string GetQueryAtLineOrNull(int lineNumber, bool forceNoNamespace)
-        {
-            if (forceNoNamespace)
-            {
-                var nodes = GetAllDescendantsNodes();
-                var lineNode = GetFirstStatmentNodeForLineOrNull(nodes, lineNumber);
-
-                return lineNode?.Id;
-            }
-
-            return GetQueryAtLineOrNull(lineNumber);
-        }
-
-        public string GetQueryAtLineOrNull(int lineNumber)
+        public string GetQueryAtLineOrNull(int lineNumber, bool useNamespace)
         {
             var nodes = GetAllDescendantsNodes();
             var lineNode = GetFirstStatmentNodeForLineOrNull(nodes, lineNumber);
 
-            return IsUsingStatementNamespaces? MapNamespaceHelper.CreateFullQueryString(MapNamespace, lineNode?.Id):lineNode?.Id;
+            if (!useNamespace)
+            {
+                return lineNode?.Id;
+            }
+
+            return MapNamespaceHelper.CreateFullQueryString(MapNamespace, lineNode?.Id);
         }
 
         public List<int> GetStatmentElementsLineNumber()

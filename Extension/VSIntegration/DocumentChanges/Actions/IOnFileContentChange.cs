@@ -9,6 +9,6 @@ namespace IBatisSuperHelper.VSIntegration.DocumentChanges.Actions
 {
     public interface IOnFileContentChange
     {
-        void HandleChange(IWpfTextView textView);
+        Task HandleChange(IWpfTextView textView);
     }
 }

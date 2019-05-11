@@ -11,7 +11,7 @@ using IBatisSuperHelper.Storage.Providers;
 
 namespace IBatisSuperHelper.Storage.Domain
 {
-    public class XmlQueryProvider : IProvider<IndexerKey, XmlQuery>
+    public class XmlQueryProvider : IQueryProvider<IndexerKey, XmlQuery>
     {
         private Dictionary<IndexerKey, XmlQuery> xmlStatments = new Dictionary<IndexerKey, XmlQuery>();
 
@@ -83,21 +83,9 @@ namespace IBatisSuperHelper.Storage.Domain
             return xmlStatments.Keys.Where(e => e.StatmentFullyQualifiedName.Equals(queryId)).ToList();
         }
 
-        public List<IndexerKey> GetKeysByQueryId(string queryId, NamespaceHandlingType handlingType)
+        public List<IndexerKey> GetKeysByQueryId(string queryId, bool useNamespace)
         {
-            switch (handlingType)
-            {
-                case NamespaceHandlingType.IGNORE_NAMESPACE:
-                    return GetKeysByQueryId(MapNamespaceHelper.GetQueryWithoutNamespace(queryId));
-                case NamespaceHandlingType.WITH_NAMESPACE:
-                    return GetKeysByFullyQualifiedName(queryId);
-                case NamespaceHandlingType.HYBRID_NAMESPACE:
-                    var withoutNamespace = GetKeysByQueryId(MapNamespaceHelper.GetQueryWithoutNamespace(queryId));
-                    var withNamespace = GetKeysByFullyQualifiedName(queryId);
-                    return withNamespace.Concat(withoutNamespace).Distinct().ToList();
-                default:
-                    return new List<IndexerKey>();
-            }
+            return useNamespace? GetKeysByFullyQualifiedName(queryId): GetKeysByQueryId(queryId);
         }
 
         public void RemoveStatmentByValue(XmlQuery value)

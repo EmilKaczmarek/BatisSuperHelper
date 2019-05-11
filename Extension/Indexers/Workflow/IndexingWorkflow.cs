@@ -5,6 +5,7 @@ using IBatisSuperHelper.Helpers;
 using IBatisSuperHelper.HelpersAndExtensions;
 using IBatisSuperHelper.Indexers.Workflow.Options;
 using IBatisSuperHelper.Indexers.Workflow.Strategies.Config;
+using IBatisSuperHelper.Indexers.Workflow.Strategies.Storage.Configs;
 using IBatisSuperHelper.Indexers.Xml;
 using IBatisSuperHelper.Models;
 using IBatisSuperHelper.Parsers;
@@ -28,14 +29,14 @@ namespace IBatisSuperHelper.Indexers.Workflow
 
         private readonly IProjectItemRetreiver _projectItemRetreiver;
         private readonly IConfigStrategy _configStrategy;
-        
-        private IEnumerable<ProjectItem> _projectItems;
 
-        public IndexingWorkflow(IndexingWorkflowOptions options, IProjectItemRetreiver projectItemRetreiver, IConfigStrategy configStrategy)
+        private IEnumerable<ProjectItem> _projectItems = Enumerable.Empty<ProjectItem>();
+
+        public IndexingWorkflow(IndexingWorkflowOptions options, IProjectItemRetreiver projectItemRetreiver, IPackageStorage storage)
         {
             _options = options;
             _projectItemRetreiver = projectItemRetreiver;
-            _configStrategy = configStrategy;
+            _configStrategy = new DefaultConfigStrategy(options.ConfigOptions, new ConfigStorageStrategyFactory(storage));
         }
 
         public void GetAndSetProjectItems()
@@ -88,8 +89,8 @@ namespace IBatisSuperHelper.Indexers.Workflow
         //Step 3: Code
         public void ExecuteIndexing()
         {
-            var configResult = _configStrategy.Process();
-            //var mapResults = HandleMaps(configResult);
+            var configResult = _configStrategy.Process(_projectItems);
+            var mapResults = HandleMaps(configResult);
         }
     }
 }

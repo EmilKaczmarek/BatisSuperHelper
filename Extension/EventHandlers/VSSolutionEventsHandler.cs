@@ -7,6 +7,7 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using NLog;
 using System;
+using System.Diagnostics;
 using static IBatisSuperHelper.Constants.EventConstats.VS;
 
 namespace IBatisSuperHelper.Events
@@ -50,6 +51,7 @@ namespace IBatisSuperHelper.Events
 
             public int OnAfterBackgroundSolutionLoadComplete()
             {
+                Debug.WriteLine("OnAfterBackgroundSolutionLoadComplete()");
                 try
                 {
                     //Load Xml files from indexer

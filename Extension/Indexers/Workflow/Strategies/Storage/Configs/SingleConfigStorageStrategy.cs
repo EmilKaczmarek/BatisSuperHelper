@@ -8,10 +8,12 @@ namespace IBatisSuperHelper.Indexers.Workflow.Strategies.Storage.Configs
     public class SingleConfigStorageStrategy : IConfigStorageStrategy
     {
         private readonly IEnumerable<SqlMapConfig> _mapConfigs;
+        private readonly IPackageStorage _storage;
 
-        public SingleConfigStorageStrategy(IEnumerable<SqlMapConfig> mapConfigs)
+        public SingleConfigStorageStrategy(IEnumerable<SqlMapConfig> mapConfigs, IPackageStorage storage)
         {
             _mapConfigs = mapConfigs;
+            _storage = storage;
         }
 
         public ConfigProcessingResult Store()
@@ -22,7 +24,7 @@ namespace IBatisSuperHelper.Indexers.Workflow.Strategies.Storage.Configs
 
         protected ConfigProcessingResult Store(SqlMapConfig config)
         {
-            GotoAsyncPackage.Storage.SetBatisSettings(config.Settings);
+            _storage.SqlMapConfigProvider.SetSingleMapConfig(config);
 
             return new ConfigProcessingResult
             {

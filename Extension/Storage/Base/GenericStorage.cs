@@ -11,6 +11,16 @@ namespace IBatisSuperHelper.Storage
     {
         private readonly ConcurrentDictionary<T, Lazy<T1>> keyValuePairs = new ConcurrentDictionary<T, Lazy<T1>>();
 
+        public GenericStorage()
+        {
+
+        }
+
+        public GenericStorage(IEnumerable<KeyValuePair<T, T1>> pairList)
+        {
+            this.AddMultiple(pairList);
+        }
+
         public IEnumerator<KeyValuePair<T, T1>> GetEnumerator()
         {
             return Enumerable.Empty<KeyValuePair<T, T1>>().GetEnumerator();

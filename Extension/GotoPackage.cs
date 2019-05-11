@@ -47,6 +47,11 @@ using Microsoft;
 using IBatisSuperHelper.Indexers.Xml;
 using IBatisSuperHelper.HelpersAndExtensions;
 using IBatisSuperHelper.EventHandlers.SolutionEventsActions;
+using IBatisSuperHelper.Indexers.Workflow;
+using IBatisSuperHelper.Indexers.Workflow.Options;
+using IBatisSuperHelper.CoreAutomation.ProjectItems;
+using IBatisSuperHelper.Indexers.Workflow.Strategies.Config;
+using IBatisSuperHelper.Indexers.Workflow.Strategies.Storage.Configs;
 
 namespace IBatisSuperHelper
 {
@@ -79,20 +84,16 @@ namespace IBatisSuperHelper
     [ProvideToolWindow(typeof(ResultWindow))]
     public sealed class GotoAsyncPackage : AsyncPackage
     {
-        /// <summary>
-        /// GotoAsyncPackage GUID string.
-        /// </summary>
         public const string PackageGuidString = "0d0c7a5a-951b-4d78-ab1d-870fa377376f";
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Goto"/> class.
-        /// </summary>
         public GotoAsyncPackage()
         {
-            // Inside this method you can place any initialization code that does not require
-            // any Visual Studio service because at this point the package object is created but
-            // not sited yet inside Visual Studio environment. The place to do all the other
-            // initialization is the Initialize method.
+
+        }
+
+        public GotoAsyncPackage(IPackageStorage storage)
+        {
+            _packageStorage = storage;
         }
 
         #region Package Members
@@ -102,6 +103,7 @@ namespace IBatisSuperHelper
         private Events2 _envDteEvents;
         private ProjectItemsEvents _envDteProjectItemsEvents;
         private EnvDTE.BuildEvents _buildEvents;
+        private static IPackageStorage _packageStorage;
         //Public fields
         public IVsSolution Solution;
         public static DTE2 EnvDTE;
@@ -111,7 +113,16 @@ namespace IBatisSuperHelper
         public ToolWindowPane ResultWindow;
         public Window SolutionExplorer;
         public VisualStudioWorkspace Workspace;
-        public static IPackageStorage Storage { get; private set; }
+        public static IPackageStorage Storage {
+            get
+            {
+                return _packageStorage ?? new PackageStorage();
+            }
+            private set
+            {
+                _packageStorage = value;
+            }
+        }
 
         protected override async System.Threading.Tasks.Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
@@ -124,7 +135,7 @@ namespace IBatisSuperHelper
             EnvDTE = await GetServiceAsync(typeof(DTE)) as DTE2;
             Assumes.Present(EnvDTE);
 
-            Storage = new PackageStorage();
+            _packageStorage = new PackageStorage();
 
             var componentModel = await GetServiceAsync(typeof(SComponentModel)) as IComponentModel;
             Assumes.Present(componentModel);
@@ -174,7 +185,9 @@ namespace IBatisSuperHelper
             Solution = await GetServiceAsync(typeof(SVsSolution)) as IVsSolution;
             Assumes.Present(Solution);
 
-            _solutionEventsHandler = new SolutionEventsHandler(new VSSolutionEventsActions(EnvDTE, new XmlIndexer()));
+            var indexingWorkflow = new IndexingWorkflow(Storage.IndexingWorkflowOptions, new ProjectItemRetreiver(EnvDTE), Storage);
+
+            _solutionEventsHandler = new SolutionEventsHandler(new VSSolutionEventsActions(indexingWorkflow));
             Solution.AdviseSolutionEvents(_solutionEventsHandler, out _solutionEventsCookie);
 
             Goto.Initialize(this);

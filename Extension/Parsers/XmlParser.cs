@@ -14,7 +14,7 @@ namespace IBatisSuperHelper.Parsers
         public string FileProjectName { get; private set; }
 
         private StringReader _stringReader;
-        private HtmlDocument _xmlDocument;
+        internal HtmlDocument _xmlDocument;
 
         private Lazy<string> _xmlNamespaceLazy;
         protected bool IsLazy = false;//I am...
@@ -22,6 +22,16 @@ namespace IBatisSuperHelper.Parsers
         public XmlParser()
         {
             InitializeEmpty();
+        }
+
+        public XmlParser(XmlParser otherInstance)
+        {
+            FilePath = otherInstance.FilePath;
+            FileName = otherInstance.FileName;
+            FileProjectName = otherInstance.FileProjectName;
+            _stringReader = otherInstance._stringReader;
+            _xmlDocument = otherInstance._xmlDocument;
+            IsLazy = otherInstance.IsLazy;
         }
 
         public XmlParser(StringReader stringReader)
@@ -57,7 +67,7 @@ namespace IBatisSuperHelper.Parsers
             _xmlNamespaceLazy = new Lazy<string>(() => GetXmlNamespace());
         }
 
-        public void Load()
+        public XmlParser Load()
         {
             InitializeEmpty();
             if (_stringReader != null)
@@ -68,6 +78,13 @@ namespace IBatisSuperHelper.Parsers
             {
                 _xmlDocument.Load(FilePath);
             }
+
+            return this;
+        }
+
+        public HtmlDocument GetDocument()
+        {
+            return _xmlDocument;
         }
 
         public IEnumerable<HtmlNode> GetChildNodesOfParentByXPath(string xPath)

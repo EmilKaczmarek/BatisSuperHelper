@@ -70,7 +70,7 @@ namespace IBatisSuperHelper.Actions.DocumentProcessors
         public ExpressionResult GetQueryValueAtLine(int lineNumber)
         {
             var elementLocation = _parser.GetStatmentElementsLineNumber().DetermineClosestInt(lineNumber + 1);
-            var queryValue = _parser.GetQueryAtLineOrNull(elementLocation);
+            var queryValue = _parser.GetQueryAtLineOrNull(elementLocation, GotoAsyncPackage.Storage.SqlMapConfigProvider.GetCurrentSettings().UseStatementNamespaces);
             return new ExpressionResult
             {
                 IsSolved = queryValue != null,

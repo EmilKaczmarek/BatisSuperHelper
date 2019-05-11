@@ -1,6 +1,8 @@
 ﻿using IBatisSuperHelper.Indexers.Workflow.Options;
 using IBatisSuperHelper.Indexers.Workflow.Strategies.Storage.Configs;
 using IBatisSuperHelper.Parsers.Models;
+using IBatisSuperHelper.Storage;
+using Moq;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
@@ -12,7 +14,8 @@ namespace Tests
         [Fact]
         public void ShouldGetSingleDefaultStrategyForDefaultOptionsAndEmptyList()
         {
-            var instance = new ConfigStorageStrategyFactory();
+            var packageStorageMock = new Mock<IPackageStorage>();
+            var instance = new ConfigStorageStrategyFactory(packageStorageMock.Object);
             var options = new ConfigsIndexingOptions();
             var parsedSuccessfully = Enumerable.Empty<SqlMapConfig>();
 
@@ -23,7 +26,8 @@ namespace Tests
         [Fact]
         public void ShouldGetSingleDefaultStrategyForNonDefaultOptionsAndEmptyList()
         {
-            var instance = new ConfigStorageStrategyFactory();
+            var packageStorageMock = new Mock<IPackageStorage>();
+            var instance = new ConfigStorageStrategyFactory(packageStorageMock.Object);
             var options = new ConfigsIndexingOptions
             {
                 SupportMultipleConfigs = true,
@@ -37,7 +41,8 @@ namespace Tests
         [Fact]
         public void ShouldGetSingleStrategyForDefaultOptionsAndListWithOneItem()
         {
-            var instance = new ConfigStorageStrategyFactory();
+            var packageStorageMock = new Mock<IPackageStorage>();
+            var instance = new ConfigStorageStrategyFactory(packageStorageMock.Object);
             var options = new ConfigsIndexingOptions();
             var parsedSuccessfully = new List<SqlMapConfig>
             {
@@ -54,7 +59,8 @@ namespace Tests
         [Fact]
         public void ShouldGetSingleStrategyForDefaultOptionsAndListWithTwoDuplicatedItems()
         {
-            var instance = new ConfigStorageStrategyFactory();
+            var packageStorageMock = new Mock<IPackageStorage>();
+            var instance = new ConfigStorageStrategyFactory(packageStorageMock.Object);
             var options = new ConfigsIndexingOptions();
 
             var parsedSuccessfully = new List<SqlMapConfig>
@@ -76,7 +82,8 @@ namespace Tests
         [Fact]
         public void ShouldGetSingleStrategyForMutlipeConfigsOptionAndListWithTwoDuplicatedItems()
         {
-            var instance = new ConfigStorageStrategyFactory();
+            var packageStorageMock = new Mock<IPackageStorage>();
+            var instance = new ConfigStorageStrategyFactory(packageStorageMock.Object);
             var options = new ConfigsIndexingOptions
             {
                 SupportMultipleConfigs = true,
@@ -101,7 +108,8 @@ namespace Tests
         [Fact]
         public void ShouldGetSingleStrategyForMutlipeConfigsOptionAndListWithOneItem()
         {
-            var instance = new ConfigStorageStrategyFactory();
+            var packageStorageMock = new Mock<IPackageStorage>();
+            var instance = new ConfigStorageStrategyFactory(packageStorageMock.Object);
             var options = new ConfigsIndexingOptions
             {
                 SupportMultipleConfigs = true,
@@ -122,7 +130,8 @@ namespace Tests
         [Fact]
         public void ShouldGetMultipleStrategyForMutlipeConfigsOptionAndListWithTwoDistinctItems()
         {
-            var instance = new ConfigStorageStrategyFactory();
+            var packageStorageMock = new Mock<IPackageStorage>();
+            var instance = new ConfigStorageStrategyFactory(packageStorageMock.Object);
             var options = new ConfigsIndexingOptions
             {
                 SupportMultipleConfigs = true,
