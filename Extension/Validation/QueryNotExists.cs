@@ -40,21 +40,18 @@ namespace VSIXProject5.Validation
         {
             NodeHelpers helper = new NodeHelpers(context.SemanticModel);
 
-            if (helper.IsIBatisMethod(context.Node as InvocationExpressionSyntax))
+            if (helper.IsIBatisMethod(context.Node as InvocationExpressionSyntax) &&
+                helper.TryGetArgumentNodeFromInvocation(context.Node as InvocationExpressionSyntax, 0, out ExpressionSyntax expressionSyntax))
             {
-                if (helper.TryGetArgumentNodeFromInvocation(context.Node as InvocationExpressionSyntax, 0, out ExpressionSyntax expressionSyntax))
+                var resolverResult = new ExpressionResolver().GetStringValueOfExpression(expressionSyntax, context.SemanticModel);
+                if (resolverResult.IsSolved)
                 {
-                    var resolverResult = new ExpressionResolver().GetStringValueOfExpression(expressionSyntax, context.SemanticModel);
-                    if (resolverResult.IsSolved)
+                    var queryKeys = GotoAsyncPackage.Storage.XmlQueries.GetKeysByQueryId(resolverResult.TextResult, GotoAsyncPackage.Storage.SqlMapConfigProvider.GetCurrentSettings().UseStatementNamespaces);
+                    if (queryKeys.Count < 1)
                     {
-                        var queryKeys = GotoAsyncPackage.Storage.XmlQueries.GetKeysByQueryId(resolverResult.TextResult, GotoAsyncPackage.Storage.SqlMapConfigProvider.GetCurrentSettings().UseStatementNamespaces);
-                        if (queryKeys.Count < 1)
-                        {
-                            context.ReportDiagnostic(Diagnostic.Create(QueryNotExistsRule, expressionSyntax.GetLocation(), resolverResult.TextResult));
-                        }
+                        context.ReportDiagnostic(Diagnostic.Create(QueryNotExistsRule, expressionSyntax.GetLocation(), resolverResult.TextResult));
                     }
                 }
-
             }
         }
     }

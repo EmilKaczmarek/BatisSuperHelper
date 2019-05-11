@@ -18,11 +18,11 @@ namespace IBatisSuperHelper.VSIntegration.DocumentChanges.Actions
 {
     public class CSharpFileContentOnChange : IOnFileContentChange
     {
-        public async Task HandleChange(IWpfTextView textView)
+        public async Task HandleChangeAsync(IWpfTextView textView)
         {
             try
             {
-                var profiler = MiniProfiler.StartNew(nameof(HandleChange));
+                var profiler = MiniProfiler.StartNew(nameof(HandleChangeAsync));
                 profiler.Storage = new NLogStorage(LogManager.GetLogger("profiler"));
                 using (profiler.Step("HandleChangeCode"))
                 {

@@ -109,17 +109,6 @@ namespace Tests
             return new ExpressionResolver(150).GetStringValueOfExpression(document, nodeToTest?.Expression, nodes, semanticModel);
         }
 
-        public void TextGenerationExample()
-        {
-            string insideMethodCode = @"test";
-            string insideClassCode = @"var test2= ""unittest""";
-            string outsideClassCode = @"public string test = ""unittest""";
-
-            var result = Execute(insideMethodCode, insideClassCode, outsideClassCode);
-            Assert.NotEqual("", result.TextResult);
-            Assert.Equal("unittest", result.TextResult);
-        }
-
         [Fact]
         public void NullDirect()
         {

@@ -16,13 +16,13 @@ namespace IBatisSuperHelper.VSIntegration.DocumentChanges.Actions
 {
     public class XmlFileContentOnChange : IOnFileContentChange
     {
-        public async System.Threading.Tasks.Task HandleChange(IWpfTextView textView)
+        public async System.Threading.Tasks.Task HandleChangeAsync(IWpfTextView textView)
         {
             try
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-                var profiler = MiniProfiler.StartNew(nameof(HandleChange));
+                var profiler = MiniProfiler.StartNew(nameof(HandleChangeAsync));
                 profiler.Storage = new NLogStorage(LogManager.GetLogger("profiler"));
                 using (profiler.Step("HandleChangeXml"))
                 {

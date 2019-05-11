@@ -18,9 +18,9 @@ namespace Playground
 {
     public class RoslynPlayground
     {
-        private string _directNamespaceText;
-        private string _fieldNamespaceText;
-        private string _fieldNamespaceCtor;
+        private readonly string _directNamespaceText;
+        private readonly string _fieldNamespaceText;
+        private readonly string _fieldNamespaceCtor;
 
         private string GetString(Stream stream)
         {

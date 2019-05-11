@@ -19,5 +19,13 @@ namespace IBatisSuperHelper.Models
                    FilePath == info.FilePath &&
                    ProjectName == info.ProjectName;
         }
+
+        public override int GetHashCode()
+        {
+            var hashCode = 1942994529;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(FilePath);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ProjectName);
+            return hashCode;
+        }
     }
 }

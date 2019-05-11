@@ -14,12 +14,12 @@ namespace Tests
 {
     public class ExpressionResolverGeneralTests
     {
-        private string _documentCSharpCode;
-        private SourceText _sourceText;
-        private CompilationUnitSyntax _treeRoot;
-        private SemanticModel _semanticModel;
-        private IEnumerable<SyntaxNode> _documentNodes;
-        private Document _document;
+        private readonly string _documentCSharpCode;
+        private readonly SourceText _sourceText;
+        private readonly CompilationUnitSyntax _treeRoot;
+        private readonly SemanticModel _semanticModel;
+        private readonly IEnumerable<SyntaxNode> _documentNodes;
+        private readonly Document _document;
 
         public ExpressionResolverGeneralTests()
         {

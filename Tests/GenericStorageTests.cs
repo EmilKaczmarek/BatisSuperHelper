@@ -8,7 +8,7 @@ namespace Tests
 {
     public class GenericStorageTests
     {
-        private GenericStorage<int, string> _storage;
+        private readonly GenericStorage<int, string> _storage;
 
         public GenericStorageTests()
         {

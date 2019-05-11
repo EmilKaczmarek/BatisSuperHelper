@@ -26,7 +26,8 @@ namespace IBatisSuperHelper.HelpersAndExtensions
 
         public static string CreateFullQueryString(string mapNamespace, string queryName)
         {
-            return string.IsNullOrEmpty(queryName) ? string.Empty : (string.IsNullOrEmpty(mapNamespace)?queryName:$"{mapNamespace}.{queryName}");
+            var query = string.IsNullOrEmpty(mapNamespace) ? queryName : $"{mapNamespace}.{queryName}";
+            return string.IsNullOrEmpty(queryName) ? string.Empty : query;
         }
 
         public static string GetQueryWithoutNamespace(string queryWithNamespace)

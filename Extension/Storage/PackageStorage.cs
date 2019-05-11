@@ -102,7 +102,7 @@ namespace IBatisSuperHelper.Storage
             CodeQueries.UpdateStatmentForFileWihoutKey(new List<List<CSharpQuery>> { codeResult.Queries });
             foreach (var generic in codeResult.Generics)
             {
-                GenericMethods.Update(generic.NodeInformation.MethodInfo, generic);
+                await GenericMethods.UpdateAsync(generic.NodeInformation.MethodInfo, generic);
             }
         }
 

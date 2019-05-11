@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace IBatisSuperHelper.Constants.BatisConstants
 {
+#pragma warning disable S1075 // URIs should not be hardcoded
     public static class XmlMapConstants
     {
         public const string XmlNamespace = @"http://ibatis.apache.org/mapping";
@@ -22,7 +23,9 @@ namespace IBatisSuperHelper.Constants.BatisConstants
         };
 
         public const string StatementsRootElementName = "statements";
+
         public const string StatementsRootElementXPath = "/sqlmap[1]/statements[1]";
+
         public const string StatmentIdAttributeName = "id";
 
         public const string MapFileRootElementName = "sqlMap";
@@ -30,3 +33,4 @@ namespace IBatisSuperHelper.Constants.BatisConstants
 
     }
 }
+#pragma warning restore S1075 // URIs should not be hardcoded
