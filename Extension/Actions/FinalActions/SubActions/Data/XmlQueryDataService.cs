@@ -14,14 +14,14 @@ namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Data
 {
     public class XmlQueryDataService : IQueryDataService<XmlQuery>
     {
-        public List<ExpressionResult> GetResultsForGenericQueries(string queryResult, NamespaceHandlingType namespaceHandlingLogic)
+        public List<ExpressionResult> GetResultsForGenericQueries(string queryResult, bool useNamespace)
         {
             return new List<ExpressionResult>();
         }
 
-        public List<IndexerKey> GetStatmentKeys(string query, NamespaceHandlingType namespaceHandlingLogic)
+        public List<IndexerKey> GetStatmentKeys(string query, bool useNamespace)
         {
-            return GotoAsyncPackage.Storage.XmlQueries.GetKeysByQueryId(query, namespaceHandlingLogic);
+            return GotoAsyncPackage.Storage.XmlQueries.GetKeysByQueryId(query, useNamespace);
         }
 
         public List<XmlQuery> GetStatmentsFromKeys(List<IndexerKey> keys)

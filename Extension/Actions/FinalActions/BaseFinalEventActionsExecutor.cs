@@ -13,7 +13,7 @@ namespace IBatisSuperHelper.Actions
     {
         internal Dictionary<Type, dynamic> QueryDataServices = new Dictionary<Type, dynamic>();
         internal Dictionary<Type, dynamic> LogicHandlers = new Dictionary<Type, dynamic>();
-        internal NamespaceHandlingType NamespaceHandlingLogicType;
+        internal bool UseNamespace;
 
         protected BaseFinalEventActionsExecutor() { }
 
@@ -30,9 +30,9 @@ namespace IBatisSuperHelper.Actions
         }
 
 
-        public virtual T WithNamespaceHandlingLogicType(NamespaceHandlingType namespaceHandlingLogicType)
+        public virtual T WithUseNamespace(bool useNamespace)
         {
-            NamespaceHandlingLogicType = namespaceHandlingLogicType;
+            UseNamespace = useNamespace;
             return (T)this;
         }
 

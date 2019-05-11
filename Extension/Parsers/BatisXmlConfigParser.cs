@@ -28,6 +28,10 @@ namespace IBatisSuperHelper.Parsers
             InitializeEmpty();
         }
 
+        public BatisXmlConfigParser(XmlParser parser) : base(parser)
+        {
+        }
+
         public BatisXmlConfigParser WithStringReader(StringReader stringReader)
         {
             InitializeWithStringReader(stringReader);
@@ -58,6 +62,7 @@ namespace IBatisSuperHelper.Parsers
         {
             return new SqlMapConfig
             {
+                Name = FileName,
                 Settings = Settings,
                 Maps = SqlMaps,
                 ParsedSuccessfully = true,

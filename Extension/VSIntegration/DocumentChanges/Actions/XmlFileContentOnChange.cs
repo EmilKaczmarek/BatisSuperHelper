@@ -9,17 +9,19 @@ using IBatisSuperHelper.Logging.MiniProfiler;
 using IBatisSuperHelper.Parsers;
 using IBatisSuperHelper.Storage;
 using IBatisSuperHelper.Constants.BatisConstants;
+using Microsoft.VisualStudio.Shell;
+using System.Threading.Tasks;
 
 namespace IBatisSuperHelper.VSIntegration.DocumentChanges.Actions
 {
     public class XmlFileContentOnChange : IOnFileContentChange
     {
-        public void HandleChange(IWpfTextView textView)
+        public async System.Threading.Tasks.Task HandleChange(IWpfTextView textView)
         {
             try
             {
-                //Throws
-                Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
                 var profiler = MiniProfiler.StartNew(nameof(HandleChange));
                 profiler.Storage = new NLogStorage(LogManager.GetLogger("profiler"));
                 using (profiler.Step("HandleChangeXml"))
@@ -30,11 +32,18 @@ namespace IBatisSuperHelper.VSIntegration.DocumentChanges.Actions
                     using (var stringReader = new StringReader(snapshot.GetText()))
                     {
                         var project = GotoAsyncPackage.EnvDTE.Solution.FindProjectItem(textDoc.FilePath).ContainingProject.Name;
-                        BatisXmlMapParser parser = new BatisXmlMapParser().WithStringReader(stringReader).WithFileInfo(textDoc.FilePath, project).Load();
-                        if (parser.XmlNamespace == XmlMapConstants.XmlNamespace)
+                        XmlParser baseParser = new XmlParser(stringReader).Load();
+                        
+                        if (baseParser.XmlNamespace == XmlMapConstants.XmlNamespace)
                         {
+                            BatisXmlMapParser parser = new BatisXmlMapParser(baseParser).WithFileInfo(textDoc.FilePath, project);
                             var newStatments = parser.GetMapFileStatments();
                             GotoAsyncPackage.Storage.XmlQueries.UpdateStatmentForFileWihoutKey(newStatments);
+                        }
+                        if (baseParser.XmlNamespace == XmlConfigConstants.XmlNamespace)
+                        {
+                            BatisXmlConfigParser parser = new BatisXmlConfigParser(baseParser).WithFileInfo(textDoc.FilePath, project);
+                            GotoAsyncPackage.Storage.SqlMapConfigProvider.UpdateOrAddConfig(parser.Result);
                         }
                     }
                 }
@@ -43,7 +52,7 @@ namespace IBatisSuperHelper.VSIntegration.DocumentChanges.Actions
             {
                 LogManager.GetLogger("error").Error(ex, "XmlFileContentOnChange.HandleChange");
                 OutputWindowLogger.WriteLn($"Exception occured during handling xml file change: {ex.Message}");
-            }  
+            }
         }
     }
 }

@@ -47,7 +47,7 @@ namespace VSIXProject5.Validation
                     var resolverResult = new ExpressionResolver().GetStringValueOfExpression(expressionSyntax, context.SemanticModel);
                     if (resolverResult.IsSolved)
                     {
-                        var queryKeys = GotoAsyncPackage.Storage.XmlQueries.GetKeysByQueryId(resolverResult.TextResult, IBatisSuperHelper.Storage.Providers.NamespaceHandlingType.HYBRID_NAMESPACE);
+                        var queryKeys = GotoAsyncPackage.Storage.XmlQueries.GetKeysByQueryId(resolverResult.TextResult, GotoAsyncPackage.Storage.SqlMapConfigProvider.GetCurrentSettings().UseStatementNamespaces);
                         if (queryKeys.Count < 1)
                         {
                             context.ReportDiagnostic(Diagnostic.Create(QueryNotExistsRule, expressionSyntax.GetLocation(), resolverResult.TextResult));

@@ -5,28 +5,30 @@ using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 using IBatisSuperHelper.Indexers;
 using IBatisSuperHelper.Indexers.Code;
 using IBatisSuperHelper.Indexers.Models;
+using IBatisSuperHelper.Indexers.Workflow.Options;
 using IBatisSuperHelper.Indexers.Xml;
 using IBatisSuperHelper.Models;
-using IBatisSuperHelper.Parsers.XmlConfig.Models;
 using IBatisSuperHelper.Storage.Interfaces;
+using IBatisSuperHelper.Storage.Providers;
 using Microsoft.CodeAnalysis;
 
 namespace IBatisSuperHelper.Storage
 {
     public interface IPackageStorage
     {
-        Settings BatisSettings { get; }
         CSharpIndexer CodeFileAnalyzer { get; }
-        IProvider<IndexerKey, List<CSharpQuery>> CodeQueries { get; }
+        IQueryProvider<IndexerKey, List<CSharpQuery>> CodeQueries { get; }
         GenericStorage<MethodInfo, ExpressionResult> GenericMethods { get; }
         GenericStorage<string, object> RuntimeConfiguration { get; }
+        ISqlMapConfigProvider SqlMapConfigProvider { get; }
         XmlIndexer XmlFileAnalyzer { get; }
-        IProvider<IndexerKey, XmlQuery> XmlQueries { get; }
+        IQueryProvider<IndexerKey, XmlQuery> XmlQueries { get; }
+        IndexingWorkflowOptions IndexingWorkflowOptions { get; }
 
         Task AnalyzeAndStoreAsync(List<Document> documents);
         void AnalyzeAndStoreSingle(XmlFileInfo xmlFile);
         Task AnalyzeAndStoreSingleAsync(Document document);
         void AnalyzeAndUpdateSingle(Document document);
-        void SetBatisSettings(Settings batisSettings);
+        Task AnalyzeAndUpdateSingleAsync(Document document);
     }
 }

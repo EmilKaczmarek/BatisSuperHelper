@@ -59,8 +59,8 @@ namespace IBatisSuperHelper.Actions.FinalActions
 
         public override void Execute(string queryResult, ExpressionResult expressionResult)
         {
-            var codeKeyValuePairs = _codeQueryDataService.GetKeyStatmentPairs(queryResult, NamespaceHandlingLogicType);
-            var xmlKeys = _xmlQueryDataService.GetStatmentKeys(queryResult, NamespaceHandlingLogicType);
+            var codeKeyValuePairs = _codeQueryDataService.GetKeyStatmentPairs(queryResult, UseNamespace);
+            var xmlKeys = _xmlQueryDataService.GetStatmentKeys(queryResult, UseNamespace);
 
             var namespaceQueryPair = MapNamespaceHelper.DetermineMapNamespaceQueryPairFromCodeInput(queryResult);
 

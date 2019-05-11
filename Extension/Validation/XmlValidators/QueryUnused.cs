@@ -86,8 +86,8 @@ namespace IBatisSuperHelper.Validation.XmlValidators
                     if (_xmlParser.HasSelectedLineValidQuery(line.LineNumber + 1))
                     {
                         var test = GotoAsyncPackage.Storage.GenericMethods;
-                        var query = _xmlParser.GetQueryAtLineOrNull(line.LineNumber + 1, true);
-                        var queryUsages = GotoAsyncPackage.Storage.CodeQueries.GetKeysByQueryId(query, Storage.Providers.NamespaceHandlingType.HYBRID_NAMESPACE);
+                        var query = _xmlParser.GetQueryAtLineOrNull(line.LineNumber + 1, GotoAsyncPackage.Storage.SqlMapConfigProvider.GetCurrentSettings().UseStatementNamespaces);
+                        var queryUsages = GotoAsyncPackage.Storage.CodeQueries.GetKeysByQueryId(query, GotoAsyncPackage.Storage.SqlMapConfigProvider.GetCurrentSettings().UseStatementNamespaces);
                         if (!queryUsages.Any())
                         {
                             var statmentIdCSpan = classificationSpans.FirstOrDefault(e =>
@@ -110,7 +110,7 @@ namespace IBatisSuperHelper.Validation.XmlValidators
             var parserResults = _xmlParser.GetMapFileStatmentsWithIdAttributeColumnInfo();
             foreach (var result in parserResults)
             {
-                var queryUsages = GotoAsyncPackage.Storage.CodeQueries.GetKeysByQueryId(result.FullyQualifiedQuery, Storage.Providers.NamespaceHandlingType.HYBRID_NAMESPACE);
+                var queryUsages = GotoAsyncPackage.Storage.CodeQueries.GetKeysByQueryId(result.FullyQualifiedQuery, GotoAsyncPackage.Storage.SqlMapConfigProvider.GetCurrentSettings().UseStatementNamespaces);
                 if (!queryUsages.Any())
                 {
                     AddError(result, $"Query {result.QueryId} is unused.");

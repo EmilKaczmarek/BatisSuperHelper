@@ -24,9 +24,9 @@ namespace IBatisSuperHelper.Actions.FinalActions
             bool shouldBeTerminated = logicHandler.ShouldBeTerminated(queryResult, expressionResult);
             if (!shouldBeTerminated)
             {
-                var genericQueries = queryDataService.GetResultsForGenericQueries(queryResult, NamespaceHandlingLogicType);
+                var genericQueries = queryDataService.GetResultsForGenericQueries(queryResult, UseNamespace);
 
-                var keys = queryDataService.GetStatmentKeys(queryResult, NamespaceHandlingLogicType);
+                var keys = queryDataService.GetStatmentKeys(queryResult, UseNamespace);
                 keysCount = keys.Count;
 
                 var statments = queryDataService.GetStatmentsFromKeys(keys);

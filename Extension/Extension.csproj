@@ -194,10 +194,11 @@
     <Compile Include="RenameCommand.cs" />
     <Compile Include="Storage\IPackageStorage.cs" />
     <Compile Include="Storage\Providers\CodeQueryProvider.cs" />
-    <Compile Include="Storage\Providers\NamespaceHandlingType.cs" />
+    <Compile Include="Storage\Base\ISqlMapConfigProvider.cs" />
+    <Compile Include="Storage\Providers\SqlMapConfigProvider.cs" />
     <Compile Include="Storage\Providers\XmlQueryProvider.cs" />
     <Compile Include="Storage\Base\GenericStorage.cs" />
-    <Compile Include="Storage\Base\IProvider.cs" />
+    <Compile Include="Storage\Base\IQueryProvider.cs" />
     <Compile Include="Storage\PackageStorage.cs" />
     <Compile Include="Validation\Helpers\QuerySearchHelp.cs" />
     <Compile Include="Validation\QueryNotExists.cs" />

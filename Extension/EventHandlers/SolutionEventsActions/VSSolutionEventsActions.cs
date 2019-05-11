@@ -3,6 +3,7 @@ using IBatisSuperHelper.Constants;
 using IBatisSuperHelper.CoreAutomation.ProjectItems;
 using IBatisSuperHelper.Helpers;
 using IBatisSuperHelper.HelpersAndExtensions;
+using IBatisSuperHelper.Indexers.Workflow;
 using IBatisSuperHelper.Indexers.Xml;
 using IBatisSuperHelper.Storage;
 using Microsoft.VisualStudio.Shell;
@@ -16,31 +17,17 @@ namespace IBatisSuperHelper.EventHandlers.SolutionEventsActions
 {
     public class VSSolutionEventsActions : IVSSolutionEventsActions
     {
-        private readonly DTE2 _dte;
-        private readonly XmlIndexer _xmlIndexer;
+        private readonly IndexingWorkflow _indexingWorkflow; 
 
-        public VSSolutionEventsActions(DTE2 dte, XmlIndexer indexer)
+        public VSSolutionEventsActions(IndexingWorkflow indexingWorkflow)
         {
-            _dte = dte;
-            _xmlIndexer = indexer;
+            _indexingWorkflow = indexingWorkflow;
         }
 
         public void OnSolutionLoadComplete()
         {
-            ThreadHelper.ThrowIfNotOnUIThread();
-            var projectItemHelper = new ProjectItemRetreiver(_dte);
-            var projectItems = projectItemHelper.GetProjectItemsFromSolutionProjects();
-            XmlIndexer xmlIndexer = new XmlIndexer();
-
-            var configFiles = ConfigurationFilesHelper.GetBatisMapConfigFiles(DocumentHelper.GetXmlConfigFiles(projectItems));
-            if (configFiles.Any())
-            {
-                GotoAsyncPackage.Storage.SetBatisSettings(_xmlIndexer.ParseSingleConfigFile(configFiles.First()).Settings);
-            }
-
-            var xmlFiles = DocumentHelper.GetXmlFiles(projectItems);
-            var xmlIndexerResult = xmlIndexer.BuildIndexer(xmlFiles);
-            GotoAsyncPackage.Storage.XmlQueries.AddMultipleWithoutKey(xmlIndexerResult);
+            _indexingWorkflow.GetAndSetProjectItems();
+            _indexingWorkflow.ExecuteIndexing();
         }
 
         public void SolutionOnClose()

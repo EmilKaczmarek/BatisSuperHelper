@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EnvDTE;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,6 @@ namespace IBatisSuperHelper.Indexers.Workflow.Strategies.Config
 {
     public interface IConfigStrategy
     {
-        ConfigProcessingResult Process();
+        ConfigProcessingResult Process(IEnumerable<ProjectItem> projectItems);
     }
 }

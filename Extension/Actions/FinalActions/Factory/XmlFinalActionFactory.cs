@@ -14,15 +14,12 @@ namespace IBatisSuperHelper.Actions.FinalActions.Factory
     {
         public GoToQueryFinalEventActionsExecutor GetFinalGoToQueryActionsExecutor(StatusBarIntegration statusBar, ToolWindowPane toolWindowPane)
         {
-            var isHybridNamespaceHandlingEnabled = (bool)GotoAsyncPackage.Storage.RuntimeConfiguration.GetValue("HybridNamespaceEnabled");
+            var useNamespace = GotoAsyncPackage.Storage.SqlMapConfigProvider.GetCurrentSettings().UseStatementNamespaces;
             return GoToQueryFinalEventActionsExecutor
                 .Create()
                 .WithLogicHandler(typeof(CSharpQuery), new GoToCodeLogicHandler(statusBar, toolWindowPane))
                 .WithQueryDataService(typeof(CSharpQuery), new CodeQueryDataService())
-                .WithNamespaceHandlingLogicType(
-                    isHybridNamespaceHandlingEnabled
-                    ? NamespaceHandlingType.HYBRID_NAMESPACE
-                    : NamespaceHandlingType.WITH_NAMESPACE);
+                .WithUseNamespace(useNamespace);
         }
 
         public RenameFinalActionsExecutor GetFinalRenameQueryActionsExecutor(StatusBarIntegration statusBar, ToolWindowPane toolWindowPane, DTE2 dte, VisualStudioWorkspace workspace)

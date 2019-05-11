@@ -26,9 +26,9 @@ namespace IBatisSuperHelper.VSIntegration.DocumentChanges
                //.Select(e => e.EventArgs.Changes)
                .DistinctUntilChanged()
                .Throttle(TimeSpan.FromMilliseconds(500))
-               .Subscribe(e =>
+               .Subscribe(async e =>
                {
-                   fileAction.HandleChange(textView);
+                   await fileAction.HandleChange(textView);
                });
         }
     }

@@ -18,7 +18,7 @@ namespace IBatisSuperHelper.VSIntegration.DocumentChanges.Actions
 {
     public class CSharpFileContentOnChange : IOnFileContentChange
     {
-        public void HandleChange(IWpfTextView textView)
+        public async Task HandleChange(IWpfTextView textView)
         {
             try
             {
@@ -34,7 +34,7 @@ namespace IBatisSuperHelper.VSIntegration.DocumentChanges.Actions
                         return;
                     }
 
-                    GotoAsyncPackage.Storage.AnalyzeAndUpdateSingle(roslynDocument);
+                    await GotoAsyncPackage.Storage.AnalyzeAndUpdateSingleAsync(roslynDocument);
                 }
             }
             catch (Exception ex)

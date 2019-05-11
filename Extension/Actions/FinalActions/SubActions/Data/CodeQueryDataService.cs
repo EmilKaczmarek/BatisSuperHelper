@@ -15,27 +15,20 @@ namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Data
 {
     public class CodeQueryDataService : IQueryDataService<CSharpQuery>
     {
-        public List<ExpressionResult> GetResultsForGenericQueries(string queryResult, NamespaceHandlingType namespaceHandlingLogic)
+        public List<ExpressionResult> GetResultsForGenericQueries(string queryResult, bool useNamespace)
         {
-            var genericResult = new List<ExpressionResult>();
-            if (namespaceHandlingLogic == NamespaceHandlingType.WITH_NAMESPACE || namespaceHandlingLogic == NamespaceHandlingType.HYBRID_NAMESPACE)
-                genericResult.AddRange(GotoAsyncPackage.Storage.GenericMethods.GetByPredictate(e => e.TextResult == queryResult));
-
-            if (namespaceHandlingLogic == NamespaceHandlingType.IGNORE_NAMESPACE || namespaceHandlingLogic == NamespaceHandlingType.HYBRID_NAMESPACE)
-                genericResult.AddRange(GotoAsyncPackage.Storage.GenericMethods.GetByPredictate(e => MapNamespaceHelper.GetQueryWithoutNamespace(e.TextResult) == MapNamespaceHelper.GetQueryWithoutNamespace(queryResult)));
-
-            return genericResult;
+            return GotoAsyncPackage.Storage.GenericMethods.GetByPredictate(e => e.TextResult == queryResult).ToList();
         }
 
-        public List<KeyValuePair<IndexerKey, List<CSharpQuery>>> GetKeyStatmentPairs(string queryResult, NamespaceHandlingType namespaceHandlingLogicType)
+        public List<KeyValuePair<IndexerKey, List<CSharpQuery>>> GetKeyStatmentPairs(string queryResult, bool useNamespace)
         {
-            var keys = GetStatmentKeys(queryResult, namespaceHandlingLogicType);
+            var keys = GetStatmentKeys(queryResult, useNamespace);
             return keys.Select(e => new KeyValuePair<IndexerKey, List<CSharpQuery>>(e, GetSingleStatmentFromKey(e))).ToList();
         }
 
-        public List<IndexerKey> GetStatmentKeys(string queryResult, NamespaceHandlingType namespaceHandlingLogicType)
+        public List<IndexerKey> GetStatmentKeys(string queryResult, bool useNamespace)
         {
-            return GotoAsyncPackage.Storage.CodeQueries.GetKeysByQueryId(queryResult, namespaceHandlingLogicType);
+            return GotoAsyncPackage.Storage.CodeQueries.GetKeysByQueryId(queryResult, useNamespace);
         }
 
         public List<CSharpQuery> GetStatmentsFromKeys(List<IndexerKey> keys)

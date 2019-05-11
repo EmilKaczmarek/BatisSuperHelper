@@ -6,6 +6,7 @@ using IBatisSuperHelper.Indexers.Workflow.Strategies.Storage.Configs;
 using IBatisSuperHelper.Indexers.Xml;
 using IBatisSuperHelper.Models;
 using IBatisSuperHelper.Parsers.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -14,31 +15,29 @@ namespace IBatisSuperHelper.Indexers.Workflow.Strategies.Config
     public class DefaultConfigStrategy : IConfigStrategy
     {
         private readonly XmlIndexer _xmlIndexer = new XmlIndexer();
-        private readonly IEnumerable<ProjectItem> _projectItems;
         private readonly ConfigsIndexingOptions _options;
         private readonly ConfigStorageStrategyFactory _strategyFactory;
 
-        public DefaultConfigStrategy(ConfigsIndexingOptions options, IEnumerable<ProjectItem> projectItems, ConfigStorageStrategyFactory strategyFactory)
+        public DefaultConfigStrategy(ConfigsIndexingOptions options, ConfigStorageStrategyFactory strategyFactory)
         {
             _options = options;
-            _projectItems = projectItems;
             _strategyFactory = strategyFactory;
         }
 
-        private IEnumerable<XmlFileInfo> GetConfigsFiles()
+        private IEnumerable<XmlFileInfo> GetConfigsFiles(IEnumerable<ProjectItem> projectItems)
         {
-            return ConfigurationFilesHelper.GetBatisMapConfigFiles(DocumentHelper.GetXmlConfigFiles(_projectItems));
+            return ConfigurationFilesHelper.GetBatisMapConfigFiles(DocumentHelper.GetXmlConfigFiles(projectItems));
         }
 
-        private IEnumerable<SqlMapConfig> GetConfigs()
+        private IEnumerable<SqlMapConfig> GetConfigs(IEnumerable<ProjectItem> projectItems)
         {
-            var configs = GetConfigsFiles();
+            var configs = GetConfigsFiles(projectItems);
             return configs.Select(config => _xmlIndexer.ParseSingleConfigFile(config)).Where(e => e.ParsedSuccessfully);
         }
 
-        public ConfigProcessingResult Process()
+        public ConfigProcessingResult Process(IEnumerable<ProjectItem> projectItems)
         {
-            var configs = GetConfigs();
+            var configs = GetConfigs(projectItems);
 
             return _strategyFactory.GetStrategy(_options, configs).Store();
         }

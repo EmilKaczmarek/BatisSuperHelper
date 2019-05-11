@@ -14,23 +14,28 @@ using Microsoft.VisualStudio.Shell;
 using IBatisSuperHelper.Parsers.XmlConfig.Models;
 using IBatisSuperHelper.Indexers.Xml;
 using IBatisSuperHelper.Indexers.Code;
+using IBatisSuperHelper.Parsers.Models.XmlConfig.SqlMap;
+using IBatisSuperHelper.Parsers.Models;
+using IBatisSuperHelper.Storage.Providers;
+using IBatisSuperHelper.Indexers.Workflow.Options;
 
 namespace IBatisSuperHelper.Storage
 {
     public class PackageStorage : IPackageStorage
     {
-        public IProvider<IndexerKey, List<CSharpQuery>> CodeQueries { get; private set; }
-        public IProvider<IndexerKey, XmlQuery> XmlQueries { get; private set; }
+        public IQueryProvider<IndexerKey, List<CSharpQuery>> CodeQueries { get; private set; }
+        public IQueryProvider<IndexerKey, XmlQuery> XmlQueries { get; private set; }
 
         public XmlIndexer XmlFileAnalyzer { get; private set; }
         public CSharpIndexer CodeFileAnalyzer { get; private set; }
 
         public GenericStorage<MethodInfo, ExpressionResult> GenericMethods { get; private set; }
 
-        public GenericStorage<string, object> RuntimeConfiguration => new GenericStorage<string, object>
-        {
-            new KeyValuePair<string, object>("HybridNamespaceEnabled", true),
-        };
+        public ISqlMapConfigProvider SqlMapConfigProvider { get; private set; }
+
+        public GenericStorage<string, object> RuntimeConfiguration { get; private set; }
+
+        public IndexingWorkflowOptions IndexingWorkflowOptions { get; private set; }
 
         public PackageStorage()
         {
@@ -39,26 +44,29 @@ namespace IBatisSuperHelper.Storage
             XmlFileAnalyzer = new XmlIndexer();
             CodeFileAnalyzer = new CSharpIndexer();
             GenericMethods = new GenericStorage<MethodInfo, ExpressionResult>();
-            //RuntimeConfiguration = runtimeConfiguration;
-            BatisSettings = new Settings();
+            SqlMapConfigProvider = new SqlMapConfigProvider();
+            IndexingWorkflowOptions = new IndexingWorkflowOptions
+            {
+                ConfigOptions = new ConfigsIndexingOptions
+                {
+                    SupportMultipleConfigs = true,
+                },
+                MapsOptions = new SqlMapIndexingOprions
+                {
+                    IndexAllMaps = true,
+                },
+            };
         }
 
-        public PackageStorage(IProvider<IndexerKey, List<CSharpQuery>> codeQueries, IProvider<IndexerKey, XmlQuery> xmlQueries, XmlIndexer xmlFileAnalyzer, CSharpIndexer codeFileAnalyzer, GenericStorage<MethodInfo, ExpressionResult> genericMethods, GenericStorage<string, object> runtimeConfiguration, Settings batisSettings)
+        public PackageStorage(IQueryProvider<IndexerKey, List<CSharpQuery>> codeQueries, IQueryProvider<IndexerKey, XmlQuery> xmlQueries, XmlIndexer xmlFileAnalyzer, CSharpIndexer codeFileAnalyzer, GenericStorage<MethodInfo, ExpressionResult> genericMethods, ISqlMapConfigProvider sqlMapConfigProvider, GenericStorage<string, object> runtimeConfiguration)
         {
             CodeQueries = codeQueries;
             XmlQueries = xmlQueries;
             XmlFileAnalyzer = xmlFileAnalyzer;
             CodeFileAnalyzer = codeFileAnalyzer;
             GenericMethods = genericMethods;
-            //RuntimeConfiguration = runtimeConfiguration;
-            BatisSettings = batisSettings;
-        }
-
-        public Settings BatisSettings { get; private set; }
-
-        public void SetBatisSettings(Settings batisSettings)
-        {
-            BatisSettings = batisSettings;
+            SqlMapConfigProvider = sqlMapConfigProvider;
+            RuntimeConfiguration = runtimeConfiguration;
         }
 
         public async System.Threading.Tasks.Task AnalyzeAndStoreAsync(List<Document> documents)
@@ -88,6 +96,16 @@ namespace IBatisSuperHelper.Storage
             }  
         }
 
+        public async System.Threading.Tasks.Task AnalyzeAndUpdateSingleAsync(Document document)
+        {
+            var codeResult = await CodeFileAnalyzer.BuildFromDocumentAsync(document);
+            CodeQueries.UpdateStatmentForFileWihoutKey(new List<List<CSharpQuery>> { codeResult.Queries });
+            foreach (var generic in codeResult.Generics)
+            {
+                GenericMethods.Update(generic.NodeInformation.MethodInfo, generic);
+            }
+        }
+
         public async System.Threading.Tasks.Task AnalyzeAndStoreSingleAsync(Document document)
         {
             using (MiniProfiler.Current.Step(nameof(AnalyzeAndStoreSingleAsync)))
@@ -97,5 +115,6 @@ namespace IBatisSuperHelper.Storage
                 CodeQueries.AddWithoutKey(codeResult.Queries);
             }
         }
+
     }
 }
