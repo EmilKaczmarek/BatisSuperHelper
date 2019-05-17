@@ -160,7 +160,7 @@
     <Compile Include="HelpersAndExtensions\VisualStudio\TextDocumentExtension.cs" />
     <Compile Include="HelpersAndExtensions\VisualStudio\TextSelectionExtension.cs" />
     <Compile Include="HelpersAndExtensions\XmlHelper.cs" />
-    <Compile Include="Indexers\Code\CodeIndexingQueue.cs" />
+    <Compile Include="Indexers\Code\ProjectIndexingQueue.cs" />
     <Compile Include="Indexers\Models\CSharpIndexerResult.cs" />
     <Compile Include="Indexers\Models\XmlIndexerResult.cs" />
     <Compile Include="Indexers\Workflow\ConfigProcessingResult.cs" />
