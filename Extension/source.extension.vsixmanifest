@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="iBatisSuperHelper.NiceDudesTeam.be16f264-9064-4939-a4b2-443148c65444" Version="1.3.1" Language="en-US" Publisher="MU&amp;EK" />
+        <Identity Id="iBatisSuperHelper.NiceDudesTeam.be16f264-9064-4939-a4b2-443148c65444" Version="1.4.0" Language="en-US" Publisher="MU&amp;EK" />
         <DisplayName>iBatisSuperHelper</DisplayName>
         <Description xml:space="preserve">Visual Studio extension to improve productivity when working with IBatis.</Description>
         <MoreInfo>https://github.com/EmilKaczmarek/IBatisSuperHelper/</MoreInfo>
