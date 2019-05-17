@@ -8,6 +8,7 @@ using IBatisSuperHelper.Indexers.Models;
 using IBatisSuperHelper.Indexers.Workflow.Options;
 using IBatisSuperHelper.Indexers.Xml;
 using IBatisSuperHelper.Models;
+using IBatisSuperHelper.Parsers.Models.SqlMap;
 using IBatisSuperHelper.Storage.Interfaces;
 using IBatisSuperHelper.Storage.Providers;
 using Microsoft.CodeAnalysis;
@@ -22,7 +23,7 @@ namespace IBatisSuperHelper.Storage
         GenericStorage<string, object> RuntimeConfiguration { get; }
         ISqlMapConfigProvider SqlMapConfigProvider { get; }
         XmlIndexer XmlFileAnalyzer { get; }
-        IQueryProvider<IndexerKey, XmlQuery> XmlQueries { get; }
+        IQueryProvider<IndexerKey, Statement> XmlQueries { get; }
         IndexingWorkflowOptions IndexingWorkflowOptions { get; }
 
         Task AnalyzeAndStoreAsync(List<Document> documents);

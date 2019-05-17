@@ -4,6 +4,7 @@ using IBatisSuperHelper.Constants.BatisConstants;
 using IBatisSuperHelper.Helpers;
 using IBatisSuperHelper.Indexers.Models;
 using IBatisSuperHelper.Parsers;
+using IBatisSuperHelper.Parsers.Models.SqlMap;
 using IBatisSuperHelper.Storage;
 using IBatisSuperHelper.VSIntegration.ErrorList;
 using Microsoft.VisualStudio.Shell;
@@ -115,7 +116,7 @@ namespace IBatisSuperHelper.Validation.XmlValidators
             _isRunning = false;
         }
 
-        private void AddError(XmlQuery query, string message)
+        private void AddError(Statement query, string message)
         {
             var error = new BatisError
             {

@@ -5,7 +5,7 @@ using static IBatisSuperHelper.Constants.BatisConstants.XmlConfigConstants;
 
 namespace IBatisSuperHelper.Parsers.Models.XmlConfig.SqlMap
 {
-    public class SqlMap
+    public class SqlMapDefinition
     {
         public string RawValue { get; set; }
         public string FileName { get; set; }
@@ -25,31 +25,31 @@ namespace IBatisSuperHelper.Parsers.Models.XmlConfig.SqlMap
             return splited.First().Trim();
         }
 
-        public static SqlMap FromAttribute(string attributeName, string attribueValue)
+        public static SqlMapDefinition FromAttribute(string attributeName, string attribueValue)
         {
             switch (attributeName)
             {
                 case ResourceAttributeName:
-                    return new SqlMap
+                    return new SqlMapDefinition
                     {
                         RawValue = attribueValue,
                         ResourceType = SqlMapResourceType.RESOURCE,
                     };
                 case EmbeddedAttributeName:
-                    return new SqlMap
+                    return new SqlMapDefinition
                     {
                         FileName = GetFileNameFromEmbeddedRawValue(attribueValue),
                         RawValue = attribueValue,
                         ResourceType = SqlMapResourceType.EMBEDDED,
                     };
                 case UriAttributeName:
-                    return new SqlMap
+                    return new SqlMapDefinition
                     {
                         RawValue = attribueValue,
                         ResourceType = SqlMapResourceType.URI,
                     };
                 default:
-                    return new SqlMap
+                    return new SqlMapDefinition
                     {
                         ResourceType = SqlMapResourceType.UNKNOWN,
                     };
@@ -58,7 +58,7 @@ namespace IBatisSuperHelper.Parsers.Models.XmlConfig.SqlMap
 
         public override bool Equals(object obj)
         {
-            var map = obj as SqlMap;
+            var map = obj as SqlMapDefinition;
             return map != null &&
                    RawValue == map.RawValue &&
                    FileName == map.FileName &&

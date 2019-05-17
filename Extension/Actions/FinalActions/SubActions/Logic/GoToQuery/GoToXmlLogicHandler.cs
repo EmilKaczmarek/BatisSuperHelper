@@ -7,10 +7,11 @@ using Microsoft.VisualStudio.Shell;
 using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 using IBatisSuperHelper.Indexers.Models;
 using IBatisSuperHelper.VSIntegration;
+using IBatisSuperHelper.Parsers.Models.SqlMap;
 
 namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Logic
 {
-    public class GoToXmlLogicHandler : GoToBaseLogicHandler<XmlQuery>
+    public class GoToXmlLogicHandler : GoToBaseLogicHandler<Statement>
     {
         public GoToXmlLogicHandler(StatusBarIntegration statusBar, ToolWindowPane toolWindowPane) : base(statusBar, toolWindowPane)
         {

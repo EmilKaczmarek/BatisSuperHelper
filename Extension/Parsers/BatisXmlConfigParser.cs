@@ -1,5 +1,4 @@
-﻿using IBatisSuperHelper.Constants;
-using IBatisSuperHelper.Constants.BatisConstants;
+﻿using IBatisSuperHelper.Constants.BatisConstants;
 using IBatisSuperHelper.Parsers.Models;
 using IBatisSuperHelper.Parsers.Models.XmlConfig.SqlMap;
 using IBatisSuperHelper.Parsers.XmlConfig.Models;
@@ -7,8 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace IBatisSuperHelper.Parsers
 {
@@ -17,10 +14,10 @@ namespace IBatisSuperHelper.Parsers
         public SqlMapConfig Result => IsLazy ? _sqlMapConfigLazy.Value : GetFull();
 
         public Settings Settings => IsLazy ? _settingsLazy.Value : GetSetting();
-        public IReadOnlyList<SqlMap> SqlMaps => IsLazy ? _sqlMapsLazy.Value : GetSqlMaps();
+        public IReadOnlyList<SqlMapDefinition> SqlMaps => IsLazy ? _sqlMapsLazy.Value : GetSqlMaps();
 
         private Lazy<Settings> _settingsLazy;
-        private Lazy<IReadOnlyList<SqlMap>> _sqlMapsLazy;
+        private Lazy<IReadOnlyList<SqlMapDefinition>> _sqlMapsLazy;
         private Lazy<SqlMapConfig> _sqlMapConfigLazy;
 
         public BatisXmlConfigParser()
@@ -54,7 +51,7 @@ namespace IBatisSuperHelper.Parsers
         {
             base.LazyLoading();
             _settingsLazy = new Lazy<Settings>(() => GetSetting());
-            _sqlMapsLazy = new Lazy<IReadOnlyList<SqlMap>>(() => GetSqlMaps());
+            _sqlMapsLazy = new Lazy<IReadOnlyList<SqlMapDefinition>>(() => GetSqlMaps());
             _sqlMapConfigLazy = new Lazy<SqlMapConfig>(() => GetFull());
         }
 
@@ -84,16 +81,16 @@ namespace IBatisSuperHelper.Parsers
             return configSetting;
         }
 
-        private IReadOnlyList<SqlMap> GetSqlMaps()
+        private IReadOnlyList<SqlMapDefinition> GetSqlMaps()
         {
-            var sqlMaps = new List<SqlMap>();
+            var sqlMaps = new List<SqlMapDefinition>();
             var sqlMapsNode = GetChildNodesOfParentByXPath(XmlConfigConstants.SqlMapXPath).Where(e => e.Name != "#text");
             foreach (var sqlMap in sqlMapsNode)
             {
                 if (sqlMap.HasAttributes && sqlMap.Attributes.Count == 1)
                 {
                     var attribute = sqlMap.Attributes.First();
-                    sqlMaps.Add(SqlMap.FromAttribute(attribute.Name, attribute.Value));
+                    sqlMaps.Add(SqlMapDefinition.FromAttribute(attribute.Name, attribute.Value));
                 }
             }
             return sqlMaps;

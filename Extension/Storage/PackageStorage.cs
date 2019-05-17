@@ -1,6 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using StackExchange.Profiling;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.Model;
@@ -11,20 +10,18 @@ using IBatisSuperHelper.Models;
 using IBatisSuperHelper.Storage.Domain;
 using IBatisSuperHelper.Storage.Interfaces;
 using Microsoft.VisualStudio.Shell;
-using IBatisSuperHelper.Parsers.XmlConfig.Models;
 using IBatisSuperHelper.Indexers.Xml;
 using IBatisSuperHelper.Indexers.Code;
-using IBatisSuperHelper.Parsers.Models.XmlConfig.SqlMap;
-using IBatisSuperHelper.Parsers.Models;
 using IBatisSuperHelper.Storage.Providers;
 using IBatisSuperHelper.Indexers.Workflow.Options;
+using IBatisSuperHelper.Parsers.Models.SqlMap;
 
 namespace IBatisSuperHelper.Storage
 {
     public class PackageStorage : IPackageStorage
     {
         public IQueryProvider<IndexerKey, List<CSharpQuery>> CodeQueries { get; private set; }
-        public IQueryProvider<IndexerKey, XmlQuery> XmlQueries { get; private set; }
+        public IQueryProvider<IndexerKey, Statement> XmlQueries { get; private set; }
 
         public XmlIndexer XmlFileAnalyzer { get; private set; }
         public CSharpIndexer CodeFileAnalyzer { get; private set; }
@@ -40,7 +37,7 @@ namespace IBatisSuperHelper.Storage
         public PackageStorage()
         {
             CodeQueries = new CodeQueryProvider();
-            XmlQueries = new XmlQueryProvider();
+            XmlQueries = new StatementProvider();
             XmlFileAnalyzer = new XmlIndexer();
             CodeFileAnalyzer = new CSharpIndexer();
             GenericMethods = new GenericStorage<MethodInfo, ExpressionResult>();
@@ -58,7 +55,7 @@ namespace IBatisSuperHelper.Storage
             };
         }
 
-        public PackageStorage(IQueryProvider<IndexerKey, List<CSharpQuery>> codeQueries, IQueryProvider<IndexerKey, XmlQuery> xmlQueries, XmlIndexer xmlFileAnalyzer, CSharpIndexer codeFileAnalyzer, GenericStorage<MethodInfo, ExpressionResult> genericMethods, ISqlMapConfigProvider sqlMapConfigProvider, GenericStorage<string, object> runtimeConfiguration)
+        public PackageStorage(IQueryProvider<IndexerKey, List<CSharpQuery>> codeQueries, IQueryProvider<IndexerKey, Statement> xmlQueries, XmlIndexer xmlFileAnalyzer, CSharpIndexer codeFileAnalyzer, GenericStorage<MethodInfo, ExpressionResult> genericMethods, ISqlMapConfigProvider sqlMapConfigProvider, GenericStorage<string, object> runtimeConfiguration)
         {
             CodeQueries = codeQueries;
             XmlQueries = xmlQueries;

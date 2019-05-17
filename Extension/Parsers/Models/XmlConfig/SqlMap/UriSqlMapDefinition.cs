@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace IBatisSuperHelper.Parsers.Models.XmlConfig.SqlMap
 {
-    public class EmbeddedSqlMap : SqlMap
+    public class UriSqlMapDefinition : SqlMapDefinition
     {
-        public string Assembly { get; set; }
+        public string Uri { get; set; }
     }
 }

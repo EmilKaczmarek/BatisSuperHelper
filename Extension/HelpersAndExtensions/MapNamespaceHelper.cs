@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using IBatisSuperHelper.Indexers.Models;
+using IBatisSuperHelper.Parsers.Models.SqlMap;
 
 namespace IBatisSuperHelper.HelpersAndExtensions
 {
@@ -35,7 +36,7 @@ namespace IBatisSuperHelper.HelpersAndExtensions
             return DetermineMapNamespaceQueryPairFromCodeInput(queryWithNamespace)?.Item2;
         }
 
-        public static string GetQueryWithoutNamespace(XmlQuery xmlIndexerResult)
+        public static string GetQueryWithoutNamespace(Statement xmlIndexerResult)
         {
             if(xmlIndexerResult != null && xmlIndexerResult.MapNamespace != null)
             {

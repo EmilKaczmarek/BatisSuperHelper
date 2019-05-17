@@ -8,6 +8,7 @@ using IBatisSuperHelper.VSIntegration;
 using EnvDTE80;
 using Microsoft.VisualStudio.LanguageServices;
 using IBatisSuperHelper.Actions.FinalActions.SubActions.Logic.Rename;
+using IBatisSuperHelper.Parsers.Models.SqlMap;
 
 namespace IBatisSuperHelper.Actions.FinalActions.Factory
 {
@@ -18,8 +19,8 @@ namespace IBatisSuperHelper.Actions.FinalActions.Factory
             var useNamespace = GotoAsyncPackage.Storage.SqlMapConfigProvider.GetCurrentSettings().UseStatementNamespaces;
             return GoToQueryFinalEventActionsExecutor
                 .Create()
-                .WithLogicHandler(typeof(XmlQuery), new GoToXmlLogicHandler(statusBar, toolWindowPane))
-                .WithQueryDataService(typeof(XmlQuery), new XmlQueryDataService())
+                .WithLogicHandler(typeof(Statement), new GoToXmlLogicHandler(statusBar, toolWindowPane))
+                .WithQueryDataService(typeof(Statement), new XmlQueryDataService())
                 .WithUseNamespace(useNamespace);
         }
 
@@ -28,7 +29,7 @@ namespace IBatisSuperHelper.Actions.FinalActions.Factory
             return RenameFinalActionsExecutor
                .Create()
                .WithQueryDataService(typeof(CSharpQuery), new CodeQueryDataService())
-               .WithQueryDataService(typeof(XmlQuery), new XmlQueryDataService())
+               .WithQueryDataService(typeof(Statement), new XmlQueryDataService())
                .WithCodeLogicHandler(new RenameCodeLogicHandler())
                .WithXmlLogicHandler(new RenameXmlLogicHandler())
                .WithEnvDte(dte)

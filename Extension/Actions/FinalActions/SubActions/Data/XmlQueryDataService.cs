@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 using IBatisSuperHelper.Indexers;
-using IBatisSuperHelper.Indexers.Models;
-using IBatisSuperHelper.Storage;
-using IBatisSuperHelper.Storage.Providers;
+using IBatisSuperHelper.Parsers.Models.SqlMap;
 using IBatisSuperHelper.Windows.ResultWindow.ViewModel;
 
 namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Data
 {
-    public class XmlQueryDataService : IQueryDataService<XmlQuery>
+    public class XmlQueryDataService : IQueryDataService<Statement>
     {
         public List<ExpressionResult> GetResultsForGenericQueries(string queryResult, bool useNamespace)
         {
@@ -24,17 +19,17 @@ namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Data
             return GotoAsyncPackage.Storage.XmlQueries.GetKeysByQueryId(query, useNamespace);
         }
 
-        public List<XmlQuery> GetStatmentsFromKeys(List<IndexerKey> keys)
+        public List<Statement> GetStatmentsFromKeys(List<IndexerKey> keys)
         {
             return keys.Select(GotoAsyncPackage.Storage.XmlQueries.GetValueOrNull).ToList();
         }
 
-        public XmlQuery GetSingleStatmentFromKey(IndexerKey key)
+        public Statement GetSingleStatmentFromKey(IndexerKey key)
         {
             return GotoAsyncPackage.Storage.XmlQueries.GetValueOrNull(key);
         }
 
-        public List<ResultWindowViewModel> PrepareViewModels(List<ExpressionResult> genericResults, ExpressionResult expressionResult, List<XmlQuery> nonGenericResults)
+        public List<ResultWindowViewModel> PrepareViewModels(List<ExpressionResult> genericResults, ExpressionResult expressionResult, List<Statement> nonGenericResults)
         {
             return nonGenericResults.Select(x => new ResultWindowViewModel
            {

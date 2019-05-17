@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace IBatisSuperHelper.Parsers.Models.XmlConfig.SqlMap
 {
-    public class ResourceSqlMap : SqlMap
+    public class ResourceSqlMapDefinition : SqlMapDefinition
     {
         public string Path { get; set; }
     }

@@ -4,6 +4,7 @@ using IBatisSuperHelper.HelpersAndExtensions;
 using IBatisSuperHelper.HelpersAndExtensions.VisualStudio;
 using IBatisSuperHelper.Indexers;
 using IBatisSuperHelper.Indexers.Models;
+using IBatisSuperHelper.Parsers.Models.SqlMap;
 using IBatisSuperHelper.Windows.RenameWindow.ViewModel;
 using Microsoft.VisualStudio.LanguageServices;
 using System;
@@ -16,7 +17,7 @@ namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Logic.Rename
 {
     public class RenameXmlLogicHandler
     {
-        public bool ExecuteRename(XmlQuery query, RenameViewModel renameViewModel, DTE2 envDte)
+        public bool ExecuteRename(Statement query, RenameViewModel renameViewModel, DTE2 envDte)
         {
             try
             {
@@ -32,7 +33,7 @@ namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Logic.Rename
                 textSelection.GotoLine(query.QueryLineNumber, true);
 
                 var line = textSelection.GetText();
-                line = line.Replace(MapNamespaceHelper.GetQueryWithoutNamespace(query), MapNamespaceHelper.GetQueryWithoutNamespace(renameViewModel.QueryText));
+                line = line.Replace(MapNamespaceHelper.GetQueryWithoutNamespace(query.QueryId), MapNamespaceHelper.GetQueryWithoutNamespace(renameViewModel.QueryText));
 
                 textSelection.Insert(line, (int)vsInsertFlags.vsInsertFlagsContainNewText);
                 projectItem.Document.Save();

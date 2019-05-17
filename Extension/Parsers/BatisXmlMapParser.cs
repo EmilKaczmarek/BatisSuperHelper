@@ -9,17 +9,23 @@ using IBatisSuperHelper.Constants.BatisConstants;
 using IBatisSuperHelper.Helpers;
 using IBatisSuperHelper.HelpersAndExtensions;
 using IBatisSuperHelper.Indexers.Models;
+using IBatisSuperHelper.Parsers.Models;
+using IBatisSuperHelper.Parsers.Models.Shared;
+using IBatisSuperHelper.Parsers.Models.SqlMap;
 
 namespace IBatisSuperHelper.Parsers
 {
     public class BatisXmlMapParser : XmlParser
     {
+        public SqlMapModel Result { get; private set; }
+        
         private Lazy<string> _xmlNamespace => new Lazy<string>(GetDocumentXmlNamespace);
         public new string XmlNamespace => _xmlNamespace.Value;
 
         private Lazy<string> _mapNamespace => new Lazy<string>(GetDocumentMapNamespace);
         public string MapNamespace =>_mapNamespace.Value;
-
+    
+        #region Construction
         public BatisXmlMapParser()
         {
             InitializeEmpty();
@@ -27,6 +33,7 @@ namespace IBatisSuperHelper.Parsers
 
         public BatisXmlMapParser(XmlParser parser) : base(parser)
         {
+
         }
 
         public BatisXmlMapParser WithStringReader(StringReader stringReader)
@@ -46,11 +53,13 @@ namespace IBatisSuperHelper.Parsers
             base.Load();
             return this;
         }
+        #endregion
 
-        public List<XmlQuery> GetMapFileStatments()
+
+        public List<Statement> GetMapFileStatments()
         {
             var statementChildNodes = GetChildNodesOfParentByXPath(XmlMapConstants.StatementsRootElementXPath);
-            return statementChildNodes.Where(e => IBatisHelper.IsIBatisStatment(e.Name)).Select(e => new XmlQuery
+            return statementChildNodes.Where(e => IBatisHelper.IsIBatisStatment(e.Name)).Select(e => new Statement
             {
                 QueryFileName = FileName,
                 QueryFilePath = FilePath,
@@ -58,24 +67,41 @@ namespace IBatisSuperHelper.Parsers
                 FullyQualifiedQuery = MapNamespaceHelper.CreateFullQueryString(MapNamespace, e.Id),
                 QueryLineNumber = e.Line,
                 QueryVsProjectName = FileProjectName,
-                MapNamespace = MapNamespace
+                MapNamespace = MapNamespace,
+                CacheModel = e.GetAttributeValue("cacheModel", null),
+                ListClass = e.GetAttributeValue("listClass", null),
+                ParameterClass = e.GetAttributeValue("parameterClass", null),
+                ParameterMap = e.GetAttributeValue("parameterMap", null),
+                ResultClass = e.GetAttributeValue("resultClass", null),
+                ResultMap = e.GetAttributeValue("resultMap", null),
+                //Type = e.GetAttributeValue("type", null),
+                Content = e.InnerHtml,
+
             }).ToList();
         }
 
-        public List<XmlQuery> GetMapFileStatmentsWithIdAttributeColumnInfo()
+        public List<Statement> GetMapFileStatmentsWithIdAttributeColumnInfo()
         {
             var statementChildNodes = GetChildNodesOfParentByXPath(XmlMapConstants.StatementsRootElementXPath);
-            return statementChildNodes.Where(e => IBatisHelper.IsIBatisStatment(e.Name)).Select(e => new XmlQuery
+            return statementChildNodes.Where(e => IBatisHelper.IsIBatisStatment(e.Name)).Select(e => new Statement
             {
                 XmlLine = e.Attributes.FirstOrDefault(x => x.Name == "id")?.Line,
-                XmlLineColumn = e.Attributes.FirstOrDefault(x=>x.Name == "id")?.LinePosition,
+                XmlLineColumn = e.Attributes.FirstOrDefault(x => x.Name == "id")?.LinePosition,
                 QueryFileName = FileName,
                 QueryFilePath = FilePath,
                 QueryId = e.Id,
                 FullyQualifiedQuery = MapNamespaceHelper.CreateFullQueryString(MapNamespace, e.Id),
                 QueryLineNumber = e.Line,
                 QueryVsProjectName = FileProjectName,
-                MapNamespace = MapNamespace
+                MapNamespace = MapNamespace,
+                CacheModel = e.GetAttributeValue("cacheModel", null),
+                ListClass = e.GetAttributeValue("listClass", null),
+                ParameterClass = e.GetAttributeValue("parameterClass", null),
+                ParameterMap = e.GetAttributeValue("parameterMap", null),
+                ResultClass = e.GetAttributeValue("resultClass", null),
+                ResultMap = e.GetAttributeValue("resultMap", null),
+                //Type = e.GetAttributeValue("type", null),
+                Content = e.InnerHtml,
             }).ToList();
         }
 

@@ -6,15 +6,16 @@ using IBatisSuperHelper.Loggers;
 using IBatisSuperHelper.Models;
 using IBatisSuperHelper.Parsers;
 using IBatisSuperHelper.Parsers.Models;
+using IBatisSuperHelper.Parsers.Models.SqlMap;
 using IBatisSuperHelper.Parsers.XmlConfig.Models;
 
 namespace IBatisSuperHelper.Indexers.Xml
 {
     public class XmlIndexer
     {
-        public List<XmlQuery> BuildIndexer(IEnumerable<XmlFileInfo> solutionXmlDocuments)
+        public List<Statement> BuildIndexer(IEnumerable<XmlFileInfo> solutionXmlDocuments)
         {
-            var result = new List<XmlQuery>();
+            var result = new List<Statement>();
             Stopwatch sw = new Stopwatch();
             sw.Start();
             foreach (var xmlSolutionDocument in solutionXmlDocuments)
@@ -32,7 +33,7 @@ namespace IBatisSuperHelper.Indexers.Xml
             return result;
         }
 
-        public List<XmlQuery> ParseSingleFile(XmlFileInfo xmlDocument)
+        public List<Statement> ParseSingleFile(XmlFileInfo xmlDocument)
         {
             BatisXmlMapParser parser = new BatisXmlMapParser().WithFileInfo(xmlDocument.FilePath, xmlDocument.ProjectName).Load();
 
@@ -41,7 +42,7 @@ namespace IBatisSuperHelper.Indexers.Xml
             {
                 return parser.GetMapFileStatments();
             }
-            return new List<XmlQuery>();
+            return new List<Statement>();
         }
 
         public SqlMapConfig ParseSingleConfigFile(XmlFileInfo xmlDocument)

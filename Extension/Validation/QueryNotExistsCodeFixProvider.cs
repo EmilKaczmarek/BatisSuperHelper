@@ -21,6 +21,7 @@ using IBatisSuperHelper.Helpers;
 using IBatisSuperHelper.Validation.Helpers;
 using IBatisSuperHelper.Indexers;
 using IBatisSuperHelper.Indexers.Models;
+using IBatisSuperHelper.Parsers.Models.SqlMap;
 
 namespace IBatisSuperHelper.Validation
 {
@@ -56,7 +57,7 @@ namespace IBatisSuperHelper.Validation
             }
         }
 
-        private async Task<Document> SwitchQueryAsync(Document document, LiteralExpressionSyntax stringLiteralExpression, XmlQuery newQuery, CancellationToken cancellationToken)
+        private async Task<Document> SwitchQueryAsync(Document document, LiteralExpressionSyntax stringLiteralExpression, Statement newQuery, CancellationToken cancellationToken)
         {
             var editor = await DocumentEditor.CreateAsync(document, cancellationToken);
             editor.ReplaceNode(stringLiteralExpression,
