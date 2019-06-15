@@ -1,10 +1,11 @@
-﻿using IBatisSuperHelper.Indexers.Workflow.Options;
-using IBatisSuperHelper.Parsers.Models;
-using IBatisSuperHelper.Storage;
+﻿using BatisSuperHelper.Indexers.Workflow.Options;
+using BatisSuperHelper.Parsers.Models;
+using BatisSuperHelper.Storage;
+using NLog;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace IBatisSuperHelper.Indexers.Workflow.Strategies.Storage.Configs
+namespace BatisSuperHelper.Indexers.Workflow.Strategies.Storage.Configs
 {
     public class ConfigStorageStrategyFactory
     {
@@ -15,20 +16,15 @@ namespace IBatisSuperHelper.Indexers.Workflow.Strategies.Storage.Configs
             _storage = storage;
         }
 
-        public IConfigStorageStrategy GetStrategy(ConfigsIndexingOptions options, IEnumerable<SqlMapConfig> successfullyParsed)
+        public IConfigStorageStrategy GetStrategy(IEnumerable<SqlMapConfig> successfullyParsed)
         {
-
-            if (options.SupportMultipleConfigs && successfullyParsed.Distinct().Count() > 1)
+            LogManager.GetLogger("error").Error($"Parsed: {string.Join(",", successfullyParsed.Select(e=>e.Name))}");
+            if (successfullyParsed.Distinct().Any())
             {
                 return new MultipleConfigsStorageStrategy(successfullyParsed, _storage);
             }
 
-            if (successfullyParsed.Distinct().Count() == 1)
-            {
-                return new SingleConfigStorageStrategy(successfullyParsed, _storage);
-            }
-
-            return new SingleDefaultConfigStorageStrategy(successfullyParsed, _storage);
+            return new FallbackConfigStrategy(successfullyParsed, _storage);
         }
 
     }

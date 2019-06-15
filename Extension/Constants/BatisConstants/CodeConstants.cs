@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Constants
+namespace BatisSuperHelper.Constants.BatisConstants
 {
-    public static class IBatisConstants
+    public static class CodeConstants
     {
         public static readonly List<string> MethodNames = new List<string>
         {

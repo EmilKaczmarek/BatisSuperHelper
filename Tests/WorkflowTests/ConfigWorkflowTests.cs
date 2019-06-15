@@ -1,9 +1,9 @@
 ﻿using EnvDTE;
 using EnvDTE80;
-using IBatisSuperHelper.CoreAutomation.ProjectItems;
-using IBatisSuperHelper.Indexers.Workflow;
-using IBatisSuperHelper.Indexers.Workflow.Options;
-using IBatisSuperHelper.Indexers.Workflow.Strategies.Config;
+using BatisSuperHelper.CoreAutomation.ProjectItems;
+using BatisSuperHelper.Indexers.Workflow;
+using BatisSuperHelper.Indexers.Workflow.Options;
+using BatisSuperHelper.Indexers.Workflow.Strategies.Config;
 using Moq;
 using System;
 using System.Linq;

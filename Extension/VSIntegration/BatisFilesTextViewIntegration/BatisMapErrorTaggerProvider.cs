@@ -1,4 +1,4 @@
-﻿using IBatisSuperHelper.Validation.XmlValidators;
+﻿using BatisSuperHelper.Validation.XmlValidators;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
@@ -8,16 +8,17 @@ using Microsoft.VisualStudio.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.VSIntegration.BatisFilesTextViewIntegration
+namespace BatisSuperHelper.VSIntegration.BatisFilesTextViewIntegration
 {
-    [Export(typeof(ITaggerProvider))]
+    [Export(typeof(IViewTaggerProvider))]
     [ContentType("XML")]
     [TagType(typeof(ErrorTag))]
-    public class BatisMapErrorTaggerProvider : ITaggerProvider
+    public class BatisMapErrorTaggerProvider : IViewTaggerProvider
     {
         [Import]
         private ITextDocumentFactoryService TextDocumentFactoryService { get; set; }
@@ -25,22 +26,20 @@ namespace IBatisSuperHelper.VSIntegration.BatisFilesTextViewIntegration
         [Import]
         IClassifierAggregatorService _classifierAggregatorService = null;
 
-        public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
+        public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag
         {
-            if (!buffer.Properties.TryGetProperty(typeof(ErrorListProvider), out ErrorListProvider errorProvider))
-                return null;
-
-            if (!buffer.Properties.TryGetProperty(typeof(IWpfTextView), out IWpfTextView _view))
-                return null;
-    
             TextDocumentFactoryService.TryGetTextDocument(buffer, out ITextDocument document);
-            var classifier = _classifierAggregatorService.GetClassifier(_view.TextBuffer);
-            var span = new SnapshotSpan(_view.TextBuffer.CurrentSnapshot, 0, _view.TextBuffer.CurrentSnapshot.Length);
+            var classifier = _classifierAggregatorService.GetClassifier(textView.TextBuffer);
+            var span = new SnapshotSpan(textView.TextBuffer.CurrentSnapshot, 0, textView.TextBuffer.CurrentSnapshot.Length);
 
             var validator = XmlValidatorsAggregator
                 .Create
-                .AllValidatorsForBuffer(classifier, span, document, _view, buffer);
-            return new BatisMapErrorTagger(validator, buffer) as ITagger<T>;
+                .AllValidatorsForBuffer(classifier, span, document, buffer);
+           
+
+            return new BatisMapErrorTagger(validator, textView, buffer) as ITagger<T>;
         }
+
+
     }
 }

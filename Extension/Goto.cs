@@ -7,85 +7,30 @@
 using Microsoft.VisualStudio.Shell;
 using System;
 using System.ComponentModel.Design;
-using IBatisSuperHelper.Actions;
+using BatisSuperHelper.Actions;
 
-namespace IBatisSuperHelper
+namespace BatisSuperHelper
 {
-    /// <summary>
-    /// Command handler
-    /// </summary>
     sealed class Goto
     {
-        /// <summary>
-        /// Command ID.
-        /// </summary>
         public const int CommandId = 0x0100;
-
-        /// <summary>
-        /// Command menu group (command set GUID).
-        /// </summary>
         public static readonly Guid CommandSet = new Guid("74b835d6-70a4-4629-9d2c-520ce16236b5");
 
-        /// <summary>
-        /// VS Package that provides this command, not null.
-        /// </summary>
-        public readonly Package package;
-
-        private readonly GoToQueryActions2 _commandActions;
-        private readonly OleMenuCommand menuItem;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Goto"/> class.
-        /// Adds our command handlers for menu (commands must exist in the command table file)
-        /// </summary>
-        /// <param name="package">Owner package, not null.</param>
-        private Goto(Package package)
+        public static async System.Threading.Tasks.Task InitializeAsync(AsyncPackage package)
         {
-            this.package = package ?? throw new ArgumentNullException(nameof(package));
- 
-            _commandActions = new GoToQueryActions2(this.package as GotoAsyncPackage);
+            var handler = new GoToQueryActions2(package as GotoAsyncPackage);
 
-            if (ServiceProvider.GetService(typeof(IMenuCommandService)) is OleMenuCommandService commandService)
-            {
-                var menuCommandID = new CommandID(CommandSet, CommandId);
-                menuItem = new OleMenuCommand(
-                    new EventHandler(this._commandActions.MenuItemCallback),
-                    new EventHandler(this._commandActions.Change),
-                    new EventHandler(this._commandActions.BeforeQuery),
-                    menuCommandID,
-                    "Go to Query");
+            var commandService = (IMenuCommandService)await package.GetServiceAsync(typeof(IMenuCommandService));
 
-                commandService.AddCommand(menuItem);
-            }                     
-        }
-       
-        /// <summary>
-        /// Gets the instance of the command.
-        /// </summary>
-        public static Goto Instance
-        {
-            get;
-            private set;
-        }
+            var menuCommandID = new CommandID(CommandSet, CommandId);
+            var menuItem = new OleMenuCommand(
+                   new EventHandler(handler.MenuItemCallback),
+                   new EventHandler(handler.Change),
+                   new EventHandler(handler.BeforeQuery),
+                   menuCommandID,
+                   "Go to Query");
 
-        /// <summary>
-        /// Gets the service provider from the owner package.
-        /// </summary>
-        private IServiceProvider ServiceProvider
-        {
-            get
-            {
-                return this.package;
-            }
-        }
-
-        /// <summary>
-        /// Initializes the singleton instance of the command.
-        /// </summary>
-        /// <param name="package">Owner package, not null.</param>
-        public static void Initialize(Package package)
-        {
-            Instance = new Goto(package);
+            commandService.AddCommand(menuItem);
         }
     }
 }

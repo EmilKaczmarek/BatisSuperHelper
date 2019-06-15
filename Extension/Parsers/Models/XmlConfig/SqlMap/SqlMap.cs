@@ -1,15 +1,15 @@
-﻿using IBatisSuperHelper.Constants.BatisConstants;
+﻿using BatisSuperHelper.Constants.BatisConstants;
 using System.Collections.Generic;
 using System.Linq;
-using static IBatisSuperHelper.Constants.BatisConstants.XmlConfigConstants;
+using static BatisSuperHelper.Constants.BatisConstants.XmlConfigConstants;
 
-namespace IBatisSuperHelper.Parsers.Models.XmlConfig.SqlMap
+namespace BatisSuperHelper.Parsers.Models.XmlConfig.SqlMap
 {
     public class SqlMap
     {
         public string RawValue { get; set; }
-        public string FileName { get; set; }
-        public SqlMapResourceType ResourceType { get; set; }
+        public string Value { get; set; }
+        public Constants.BatisConstants.XmlConfigConstants.SqlMapResourceType ResourceType { get; set; }
 
         private static string GetFileNameFromEmbeddedRawValue(string rawValue)
         {
@@ -25,6 +25,21 @@ namespace IBatisSuperHelper.Parsers.Models.XmlConfig.SqlMap
             return splited.First().Trim();
         }
 
+        private static string GetFileNameFromAssembly(string assembly)
+        {
+            //Mynamespace.sqlMap.xml
+            if (string.IsNullOrWhiteSpace(assembly))
+            {
+                return null;
+            }
+            var splited = assembly.Split('.');
+            if (splited.Length < 2)
+            {
+                return null;
+            }
+            return $"{splited[splited.Length - 2]}.{splited[splited.Length - 1]}";
+        }
+
         public static SqlMap FromAttribute(string attributeName, string attribueValue)
         {
             switch (attributeName)
@@ -38,7 +53,7 @@ namespace IBatisSuperHelper.Parsers.Models.XmlConfig.SqlMap
                 case EmbeddedAttributeName:
                     return new SqlMap
                     {
-                        FileName = GetFileNameFromEmbeddedRawValue(attribueValue),
+                        Value = GetFileNameFromAssembly(GetFileNameFromEmbeddedRawValue(attribueValue)),
                         RawValue = attribueValue,
                         ResourceType = SqlMapResourceType.EMBEDDED,
                     };
@@ -61,7 +76,7 @@ namespace IBatisSuperHelper.Parsers.Models.XmlConfig.SqlMap
             var map = obj as SqlMap;
             return map != null &&
                    RawValue == map.RawValue &&
-                   FileName == map.FileName &&
+                   Value == map.Value &&
                    ResourceType == map.ResourceType;
         }
 
@@ -69,7 +84,7 @@ namespace IBatisSuperHelper.Parsers.Models.XmlConfig.SqlMap
         {
             var hashCode = -814287421;
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(RawValue);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(FileName);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Value);
             hashCode = hashCode * -1521134295 + ResourceType.GetHashCode();
             return hashCode;
         }

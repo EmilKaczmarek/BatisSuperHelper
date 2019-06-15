@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.HelpersAndExtensions.Roslyn
+namespace BatisSuperHelper.HelpersAndExtensions.Roslyn
 {
     public static class ArgumentSyntaxExtension
     {

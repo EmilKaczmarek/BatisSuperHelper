@@ -1,13 +1,13 @@
-﻿namespace IBatisSuperHelper
+﻿namespace BatisSuperHelper
 {
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Media;
-    using IBatisSuperHelper.Indexers.Models;
-    using IBatisSuperHelper.VSIntegration.Navigation;
-    using IBatisSuperHelper.Windows.ResultWindow.ViewModel;
+    using BatisSuperHelper.Indexers.Models;
+    using BatisSuperHelper.VSIntegration.Navigation;
+    using BatisSuperHelper.Windows.ResultWindow.ViewModel;
 
 
     /// <summary>

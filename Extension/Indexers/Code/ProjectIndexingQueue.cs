@@ -1,5 +1,5 @@
-﻿using IBatisSuperHelper.Logging.MiniProfiler;
-using IBatisSuperHelper.Storage;
+﻿using BatisSuperHelper.Logging.MiniProfiler;
+using BatisSuperHelper.Storage;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Shell;
 using NLog;
@@ -12,7 +12,7 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Indexers.Code
+namespace BatisSuperHelper.Indexers.Code
 {
     public class ProjectIndexingQueue : IDisposable
     {

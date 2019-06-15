@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.Model
+namespace BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.Model
 {
     public class NodeInfo
     {

@@ -1,4 +1,4 @@
-﻿namespace IBatisSuperHelper
+﻿namespace BatisSuperHelper
 {
     using System;
     using System.Runtime.InteropServices;

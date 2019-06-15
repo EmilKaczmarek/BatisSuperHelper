@@ -3,26 +3,29 @@ using StackExchange.Profiling;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.Model;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
-using IBatisSuperHelper.Indexers;
-using IBatisSuperHelper.Indexers.Models;
-using IBatisSuperHelper.Models;
-using IBatisSuperHelper.Storage.Domain;
-using IBatisSuperHelper.Storage.Interfaces;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.Model;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using BatisSuperHelper.Indexers;
+using BatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Models;
+using BatisSuperHelper.Storage.Domain;
+using BatisSuperHelper.Storage.Interfaces;
 using Microsoft.VisualStudio.Shell;
-using IBatisSuperHelper.Parsers.XmlConfig.Models;
-using IBatisSuperHelper.Indexers.Xml;
-using IBatisSuperHelper.Indexers.Code;
-using IBatisSuperHelper.Parsers.Models.XmlConfig.SqlMap;
-using IBatisSuperHelper.Parsers.Models;
-using IBatisSuperHelper.Storage.Providers;
-using IBatisSuperHelper.Indexers.Workflow.Options;
+using BatisSuperHelper.Parsers.XmlConfig.Models;
+using BatisSuperHelper.Indexers.Xml;
+using BatisSuperHelper.Indexers.Code;
+using BatisSuperHelper.Parsers.Models.XmlConfig.SqlMap;
+using BatisSuperHelper.Parsers.Models;
+using BatisSuperHelper.Storage.Providers;
+using BatisSuperHelper.Indexers.Workflow.Options;
+using BatisSuperHelper.Storage.Event;
+using System.Diagnostics;
 
-namespace IBatisSuperHelper.Storage
+namespace BatisSuperHelper.Storage
 {
     public class PackageStorage : IPackageStorage
     {
+        public long Initialized { get; private set; }
         public IQueryProvider<IndexerKey, List<CSharpQuery>> CodeQueries { get; private set; }
         public IQueryProvider<IndexerKey, XmlQuery> XmlQueries { get; private set; }
 
@@ -37,8 +40,11 @@ namespace IBatisSuperHelper.Storage
 
         public IndexingWorkflowOptions IndexingWorkflowOptions { get; private set; }
 
+        public event EventHandler<StoreChangeEventArgs> OnStoreChange;
+
         public PackageStorage()
         {
+            Initialized = DateTime.Now.Ticks;
             CodeQueries = new CodeQueryProvider();
             XmlQueries = new XmlQueryProvider();
             XmlFileAnalyzer = new XmlIndexer();
@@ -47,13 +53,10 @@ namespace IBatisSuperHelper.Storage
             SqlMapConfigProvider = new SqlMapConfigProvider();
             IndexingWorkflowOptions = new IndexingWorkflowOptions
             {
-                ConfigOptions = new ConfigsIndexingOptions
+                MapsOptions = new SqlMapIndexingOptions
                 {
-                    SupportMultipleConfigs = true,
-                },
-                MapsOptions = new SqlMapIndexingOprions
-                {
-                    IndexAllMaps = true,
+                    IndexOnlyMapsInConfig = true,
+                    IndexAllMapsOnError = true,
                 },
             };
         }
@@ -69,6 +72,11 @@ namespace IBatisSuperHelper.Storage
             RuntimeConfiguration = runtimeConfiguration;
         }
 
+        private void OnStoreChangeHandler(ChangedFileTypeFlag flag)
+        {
+            StorageEvents.TriggerStoreChange(this, new StoreChangeEventArgs(flag));
+        }
+
         public async System.Threading.Tasks.Task AnalyzeAndStoreAsync(List<Document> documents)
         {
             using (MiniProfiler.Current.Step(nameof(AnalyzeAndStoreAsync)))
@@ -77,6 +85,7 @@ namespace IBatisSuperHelper.Storage
                 var generics = codeResults.SelectMany(e => e.Generics).Select(e => new KeyValuePair<MethodInfo, ExpressionResult>(e.NodeInformation.MethodInfo, e));
                 await GenericMethods.AddMultipleAsync(generics);
                 CodeQueries.AddMultipleWithoutKey(codeResults.Select(e => e.Queries).ToList());
+                OnStoreChangeHandler(ChangedFileTypeFlag.CSharp);
             }
         }
 
@@ -84,6 +93,7 @@ namespace IBatisSuperHelper.Storage
         {
             var xmlFileResult = XmlFileAnalyzer.ParseSingleFile(xmlFile);
             XmlQueries.AddMultipleWithoutKey(xmlFileResult);
+            OnStoreChangeHandler(ChangedFileTypeFlag.Xml);
         }
 
         public void AnalyzeAndUpdateSingle(Document document)
@@ -93,7 +103,8 @@ namespace IBatisSuperHelper.Storage
             foreach (var generic in codeResult.Generics)
             {
                 GenericMethods.Update(generic.NodeInformation.MethodInfo, generic);
-            }  
+            }
+            OnStoreChangeHandler(ChangedFileTypeFlag.CSharp);
         }
 
         public async System.Threading.Tasks.Task AnalyzeAndUpdateSingleAsync(Document document)
@@ -104,15 +115,20 @@ namespace IBatisSuperHelper.Storage
             {
                 await GenericMethods.UpdateAsync(generic.NodeInformation.MethodInfo, generic);
             }
+            OnStoreChangeHandler(ChangedFileTypeFlag.CSharp);
         }
 
         public async System.Threading.Tasks.Task AnalyzeAndStoreSingleAsync(Document document)
         {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+            Debug.WriteLine($"AnalyzeAndStoreSingleAsync for file {document.Name}");
             using (MiniProfiler.Current.Step(nameof(AnalyzeAndStoreSingleAsync)))
             {
                 var codeResult = await CodeFileAnalyzer.BuildAsync(document);
                 await GenericMethods.AddMultipleAsync(codeResult.Generics.Select(e => new KeyValuePair<MethodInfo, ExpressionResult>(e.NodeInformation.MethodInfo, e)));
                 CodeQueries.AddWithoutKey(codeResult.Queries);
+                OnStoreChangeHandler(ChangedFileTypeFlag.CSharp);
             }
         }
 

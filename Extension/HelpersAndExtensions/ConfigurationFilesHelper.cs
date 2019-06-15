@@ -1,6 +1,6 @@
-﻿using IBatisSuperHelper.Constants.BatisConstants;
-using IBatisSuperHelper.Models;
-using IBatisSuperHelper.Parsers;
+﻿using BatisSuperHelper.Constants.BatisConstants;
+using BatisSuperHelper.Models;
+using BatisSuperHelper.Parsers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.HelpersAndExtensions
+namespace BatisSuperHelper.HelpersAndExtensions
 {
     public static class ConfigurationFilesHelper
     {
@@ -28,7 +28,7 @@ namespace IBatisSuperHelper.HelpersAndExtensions
             }
 
             var otherConfigs = FilterDotNetCommonConfigFileNames(allConfigFiles);
-            var sqlMapConfigsWithDifferentName = otherConfigs.Where(e => new XmlParser(e.FilePath, e.ProjectName).GetXmlNamespace().Equals(XmlConfigConstants.XmlNamespace));
+            var sqlMapConfigsWithDifferentName = otherConfigs.Where(e => new XmlParser(e.FilePath, e.ProjectName).Load().GetXmlNamespace()?.Equals(XmlConfigConstants.XmlNamespace) ?? false);
 
             if (sqlMapConfigsWithDifferentName.Any())
             {

@@ -5,15 +5,15 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using IBatisSuperHelper.Actions.ActionValidators;
-using IBatisSuperHelper.HelpersAndExtensions;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
-using IBatisSuperHelper.Parsers;
-using static IBatisSuperHelper.HelpersAndExtensions.XmlHelper;
-using IBatisSuperHelper.Constants.BatisConstants;
+using BatisSuperHelper.Actions.ActionValidators;
+using BatisSuperHelper.HelpersAndExtensions;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using BatisSuperHelper.Parsers;
+using static BatisSuperHelper.HelpersAndExtensions.XmlHelper;
+using BatisSuperHelper.Constants.BatisConstants;
 
-namespace IBatisSuperHelper.Actions.DocumentProcessors
+namespace BatisSuperHelper.Actions.DocumentProcessors
 {
     public class XmlDocumentProcessor : IDocumentProcessor
     {
@@ -28,7 +28,7 @@ namespace IBatisSuperHelper.Actions.DocumentProcessors
                 .WithFunctionList("jump", new List<Func<int, bool>>
                 {
                     (selectionLineNum) => !XmlStringLine.IsIgnored(GetLineText(selectionLineNum + 1)),
-                    (selectionLineNum) => _parser.XmlNamespace == XmlMapConstants.XmlNamespace,
+                    (selectionLineNum) => _parser.XmlNamespace == Constants.BatisConstants.XmlMapConstants.XmlNamespace,
                     (selectionLineNum) => _parser.HasSelectedLineValidQuery(selectionLineNum + 1)
                 })
                 .WithFunctionList("rename", new List<Func<int, bool>>());
@@ -70,7 +70,7 @@ namespace IBatisSuperHelper.Actions.DocumentProcessors
         public ExpressionResult GetQueryValueAtLine(int lineNumber)
         {
             var elementLocation = _parser.GetStatmentElementsLineNumber().DetermineClosestInt(lineNumber + 1);
-            var queryValue = _parser.GetQueryAtLineOrNull(elementLocation, GotoAsyncPackage.Storage.SqlMapConfigProvider.GetCurrentSettings().UseStatementNamespaces);
+            var queryValue = _parser.GetQueryAtLineOrNull(elementLocation, GotoAsyncPackage.Storage.SqlMapConfigProvider.GetConfigForMapFile(_parser.FileName).Settings.UseStatementNamespaces);
             return new ExpressionResult
             {
                 IsSolved = queryValue != null,

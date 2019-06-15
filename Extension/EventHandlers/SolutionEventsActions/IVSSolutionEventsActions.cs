@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.EventHandlers.SolutionEventsActions
+namespace BatisSuperHelper.EventHandlers.SolutionEventsActions
 {
     public interface IVSSolutionEventsActions
     {

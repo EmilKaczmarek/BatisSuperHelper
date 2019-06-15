@@ -1,11 +1,12 @@
 ﻿using EnvDTE80;
-using IBatisSuperHelper.Constants;
-using IBatisSuperHelper.CoreAutomation.ProjectItems;
-using IBatisSuperHelper.Helpers;
-using IBatisSuperHelper.HelpersAndExtensions;
-using IBatisSuperHelper.Indexers.Workflow;
-using IBatisSuperHelper.Indexers.Xml;
-using IBatisSuperHelper.Storage;
+using BatisSuperHelper.Constants;
+using BatisSuperHelper.CoreAutomation.ProjectItems;
+using BatisSuperHelper.Helpers;
+using BatisSuperHelper.HelpersAndExtensions;
+using BatisSuperHelper.Indexers;
+using BatisSuperHelper.Indexers.Workflow;
+using BatisSuperHelper.Indexers.Xml;
+using BatisSuperHelper.Storage;
 using Microsoft.VisualStudio.Shell;
 using System;
 using System.Collections.Generic;
@@ -13,11 +14,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.EventHandlers.SolutionEventsActions
+namespace BatisSuperHelper.EventHandlers.SolutionEventsActions
 {
     public class VSSolutionEventsActions : IVSSolutionEventsActions
     {
-        private readonly IndexingWorkflow _indexingWorkflow; 
+        private readonly IndexingWorkflow _indexingWorkflow;
 
         public VSSolutionEventsActions(IndexingWorkflow indexingWorkflow)
         {

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Helpers
+namespace BatisSuperHelper.Helpers
 {
     public static class TextDocumentHelper
     {

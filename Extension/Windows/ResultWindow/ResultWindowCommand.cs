@@ -4,50 +4,15 @@ using System.Globalization;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
-namespace IBatisSuperHelper
+namespace BatisSuperHelper
 {
     /// <summary>
     /// Command handler
     /// </summary>
     internal sealed class ResultWindowCommand
     {
-        /// <summary>
-        /// Command ID.
-        /// </summary>
         public const int CommandId = 258;
-
-        /// <summary>
-        /// Command menu group (command set GUID).
-        /// </summary>
         public static readonly Guid CommandSet = new Guid("16d16112-fe5d-40b1-9e67-9ae342523f8b");
-
-        /// <summary>
-        /// VS Package that provides this command, not null.
-        /// </summary>
-        private readonly Package package;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ResultWindowCommand"/> class.
-        /// Adds our command handlers for menu (commands must exist in the command table file)
-        /// </summary>
-        /// <param name="package">Owner package, not null.</param>
-        private ResultWindowCommand(Package package)
-        {
-            if (package == null)
-            {
-                throw new ArgumentNullException("package");
-            }
-
-            this.package = package;
-
-            OleMenuCommandService commandService = this.ServiceProvider.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-            if (commandService != null)
-            {
-                var menuCommandID = new CommandID(CommandSet, CommandId);
-                var menuItem = new MenuCommand(this.ShowToolWindow, menuCommandID);
-                commandService.AddCommand(menuItem);
-            }
-        }
 
         /// <summary>
         /// Gets the instance of the command.
@@ -58,38 +23,20 @@ namespace IBatisSuperHelper
             private set;
         }
 
-        /// <summary>
-        /// Gets the service provider from the owner package.
-        /// </summary>
-        private IServiceProvider ServiceProvider
+
+        public static async System.Threading.Tasks.Task InitializeAsync(AsyncPackage package)
         {
-            get
-            {
-                return this.package;
-            }
+            var commandService = (IMenuCommandService)await package.GetServiceAsync(typeof(IMenuCommandService));
+
+            var menuCommandID = new CommandID(CommandSet, CommandId);
+            var cmd = new MenuCommand((s, e) => ShowToolWindow(package), menuCommandID);
+            commandService.AddCommand(cmd);
         }
 
-        /// <summary>
-        /// Initializes the singleton instance of the command.
-        /// </summary>
-        /// <param name="package">Owner package, not null.</param>
-        public static void Initialize(Package package)
-        {
-            Instance = new ResultWindowCommand(package);
-        }
-
-        /// <summary>
-        /// Shows the tool window when the menu item is clicked.
-        /// </summary>
-        /// <param name="sender">The event sender.</param>
-        /// <param name="e">The event args.</param>
-        private void ShowToolWindow(object sender, EventArgs e)
+        private static void ShowToolWindow(AsyncPackage package)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-            // Get the instance number 0 of this tool window. This window is single instance so this instance
-            // is actually the only one.
-            // The last flag is set to true so that if the tool window does not exists it will be created.
-            ToolWindowPane window = this.package.FindToolWindow(typeof(ResultWindow), 0, true);
+            ToolWindowPane window = package.FindToolWindow(typeof(ResultWindow), 0, true);
             if ((null == window) || (null == window.Frame))
             {
                 throw new NotSupportedException("Cannot create tool window");

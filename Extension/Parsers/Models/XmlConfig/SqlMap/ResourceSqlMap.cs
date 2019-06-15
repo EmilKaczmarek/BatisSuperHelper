@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Parsers.Models.XmlConfig.SqlMap
+namespace BatisSuperHelper.Parsers.Models.XmlConfig.SqlMap
 {
     public class ResourceSqlMap : SqlMap
     {

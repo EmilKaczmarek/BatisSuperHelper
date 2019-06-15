@@ -13,19 +13,22 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using IBatisSuperHelper.Constants;
-using IBatisSuperHelper.Helpers;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
-using IBatisSuperHelper.Indexers.Models;
-using IBatisSuperHelper.Loggers;
-using IBatisSuperHelper.Models;
+using BatisSuperHelper.Constants;
+using BatisSuperHelper.Helpers;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using BatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Loggers;
+using BatisSuperHelper.Models;
+using BatisSuperHelper.Constants.BatisConstants;
 
-namespace IBatisSuperHelper.Indexers.Code
+namespace BatisSuperHelper.Indexers.Code
 {
     public class CSharpIndexer
     {
+        public object CodeCostants { get; private set; }
+
         public async Task<List<CSharpIndexerResult>> BuildIndexerAsync(List<Document> documents)
         {
             var results = new List<CSharpIndexerResult>();
@@ -111,7 +114,7 @@ namespace IBatisSuperHelper.Indexers.Code
                         {
                             nameIdentifiers = firstInvocationOfNodeAncestors.Expression.DescendantNodes().Where(e => allowedTypes.Contains(e.GetType())).Cast<SimpleNameSyntax>();
                         }
-                        if (nameIdentifiers.Any(e => IBatisConstants.MethodNames.Contains(e.Identifier.ValueText)))
+                        if (nameIdentifiers.Any(e => CodeConstants.MethodNames.Contains(e.Identifier.ValueText)))
                         {
                             Location loc = Location.Create(synTree, node.Span);
                             ExpressionResult expressionResult;

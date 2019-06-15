@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Indexers.Workflow.Options
+namespace BatisSuperHelper.Indexers.Workflow.Options
 {
-    public class SqlMapIndexingOprions
+    public class SqlMapIndexingOptions
     {
         public bool IndexAllMaps { get; set; }
         public bool IndexOnlyMapsInConfig { get; set; }
         public bool MarkUnusedMap { get; set; }
+        public bool IndexAllMapsOnError { get; set; }
     }
 }

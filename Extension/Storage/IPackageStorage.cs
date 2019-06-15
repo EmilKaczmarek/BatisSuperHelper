@@ -1,21 +1,23 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.Model;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
-using IBatisSuperHelper.Indexers;
-using IBatisSuperHelper.Indexers.Code;
-using IBatisSuperHelper.Indexers.Models;
-using IBatisSuperHelper.Indexers.Workflow.Options;
-using IBatisSuperHelper.Indexers.Xml;
-using IBatisSuperHelper.Models;
-using IBatisSuperHelper.Storage.Interfaces;
-using IBatisSuperHelper.Storage.Providers;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.Model;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using BatisSuperHelper.Indexers;
+using BatisSuperHelper.Indexers.Code;
+using BatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Indexers.Workflow.Options;
+using BatisSuperHelper.Indexers.Xml;
+using BatisSuperHelper.Models;
+using BatisSuperHelper.Storage.Interfaces;
+using BatisSuperHelper.Storage.Providers;
 using Microsoft.CodeAnalysis;
 
-namespace IBatisSuperHelper.Storage
+namespace BatisSuperHelper.Storage
 {
     public interface IPackageStorage
     {
+        long Initialized { get; }
         CSharpIndexer CodeFileAnalyzer { get; }
         IQueryProvider<IndexerKey, List<CSharpQuery>> CodeQueries { get; }
         GenericStorage<MethodInfo, ExpressionResult> GenericMethods { get; }
@@ -30,5 +32,7 @@ namespace IBatisSuperHelper.Storage
         Task AnalyzeAndStoreSingleAsync(Document document);
         void AnalyzeAndUpdateSingle(Document document);
         Task AnalyzeAndUpdateSingleAsync(Document document);
+
+        event EventHandler<StoreChangeEventArgs> OnStoreChange;
     }
 }

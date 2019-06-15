@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using IBatisSuperHelper.Actions.ActionValidators;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using BatisSuperHelper.Actions.ActionValidators;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 
-namespace IBatisSuperHelper.Actions.DocumentProcessors
+namespace BatisSuperHelper.Actions.DocumentProcessors
 {
     public interface IDocumentProcessor
     {

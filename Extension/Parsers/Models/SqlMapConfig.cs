@@ -1,12 +1,12 @@
-﻿using IBatisSuperHelper.Parsers.Models.XmlConfig.SqlMap;
-using IBatisSuperHelper.Parsers.XmlConfig.Models;
+﻿using BatisSuperHelper.Parsers.Models.XmlConfig.SqlMap;
+using BatisSuperHelper.Parsers.XmlConfig.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Parsers.Models
+namespace BatisSuperHelper.Parsers.Models
 {
     public class SqlMapConfig
     {

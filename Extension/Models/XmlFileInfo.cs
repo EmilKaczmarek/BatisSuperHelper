@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Models
+namespace BatisSuperHelper.Models
 {
     public class XmlFileInfo
     {

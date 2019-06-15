@@ -68,8 +68,8 @@
     <ProjectGuid>{B06A0AE7-66B0-423C-9523-2E312019FEC7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>IBatisSuperHelper</RootNamespace>
-    <AssemblyName>iBatisSuperHelper</AssemblyName>
+    <RootNamespace>BatisSuperHelper</RootNamespace>
+    <AssemblyName>BatisSuperHelper</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
@@ -139,7 +139,7 @@
     <Compile Include="EventHandlers\WorkspaceEvents.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="HelpersAndExtensions\ConfigurationFilesHelper.cs" />
-    <Compile Include="HelpersAndExtensions\IBatisHelper.cs" />
+    <Compile Include="HelpersAndExtensions\BatisHelper.cs" />
     <Compile Include="HelpersAndExtensions\IEnumerableIntExtensions.cs" />
     <Compile Include="HelpersAndExtensions\MapNamespaceHelper.cs" />
     <Compile Include="HelpersAndExtensions\Roslyn\ArgumentSyntaxExtension.cs" />
@@ -154,7 +154,6 @@
     <Compile Include="HelpersAndExtensions\Roslyn\ExpressionResolver\ResolveStrategy\IResolveStrategy.cs" />
     <Compile Include="HelpersAndExtensions\Roslyn\ExpressionResolver\ResolveStrategy\SimpleMemberAccessStrategy.cs" />
     <Compile Include="HelpersAndExtensions\Roslyn\ExpressionResolver\ResolveStrategy\StringLiteralStrategy.cs" />
-    <Compile Include="HelpersAndExtensions\Roslyn\RoslynSolutionExtension.cs" />
     <Compile Include="CoreAutomation\ProjectItems\ProjectItemRetreiver.cs" />
     <Compile Include="HelpersAndExtensions\VisualStudio\SnapshotExtension.cs" />
     <Compile Include="HelpersAndExtensions\VisualStudio\TextDocumentExtension.cs" />
@@ -166,7 +165,6 @@
     <Compile Include="Indexers\Workflow\ConfigProcessingResult.cs" />
     <Compile Include="Indexers\Workflow\MapProcessingResult.cs" />
     <Compile Include="Indexers\Workflow\Options\CodeIndexingOptions.cs" />
-    <Compile Include="Indexers\Workflow\Options\ConfigsIndexingOptions.cs" />
     <Compile Include="Indexers\Workflow\IndexingWorkflow.cs" />
     <Compile Include="Indexers\Workflow\Options\IndexingWorkflowOptions.cs" />
     <Compile Include="Indexers\Workflow\Options\SqlMapIndexingOprions.cs" />
@@ -176,8 +174,7 @@
     <Compile Include="Indexers\Workflow\Strategies\Storage\Configs\ConfigStorageStrategyFactory.cs" />
     <Compile Include="Indexers\Workflow\Strategies\Storage\Configs\IConfigStorageStrategy.cs" />
     <Compile Include="Indexers\Workflow\Strategies\Storage\Configs\MultipleConfigsStorageStrategy.cs" />
-    <Compile Include="Indexers\Workflow\Strategies\Storage\Configs\SingleConfigStorageStrategy.cs" />
-    <Compile Include="Indexers\Workflow\Strategies\Storage\Configs\SingleDefaultConfigStorageStrategy.cs" />
+    <Compile Include="Indexers\Workflow\Strategies\Storage\Configs\FallbackConfigStrategy.cs" />
     <Compile Include="Logging\MiniProfiler\NLogStorage.cs" />
     <Compile Include="Logging\NLogConfigurationService.cs" />
     <Compile Include="Logging\OutputWindowLogger.cs" />
@@ -192,6 +189,8 @@
     <Compile Include="Parsers\BatisXmlConfigParser.cs" />
     <Compile Include="Parsers\BatisXmlMapParser.cs" />
     <Compile Include="RenameCommand.cs" />
+    <Compile Include="Storage\Event\ChangedFileType.cs" />
+    <Compile Include="Storage\Event\StorageEvents.cs" />
     <Compile Include="Storage\IPackageStorage.cs" />
     <Compile Include="Storage\Providers\CodeQueryProvider.cs" />
     <Compile Include="Storage\Base\ISqlMapConfigProvider.cs" />
@@ -200,7 +199,8 @@
     <Compile Include="Storage\Base\GenericStorage.cs" />
     <Compile Include="Storage\Base\IQueryProvider.cs" />
     <Compile Include="Storage\PackageStorage.cs" />
-    <Compile Include="Validation\Helpers\QuerySearchHelp.cs" />
+    <Compile Include="Storage\Event\StoreChangeEventArgs.cs" />
+    <Compile Include="Validation\Helpers\QuerySearchHelper.cs" />
     <Compile Include="Validation\QueryNotExists.cs" />
     <Compile Include="Validation\QueryNotExistsCodeFixProvider.cs" />
     <Compile Include="Validation\XmlValidators\IBufferValidator.cs" />
@@ -222,12 +222,7 @@
     <Compile Include="VSIntegration\ErrorList\TableEntriesSnapshot.cs" />
     <Compile Include="VSIntegration\Navigation\DocumentNavigation.cs" />
     <Compile Include="VSIntegration\Navigation\DocumentNavigationInstance.cs" />
-    <Compile Include="Windows\DebugConsole\BatisSHelperTestConsole.cs" />
-    <Compile Include="Windows\DebugConsole\BatisSHelperTestConsoleCommand.cs" />
-    <Compile Include="Windows\DebugConsole\BatisSHelperTestConsoleControl.xaml.cs">
-      <DependentUpon>BatisSHelperTestConsoleControl.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Constants\IBatisConstants.cs" />
+    <Compile Include="Constants\BatisConstants\CodeConstants.cs" />
     <Compile Include="Goto.cs" />
     <Compile Include="GotoPackage.cs" />
     <Compile Include="HelpersAndExtensions\VisualStudio\DocumentExtension.cs" />
@@ -272,11 +267,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="Resources\BatisSHelperTestConsoleCommand.png" />
     <Content Include="Resources\Goto.png" />
     <Content Include="Resources\GotoPackage.ico" />
     <Content Include="Resources\ResultWindowCommand.png" />
-    <Content Include="Resources\TestWindowCommand.png" />
     <Content Include="stylesheet.css" />
   </ItemGroup>
   <ItemGroup>
@@ -306,10 +299,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Windows\DebugConsole\BatisSHelperTestConsoleControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Windows\RenameWindow\RenameModalWindowControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -371,6 +360,7 @@
       <VSIXSourceItem Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)' == 'MiniProfiler.Shared'" />
       <VSIXSourceItem Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)' == 'HtmlAgilityPack'" />
       <VSIXSourceItem Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)' == 'Ruzzie.FuzzyStrings'" />
+      <VSIXSourceItem Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)' == 'Newtonsoft.Json'" />
     </ItemGroup>
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

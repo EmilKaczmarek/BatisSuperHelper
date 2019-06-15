@@ -1,4 +1,4 @@
-﻿namespace IBatisSuperHelper.Indexers.Workflow.Strategies.Storage.Configs
+﻿namespace BatisSuperHelper.Indexers.Workflow.Strategies.Storage.Configs
 {
     public interface IConfigStorageStrategy
     {

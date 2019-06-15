@@ -1,5 +1,5 @@
 ﻿using System;
-using IBatisSuperHelper.HelpersAndExtensions;
+using BatisSuperHelper.HelpersAndExtensions;
 using Xunit;
 
 namespace Tests

@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.VSIntegration.BatisFilesTextViewIntegration
+namespace BatisSuperHelper.VSIntegration.BatisFilesTextViewIntegration
 {
     [Export(typeof(IVsTextViewCreationListener))]
     [ContentType("XML")]

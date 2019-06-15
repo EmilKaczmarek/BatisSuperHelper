@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using IBatisSuperHelper.Actions.DocumentProcessors;
+using BatisSuperHelper.Actions.DocumentProcessors;
 
-namespace IBatisSuperHelper.Actions.DocumentProcessors
+namespace BatisSuperHelper.Actions.DocumentProcessors
 {
     public abstract class DocumentProcessorFactory
     {

@@ -15,14 +15,14 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Simplification;
 using VSIXProject5.Validation;
-using IBatisSuperHelper.Storage;
+using BatisSuperHelper.Storage;
 using Microsoft.CodeAnalysis.Editing;
-using IBatisSuperHelper.Helpers;
-using IBatisSuperHelper.Validation.Helpers;
-using IBatisSuperHelper.Indexers;
-using IBatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Helpers;
+using BatisSuperHelper.Validation.Helpers;
+using BatisSuperHelper.Indexers;
+using BatisSuperHelper.Indexers.Models;
 
-namespace IBatisSuperHelper.Validation
+namespace BatisSuperHelper.Validation
 {
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(QueryNotExistsCodeFixProvider)), Shared]
     public class QueryNotExistsCodeFixProvider : CodeFixProvider

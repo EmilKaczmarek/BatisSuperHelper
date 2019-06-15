@@ -1,11 +1,11 @@
 ﻿using EnvDTE;
-using IBatisSuperHelper.Constants;
-using IBatisSuperHelper.Constants.BatisConstants;
-using IBatisSuperHelper.Helpers;
-using IBatisSuperHelper.Indexers.Models;
-using IBatisSuperHelper.Parsers;
-using IBatisSuperHelper.Storage;
-using IBatisSuperHelper.VSIntegration.ErrorList;
+using BatisSuperHelper.Constants;
+using BatisSuperHelper.Constants.BatisConstants;
+using BatisSuperHelper.Helpers;
+using BatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Parsers;
+using BatisSuperHelper.Storage;
+using BatisSuperHelper.VSIntegration.ErrorList;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
@@ -18,7 +18,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Validation.XmlValidators
+namespace BatisSuperHelper.Validation.XmlValidators
 {
     public class QueryUnused : IXmlValidator, IBufferValidator, IBuildDocumentValidator
     {
@@ -27,6 +27,7 @@ namespace IBatisSuperHelper.Validation.XmlValidators
         private readonly ITextDocument _document;
         private BatisXmlMapParser _xmlParser;
 
+        public string FilePath => _filePath;
         private readonly string _filePath;
 
         private readonly List<BatisError> _errors = new List<BatisError>();
@@ -82,8 +83,10 @@ namespace IBatisSuperHelper.Validation.XmlValidators
                     var line = cSpan.Span.Start.GetContainingLine();
                     if (_xmlParser.HasSelectedLineValidQuery(line.LineNumber + 1))
                     {
-                        var query = _xmlParser.GetQueryAtLineOrNull(line.LineNumber + 1, GotoAsyncPackage.Storage.SqlMapConfigProvider.GetCurrentSettings().UseStatementNamespaces);
-                        var queryUsages = GotoAsyncPackage.Storage.CodeQueries.GetKeysByQueryId(query, GotoAsyncPackage.Storage.SqlMapConfigProvider.GetCurrentSettings().UseStatementNamespaces);
+                        var fileName = string.IsNullOrEmpty(_filePath) ? Path.GetFileName(_document.FilePath) : Path.GetFileName(_filePath);
+                        var useNamespace = GotoAsyncPackage.Storage.SqlMapConfigProvider.GetConfigForMapFile(Path.GetFileName(fileName)).Settings.UseStatementNamespaces;
+                        var query = _xmlParser.GetQueryAtLineOrNull(line.LineNumber + 1, useNamespace);
+                        var queryUsages = GotoAsyncPackage.Storage.CodeQueries.GetKeys(query, useNamespace);
                         if (!queryUsages.Any())
                         {
                             var statmentIdCSpan = classificationSpans.FirstOrDefault(e =>
@@ -106,7 +109,9 @@ namespace IBatisSuperHelper.Validation.XmlValidators
             var parserResults = _xmlParser.GetMapFileStatmentsWithIdAttributeColumnInfo();
             foreach (var result in parserResults)
             {
-                var queryUsages = GotoAsyncPackage.Storage.CodeQueries.GetKeysByQueryId(result.FullyQualifiedQuery, GotoAsyncPackage.Storage.SqlMapConfigProvider.GetCurrentSettings().UseStatementNamespaces);
+                var fileName = string.IsNullOrEmpty(_filePath) ? Path.GetFileName(_document.FilePath) : Path.GetFileName(_filePath);
+                var useNamespace = GotoAsyncPackage.Storage.SqlMapConfigProvider.GetConfigForMapFile(Path.GetFileName(fileName)).Settings.UseStatementNamespaces;
+                var queryUsages = GotoAsyncPackage.Storage.CodeQueries.GetKeys(result.FullyQualifiedQuery, useNamespace);
                 if (!queryUsages.Any())
                 {
                     AddError(result, $"Query {result.QueryId} is unused.");
@@ -125,6 +130,7 @@ namespace IBatisSuperHelper.Validation.XmlValidators
                 Category = TaskCategory.Misc,
                 Document = _filePath,
                 ErrorCode = "IB002",
+                ErrorSeverity = Microsoft.VisualStudio.Shell.Interop.__VSERRORCATEGORY.EC_MESSAGE,
             };
 
             if (!_errors.Any(e => e.Line == error.Line &&
@@ -147,6 +153,7 @@ namespace IBatisSuperHelper.Validation.XmlValidators
                 Category = TaskCategory.Misc,
                 Document = _document.FilePath,
                 ErrorCode = "IB002",
+                ErrorSeverity = Microsoft.VisualStudio.Shell.Interop.__VSERRORCATEGORY.EC_MESSAGE,
             };
 
             if (!_errors.Any(e=>e.Line == error.Line && 

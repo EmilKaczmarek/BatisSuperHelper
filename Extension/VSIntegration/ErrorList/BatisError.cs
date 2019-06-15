@@ -1,13 +1,14 @@
 ﻿using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Adornments;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.VSIntegration.ErrorList
+namespace BatisSuperHelper.VSIntegration.ErrorList
 {
     public class BatisError
     {
@@ -24,5 +25,22 @@ namespace IBatisSuperHelper.VSIntegration.ErrorList
         public TaskPriority Priority => TaskPriority.Normal;
         public TaskCategory Category { get; set; }
         public string Document { get; set; }
+
+        public string TaggerErrorType => GetTaggerError();
+
+        private string GetTaggerError()
+        {
+            switch (ErrorSeverity)
+            {
+                case __VSERRORCATEGORY.EC_ERROR:
+                    return PredefinedErrorTypeNames.CompilerError;
+                case __VSERRORCATEGORY.EC_WARNING:
+                    return PredefinedErrorTypeNames.Warning;
+                case __VSERRORCATEGORY.EC_MESSAGE:
+                    return PredefinedErrorTypeNames.Suggestion;
+                default:
+                    return PredefinedErrorTypeNames.OtherError;
+            }
+        }
     }
 }

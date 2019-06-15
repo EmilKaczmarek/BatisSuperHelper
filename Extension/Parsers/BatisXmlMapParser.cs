@@ -4,13 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
-using IBatisSuperHelper.Constants;
-using IBatisSuperHelper.Constants.BatisConstants;
-using IBatisSuperHelper.Helpers;
-using IBatisSuperHelper.HelpersAndExtensions;
-using IBatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Constants;
+using BatisSuperHelper.Constants.BatisConstants;
+using BatisSuperHelper.Helpers;
+using BatisSuperHelper.HelpersAndExtensions;
+using BatisSuperHelper.Indexers.Models;
 
-namespace IBatisSuperHelper.Parsers
+namespace BatisSuperHelper.Parsers
 {
     public class BatisXmlMapParser : XmlParser
     {
@@ -50,7 +50,7 @@ namespace IBatisSuperHelper.Parsers
         public List<XmlQuery> GetMapFileStatments()
         {
             var statementChildNodes = GetChildNodesOfParentByXPath(XmlMapConstants.StatementsRootElementXPath);
-            return statementChildNodes.Where(e => IBatisHelper.IsIBatisStatment(e.Name)).Select(e => new XmlQuery
+            return statementChildNodes.Where(e => BatisConstantsHelper.IsBatisStatment(e.Name)).Select(e => new XmlQuery
             {
                 QueryFileName = FileName,
                 QueryFilePath = FilePath,
@@ -65,7 +65,7 @@ namespace IBatisSuperHelper.Parsers
         public List<XmlQuery> GetMapFileStatmentsWithIdAttributeColumnInfo()
         {
             var statementChildNodes = GetChildNodesOfParentByXPath(XmlMapConstants.StatementsRootElementXPath);
-            return statementChildNodes.Where(e => IBatisHelper.IsIBatisStatment(e.Name)).Select(e => new XmlQuery
+            return statementChildNodes.Where(e => BatisConstantsHelper.IsBatisStatment(e.Name)).Select(e => new XmlQuery
             {
                 XmlLine = e.Attributes.FirstOrDefault(x => x.Name == "id")?.Line,
                 XmlLineColumn = e.Attributes.FirstOrDefault(x=>x.Name == "id")?.LinePosition,

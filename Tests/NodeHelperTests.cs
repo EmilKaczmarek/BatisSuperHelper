@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using IBatisSuperHelper.Helpers;
+using BatisSuperHelper.Helpers;
 using Xunit;
 
 namespace Tests

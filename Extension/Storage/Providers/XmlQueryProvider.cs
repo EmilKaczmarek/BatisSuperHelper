@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using IBatisSuperHelper.HelpersAndExtensions;
-using IBatisSuperHelper.Indexers;
-using IBatisSuperHelper.Indexers.Models;
-using IBatisSuperHelper.Storage.Interfaces;
-using IBatisSuperHelper.Storage.Providers;
+using BatisSuperHelper.HelpersAndExtensions;
+using BatisSuperHelper.Indexers;
+using BatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Storage.Interfaces;
+using BatisSuperHelper.Storage.Providers;
 
-namespace IBatisSuperHelper.Storage.Domain
+namespace BatisSuperHelper.Storage.Domain
 {
     public class XmlQueryProvider : IQueryProvider<IndexerKey, XmlQuery>
     {
@@ -73,19 +73,27 @@ namespace IBatisSuperHelper.Storage.Domain
             return _xmlStatments.Values.Where(x => x.QueryFileName.Equals(fileName, StringComparison.CurrentCultureIgnoreCase)).ToList();
         }
 
-        private List<IndexerKey> GetKeysByQueryId(string queryId)
+        private List<IndexerKey> GetKeysByQueryId(string queryId, bool useNamespace)
         {
-            return _xmlStatments.Keys.Where(e => e.StatmentName.Equals(queryId)).ToList();
+            return _xmlStatments
+               .Where(e => e.Key.StatmentName.Equals(queryId))
+               .Where(e => e.Value.Config.Settings.UseStatementNamespaces == useNamespace)
+               .Select(e => e.Key)
+               .ToList();
         }
 
-        private List<IndexerKey> GetKeysByFullyQualifiedName(string queryId)
+        private List<IndexerKey> GetKeysByFullyQualifiedName(string queryId, bool useNamespace)
         {
-            return _xmlStatments.Keys.Where(e => e.StatmentFullyQualifiedName.Equals(queryId)).ToList();
+            return _xmlStatments
+                .Where(e => e.Key.StatmentFullyQualifiedName.Equals(queryId))
+                .Where(e => e.Value.Config.Settings.UseStatementNamespaces == useNamespace)
+                .Select(e => e.Key)
+                .ToList();
         }
 
-        public List<IndexerKey> GetKeysByQueryId(string queryId, bool useNamespace)
+        public List<IndexerKey> GetKeys(string queryId, bool useNamespace)
         {
-            return useNamespace? GetKeysByFullyQualifiedName(queryId): GetKeysByQueryId(queryId);
+            return useNamespace? GetKeysByFullyQualifiedName(queryId, useNamespace): GetKeysByQueryId(queryId, useNamespace);
         }
 
         public void RemoveStatmentByValue(XmlQuery value)

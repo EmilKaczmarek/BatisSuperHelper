@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("iBatisSuperHelper Alpha preview")]
+[assembly: AssemblyTitle("BatisSuperHelper Alpha preview")]
 [assembly: AssemblyDescription("Productivity enchanting extension Alpha preview")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("MU&EK")]
-[assembly: AssemblyProduct("iBatisSuperHelper")]
+[assembly: AssemblyProduct("BatisSuperHelper")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

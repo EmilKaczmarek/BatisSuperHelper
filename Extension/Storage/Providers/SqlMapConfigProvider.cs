@@ -1,73 +1,35 @@
-﻿using IBatisSuperHelper.Parsers.Models;
-using IBatisSuperHelper.Parsers.XmlConfig.Models;
+﻿using BatisSuperHelper.Parsers.Models;
+using BatisSuperHelper.Parsers.XmlConfig.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Storage.Providers
+namespace BatisSuperHelper.Storage.Providers
 {
     public class SqlMapConfigProvider : ISqlMapConfigProvider
     {
-        private SqlMapConfig _currentSqlMapConfig;
         private GenericStorage<string, SqlMapConfig> _sqlMapConfigs;
 
         public SqlMapConfigProvider()
         {
-            _currentSqlMapConfig = new SqlMapConfig();
             _sqlMapConfigs = new GenericStorage<string, SqlMapConfig>();
         }
 
-        public void SetSingleMapConfig(SqlMapConfig config)
+        public void AddMultiple(IEnumerable<SqlMapConfig> configs)
         {
-            _sqlMapConfigs.Add(config.Name, config);
-            if (_currentSqlMapConfig == null || _currentSqlMapConfig.IsDefault)
-            {
-                _currentSqlMapConfig = config;
-            }
+            _sqlMapConfigs.AddMultiple(configs.Select(e => new KeyValuePair<string, SqlMapConfig>(e.Name, e)));
         }
 
-        public void SetMultipleMapConfigs(IEnumerable<SqlMapConfig> configs, SqlMapConfig current)
+        public IEnumerable<SqlMapConfig> GetAll()
         {
-            _currentSqlMapConfig = current;
-            _sqlMapConfigs = new GenericStorage<string, SqlMapConfig>(configs.Select(e=> new KeyValuePair<string, SqlMapConfig>(e.Name, e)));
+            return _sqlMapConfigs.GetAllValues();
         }
 
-        public void SetMultipleMapConfigs(IEnumerable<SqlMapConfig> configs, string currentConfigName)
+        public SqlMapConfig GetSingle(string name)
         {
-            _sqlMapConfigs = new GenericStorage<string, SqlMapConfig>(configs.Select(e => new KeyValuePair<string, SqlMapConfig>(e.Name, e)));
-
-            if (!_sqlMapConfigs.TryGetValue(currentConfigName, out var sqlMapConfig))
-            {
-                throw new ArgumentException($"{nameof(currentConfigName)} with value {currentConfigName} was not found.");
-            }
-            _currentSqlMapConfig = sqlMapConfig;
-            
-        }
-
-        public Settings GetCurrentSettings()
-        {
-            return _currentSqlMapConfig.Settings;
-        }
-
-        public void SwitchCurrentConfig(SqlMapConfig current)
-        {
-            if (!_sqlMapConfigs.TryGetValue(current.Name, out var sqlMapConfig))
-            {
-                throw new ArgumentException($"{nameof(current)} was not found.");
-            }
-            _currentSqlMapConfig = sqlMapConfig;
-
-        }
-
-        public void SwitchCurrentConfig(string currentConfigName)
-        {
-            if (_sqlMapConfigs.TryGetValue(currentConfigName, out var sqlMapConfig))
-            {
-                throw new ArgumentException($"{nameof(currentConfigName)} with value {currentConfigName} was not found.");
-            }
-            _currentSqlMapConfig = sqlMapConfig;
+            return _sqlMapConfigs.GetValue(name);
         }
 
         public void UpdateOrAddConfig(SqlMapConfig updated)
@@ -78,13 +40,30 @@ namespace IBatisSuperHelper.Storage.Providers
             }
             else
             {
-                SetSingleMapConfig(updated);
-            }
-
-            if (_currentSqlMapConfig.Name == updated.Name)
-            {
-                SwitchCurrentConfig(updated);
+                _sqlMapConfigs.Add(updated.Name, updated);
             }
         }
+
+        public SqlMapConfig GetConfigForMapFile(string mapfileName)
+        {
+            var configs = _sqlMapConfigs.Where(e => e.Value.Maps.Select(x => x.Value).Contains(mapfileName)).Select(e=>e.Value);
+            if (configs.Count() == 1)
+            {
+                return configs.First();
+            }
+
+            if (configs.Count() == 0)
+            {
+                return new SqlMapConfig();
+            }
+
+            if (configs.Count() > 1 && configs.All(e => configs.First().Equals(e)))
+            {
+                return configs.First();
+            }
+
+            throw new Exception($"Map {mapfileName} is found in more than 1 non distinct configs.");
+        }
+
     }
 }

@@ -1,30 +1,32 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
-using IBatisSuperHelper.Constants.BatisConstants;
-using IBatisSuperHelper.Indexers.Models;
-using IBatisSuperHelper.Loggers;
-using IBatisSuperHelper.Models;
-using IBatisSuperHelper.Parsers;
-using IBatisSuperHelper.Parsers.Models;
-using IBatisSuperHelper.Parsers.XmlConfig.Models;
+using BatisSuperHelper.Constants.BatisConstants;
+using BatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Loggers;
+using BatisSuperHelper.Models;
+using BatisSuperHelper.Parsers;
+using BatisSuperHelper.Parsers.Models;
 
-namespace IBatisSuperHelper.Indexers.Xml
+namespace BatisSuperHelper.Indexers.Xml
 {
     public class XmlIndexer
     {
-        public List<XmlQuery> BuildIndexer(IEnumerable<XmlFileInfo> solutionXmlDocuments)
+        public List<XmlQuery> BuildIndexer(IDictionary<SqlMapConfig, IEnumerable<XmlFileInfo>> configFileInfosPairs)
         {
             var result = new List<XmlQuery>();
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            foreach (var xmlSolutionDocument in solutionXmlDocuments)
+            foreach (var configFilesPair in configFileInfosPairs)
             {
-                BatisXmlMapParser parser = new BatisXmlMapParser().WithFileInfo(xmlSolutionDocument.FilePath, xmlSolutionDocument.ProjectName).Load();
-
-                bool isIBatisQueryXmlFile = parser.XmlNamespace == XmlMapConstants.XmlNamespace;
-                if (isIBatisQueryXmlFile)
+                foreach (var xmlSolutionDocument in configFilesPair.Value)
                 {
-                    result.AddRange(parser.GetMapFileStatments());
+                    BatisXmlMapParser parser = new BatisXmlMapParser().WithFileInfo(xmlSolutionDocument.FilePath, xmlSolutionDocument.ProjectName).Load();
+
+                    bool isBatisQueryXmlFile = parser.XmlNamespace == XmlMapConstants.XmlNamespace;
+                    if (isBatisQueryXmlFile)
+                    {
+                        result.AddRange(parser.GetMapFileStatments());
+                    }
                 }
             }
             sw.Stop();
@@ -36,8 +38,8 @@ namespace IBatisSuperHelper.Indexers.Xml
         {
             BatisXmlMapParser parser = new BatisXmlMapParser().WithFileInfo(xmlDocument.FilePath, xmlDocument.ProjectName).Load();
 
-            bool isIBatisQueryXmlFile = parser.XmlNamespace == XmlMapConstants.XmlNamespace;
-            if (isIBatisQueryXmlFile)
+            bool isBatisQueryXmlFile = parser.XmlNamespace == XmlMapConstants.XmlNamespace;
+            if (isBatisQueryXmlFile)
             {
                 return parser.GetMapFileStatments();
             }
@@ -48,7 +50,7 @@ namespace IBatisSuperHelper.Indexers.Xml
         {
             BatisXmlConfigParser parser = new BatisXmlConfigParser().WithFileInfo(xmlDocument.FilePath, xmlDocument.ProjectName).Load();
 
-            if (parser.XmlNamespace == XmlConfigConstants.XmlNamespace)
+            if (parser.XmlNamespace == Constants.BatisConstants.XmlConfigConstants.XmlNamespace)
             {
                 return parser.Result;
             }

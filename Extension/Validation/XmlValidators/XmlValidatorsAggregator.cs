@@ -6,29 +6,32 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EnvDTE;
-using IBatisSuperHelper.Loggers;
-using IBatisSuperHelper.VSIntegration.ErrorList;
+using BatisSuperHelper.Loggers;
+using BatisSuperHelper.VSIntegration.ErrorList;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using NLog;
 
-namespace IBatisSuperHelper.Validation.XmlValidators
+namespace BatisSuperHelper.Validation.XmlValidators
 {
     public class XmlValidatorsAggregator : IXmlValidator, IBuildDocumentValidator, IBufferValidator
     {
         public static XmlValidatorsAggregator Create => new XmlValidatorsAggregator();
         private readonly List<IXmlValidator> _validators = new List<IXmlValidator>();
 
+        public string FilePath { get; private set; }
         private XmlValidatorsAggregator()
         {
             _validators.Clear();
         }
 
-        public XmlValidatorsAggregator AllValidatorsForBuffer(IClassifier classifier, SnapshotSpan span, ITextDocument document, IWpfTextView view, ITextBuffer buffer)
+        public XmlValidatorsAggregator AllValidatorsForBuffer(IClassifier classifier, SnapshotSpan span, ITextDocument document, ITextBuffer buffer)
         {
             _validators.Add(new QueryUnused(classifier, span, document));
             _validators.Add(new MapNotEmbedded(classifier, span, document, buffer));
+
+            FilePath = document.FilePath;
 
             return this;
         }
@@ -37,6 +40,8 @@ namespace IBatisSuperHelper.Validation.XmlValidators
         {
             _validators.Add(new QueryUnused(filePath));
             _validators.Add(new MapNotEmbedded(filePath));
+
+            FilePath = filePath;
 
             return this;
         }
