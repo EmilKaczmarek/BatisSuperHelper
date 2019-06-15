@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using IBatisSuperHelper.HelpersAndExtensions;
-using IBatisSuperHelper.Models;
 using Xunit;
+using BatisSuperHelper.Models;
+using BatisSuperHelper.HelpersAndExtensions;
 
 namespace Tests
 {

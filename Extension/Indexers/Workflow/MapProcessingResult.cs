@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Indexers.Workflow
+namespace BatisSuperHelper.Indexers.Workflow
 {
     public class MapProcessingResult
     {

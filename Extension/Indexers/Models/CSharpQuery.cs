@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace IBatisSuperHelper.Indexers.Models
+namespace BatisSuperHelper.Indexers.Models
 {
     public class CSharpQuery : BaseIndexerValue
     {

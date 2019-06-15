@@ -3,12 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using IBatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Indexers.Models;
 
-namespace IBatisSuperHelper.HelpersAndExtensions
+namespace BatisSuperHelper.HelpersAndExtensions
 {
     public static class MapNamespaceHelper
     {
+        public static bool IsQueryWithNamespace(string query)
+        {
+            return query.Split('.').Count() > 1;
+        }
+
         public static Tuple<string,string> DetermineMapNamespaceQueryPairFromCodeInput(string queryWithNamespace)
         {
             if (queryWithNamespace == null)

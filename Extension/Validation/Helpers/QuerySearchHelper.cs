@@ -1,14 +1,9 @@
-﻿using IBatisSuperHelper.Indexers;
-using IBatisSuperHelper.Indexers.Models;
-using IBatisSuperHelper.Storage;
+﻿using BatisSuperHelper.Indexers;
 using Ruzzie.FuzzyStrings;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Validation.Helpers
+namespace BatisSuperHelper.Validation.Helpers
 {
     public class QuerySearchHelper
     {

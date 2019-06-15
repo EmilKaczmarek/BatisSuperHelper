@@ -1,4 +1,4 @@
-﻿<platformUi:DialogWindow x:Class="IBatisSuperHelper.Windows.RenameWindow.RenameModalWindowControl"
+﻿<platformUi:DialogWindow x:Class="BatisSuperHelper.Windows.RenameWindow.RenameModalWindowControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"

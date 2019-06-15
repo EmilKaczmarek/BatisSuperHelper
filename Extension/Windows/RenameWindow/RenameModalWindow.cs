@@ -1,4 +1,4 @@
-﻿namespace IBatisSuperHelper.Windows.RenameWindow
+﻿namespace BatisSuperHelper.Windows.RenameWindow
 {
     using System;
     using System.Runtime.InteropServices;

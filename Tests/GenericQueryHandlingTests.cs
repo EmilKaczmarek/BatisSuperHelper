@@ -5,7 +5,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System.Threading.Tasks;
-using IBatisSuperHelper.Indexers.Code;
+using BatisSuperHelper.Indexers.Code;
 using Xunit;
 
 namespace Tests

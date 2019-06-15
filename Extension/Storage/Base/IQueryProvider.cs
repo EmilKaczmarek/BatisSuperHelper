@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using IBatisSuperHelper.Storage.Providers;
+using BatisSuperHelper.Storage.Providers;
 
-namespace IBatisSuperHelper.Storage.Interfaces
+namespace BatisSuperHelper.Storage.Interfaces
 {
     public interface IQueryProvider<T, T1>
     {
@@ -13,7 +13,7 @@ namespace IBatisSuperHelper.Storage.Interfaces
         List<T> GetAllKeys();
         T1 GetValue(T key);
         T1 GetValueOrNull(T key);
-        List<T> GetKeysByQueryId(string queryId, bool useNamespace);
+        List<T> GetKeys(string queryId, bool useNamespace);
         void Add(T key, T1 value);
         void AddWithoutKey(T1 value);
         void AddMultiple(List<KeyValuePair<T, T1>> keyValuePairs);

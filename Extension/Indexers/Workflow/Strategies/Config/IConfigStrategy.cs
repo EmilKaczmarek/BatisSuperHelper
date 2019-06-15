@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Indexers.Workflow.Strategies.Config
+namespace BatisSuperHelper.Indexers.Workflow.Strategies.Config
 {
     public interface IConfigStrategy
     {

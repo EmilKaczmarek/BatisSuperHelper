@@ -8,9 +8,9 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.FindSymbols;
 using StackExchange.Profiling;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 
-namespace IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.ResolveStrategy
+namespace BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.ResolveStrategy
 {
     public class IdentifierStrategy : IResolveStrategy
     {
@@ -32,6 +32,15 @@ namespace IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.Resol
                     {
                         var getter = property.AccessorList.Accessors.FirstOrDefault(e => e.IsKind(SyntaxKind.GetAccessorDeclaration));
                         var getterBody = getter.Body;
+                        if (getterBody == null)
+                        {
+                            return new ExpressionResult
+                            {
+                                IsSolved = false,
+                                UnresolvableReason = "Getter Body is null",
+                                TextResult = "",
+                            };
+                        }
                         var firstReturnStatement = getterBody.Statements.FirstOrDefault(e => e.IsKind(SyntaxKind.ReturnStatement)) as ReturnStatementSyntax;
                         return expressionResolverInstance.GetStringValueOfExpression(document, firstReturnStatement.Expression, nodes, semanticModel);
                     }

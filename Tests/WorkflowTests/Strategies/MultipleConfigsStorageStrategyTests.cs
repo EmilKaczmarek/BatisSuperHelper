@@ -1,7 +1,7 @@
-﻿using IBatisSuperHelper;
-using IBatisSuperHelper.Indexers.Workflow.Strategies.Storage.Configs;
-using IBatisSuperHelper.Parsers.Models;
-using IBatisSuperHelper.Storage;
+﻿using BatisSuperHelper;
+using BatisSuperHelper.Indexers.Workflow.Strategies.Storage.Configs;
+using BatisSuperHelper.Parsers.Models;
+using BatisSuperHelper.Storage;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -23,12 +23,12 @@ namespace Tests
                 map1, map2
             };
             var storageMock = new Mock<IPackageStorage>();
-            storageMock.Setup(e => e.SqlMapConfigProvider.SetMultipleMapConfigs(It.IsAny<IEnumerable<SqlMapConfig>>(), It.IsAny<SqlMapConfig>()));
+            storageMock.Setup(e => e.SqlMapConfigProvider.AddMultiple(It.IsAny<IEnumerable<SqlMapConfig>>()));
 
             var instance = new MultipleConfigsStorageStrategy(maps, storageMock.Object);
             instance.Store();
 
-            storageMock.Verify(e => e.SqlMapConfigProvider.SetMultipleMapConfigs(maps, map1));
+            storageMock.Verify(e => e.SqlMapConfigProvider.AddMultiple(maps));
         }
     }
 }

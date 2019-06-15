@@ -1,16 +1,16 @@
-﻿using IBatisSuperHelper.EventHandlers;
-using IBatisSuperHelper.EventHandlers.SolutionEventsActions;
-using IBatisSuperHelper.Indexers.Workflow;
-using IBatisSuperHelper.Loggers;
-using IBatisSuperHelper.VSIntegration.ErrorList;
+﻿using BatisSuperHelper.EventHandlers;
+using BatisSuperHelper.EventHandlers.SolutionEventsActions;
+using BatisSuperHelper.Indexers.Workflow;
+using BatisSuperHelper.Loggers;
+using BatisSuperHelper.VSIntegration.ErrorList;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using NLog;
 using System;
 using System.Diagnostics;
-using static IBatisSuperHelper.Constants.EventConstats.VS;
+using static BatisSuperHelper.Constants.EventConstats.VS;
 
-namespace IBatisSuperHelper.Events
+namespace BatisSuperHelper.Events
 {
     public class VSSolutionEventsHandler
     {

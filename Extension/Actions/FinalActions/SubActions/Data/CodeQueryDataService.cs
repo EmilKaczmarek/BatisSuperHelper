@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using IBatisSuperHelper.HelpersAndExtensions;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
-using IBatisSuperHelper.Indexers;
-using IBatisSuperHelper.Indexers.Models;
-using IBatisSuperHelper.Storage;
-using IBatisSuperHelper.Storage.Providers;
-using IBatisSuperHelper.Windows.ResultWindow.ViewModel;
+using BatisSuperHelper.HelpersAndExtensions;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using BatisSuperHelper.Indexers;
+using BatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Storage;
+using BatisSuperHelper.Storage.Providers;
+using BatisSuperHelper.Windows.ResultWindow.ViewModel;
 
-namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Data
+namespace BatisSuperHelper.Actions.FinalActions.SubActions.Data
 {
     public class CodeQueryDataService : IQueryDataService<CSharpQuery>
     {
@@ -28,7 +28,7 @@ namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Data
 
         public List<IndexerKey> GetStatmentKeys(string query, bool useNamespace)
         {
-            return GotoAsyncPackage.Storage.CodeQueries.GetKeysByQueryId(query, useNamespace);
+            return GotoAsyncPackage.Storage.CodeQueries.GetKeys(query, useNamespace);
         }
 
         public List<CSharpQuery> GetStatmentsFromKeys(List<IndexerKey> keys)

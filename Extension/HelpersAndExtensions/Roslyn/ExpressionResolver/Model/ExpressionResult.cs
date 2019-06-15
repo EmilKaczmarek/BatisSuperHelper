@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.Model;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.Model;
 
-namespace IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels
+namespace BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels
 {
     public enum UnresolvedPartType
     {

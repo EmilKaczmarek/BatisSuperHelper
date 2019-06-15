@@ -1,6 +1,6 @@
-﻿using IBatisSuperHelper.Constants.BatisConstants;
+﻿using BatisSuperHelper.Constants.BatisConstants;
 
-namespace IBatisSuperHelper.Parsers.XmlConfig.Models
+namespace BatisSuperHelper.Parsers.XmlConfig.Models
 {
     public class Settings
     {

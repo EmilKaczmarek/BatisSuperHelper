@@ -1,10 +1,10 @@
 ﻿using EnvDTE;
 using EnvDTE80;
-using IBatisSuperHelper.HelpersAndExtensions;
-using IBatisSuperHelper.HelpersAndExtensions.VisualStudio;
-using IBatisSuperHelper.Indexers;
-using IBatisSuperHelper.Indexers.Models;
-using IBatisSuperHelper.Windows.RenameWindow.ViewModel;
+using BatisSuperHelper.HelpersAndExtensions;
+using BatisSuperHelper.HelpersAndExtensions.VisualStudio;
+using BatisSuperHelper.Indexers;
+using BatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Windows.RenameWindow.ViewModel;
 using Microsoft.VisualStudio.LanguageServices;
 using System;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Logic.Rename
+namespace BatisSuperHelper.Actions.FinalActions.SubActions.Logic.Rename
 {
     public class RenameXmlLogicHandler
     {

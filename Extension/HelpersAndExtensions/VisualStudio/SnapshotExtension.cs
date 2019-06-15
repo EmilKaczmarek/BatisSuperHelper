@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.HelpersAndExtensions.VisualStudio
+namespace BatisSuperHelper.HelpersAndExtensions.VisualStudio
 {
     public static class SnapshotExtension
     {

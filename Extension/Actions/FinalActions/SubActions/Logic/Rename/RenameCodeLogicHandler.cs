@@ -1,7 +1,7 @@
-﻿using IBatisSuperHelper.Helpers;
-using IBatisSuperHelper.Indexers;
-using IBatisSuperHelper.Indexers.Models;
-using IBatisSuperHelper.Windows.RenameWindow.ViewModel;
+﻿using BatisSuperHelper.Helpers;
+using BatisSuperHelper.Indexers;
+using BatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Windows.RenameWindow.ViewModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -10,7 +10,7 @@ using Microsoft.VisualStudio.Shell;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Logic.Rename
+namespace BatisSuperHelper.Actions.FinalActions.SubActions.Logic.Rename
 {
     public class RenameCodeLogicHandler
     {

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.VSIntegration
+namespace BatisSuperHelper.VSIntegration
 {
     public class StatusBarIntegration
     {

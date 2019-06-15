@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Validation.XmlValidators
+namespace BatisSuperHelper.Validation.XmlValidators
 {
     public interface IBuildDocumentValidator
     {

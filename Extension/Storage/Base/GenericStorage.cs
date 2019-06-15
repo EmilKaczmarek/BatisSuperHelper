@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Storage
+namespace BatisSuperHelper.Storage
 {
     public class GenericStorage<T, T1> : IEnumerable<KeyValuePair<T, T1>>
     {

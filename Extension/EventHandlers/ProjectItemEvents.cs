@@ -5,14 +5,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using IBatisSuperHelper.Indexers;
-using IBatisSuperHelper.Models;
-using IBatisSuperHelper.Parsers;
-using IBatisSuperHelper.Storage;
+using BatisSuperHelper.Indexers;
+using BatisSuperHelper.Models;
+using BatisSuperHelper.Parsers;
+using BatisSuperHelper.Storage;
 using NLog;
-using IBatisSuperHelper.Loggers;
+using BatisSuperHelper.Loggers;
 
-namespace IBatisSuperHelper.EventHandlers
+namespace BatisSuperHelper.EventHandlers
 {
     public class ProjectItemEventsActions
     {

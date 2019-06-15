@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using IBatisSuperHelper.Storage;
+using BatisSuperHelper.Storage;
 using System.Threading.Tasks;
 using Xunit;
 

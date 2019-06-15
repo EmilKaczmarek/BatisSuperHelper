@@ -1,7 +1,7 @@
 ﻿//using System;
 //using Microsoft.VisualStudio.TestTools.UnitTesting;
-//using IBatisSuperHelper.Indexers;
-//using static IBatisSuperHelper.Indexers.XmlIndexer;
+//using BatisSuperHelper.Indexers;
+//using static BatisSuperHelper.Indexers.XmlIndexer;
 //using System.Collections.Generic;
 
 //namespace GoToQueryUnitTests

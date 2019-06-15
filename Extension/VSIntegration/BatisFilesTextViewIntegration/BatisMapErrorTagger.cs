@@ -1,11 +1,13 @@
-﻿using IBatisSuperHelper.Constants;
-using IBatisSuperHelper.Parsers;
-using IBatisSuperHelper.Storage;
-using IBatisSuperHelper.Validation.XmlValidators;
-using IBatisSuperHelper.VSIntegration.ErrorList;
-using IBatisSuperHelper.VSIntegration.Navigation;
+﻿using BatisSuperHelper.Constants;
+using BatisSuperHelper.Parsers;
+using BatisSuperHelper.Storage;
+using BatisSuperHelper.Storage.Event;
+using BatisSuperHelper.Validation.XmlValidators;
+using BatisSuperHelper.VSIntegration.ErrorList;
+using BatisSuperHelper.VSIntegration.Navigation;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Adornments;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
@@ -14,7 +16,7 @@ using System;
 using System.Collections.Generic;
 
 
-namespace IBatisSuperHelper.VSIntegration.BatisFilesTextViewIntegration
+namespace BatisSuperHelper.VSIntegration.BatisFilesTextViewIntegration
 {
     public class BatisMapErrorTagger : ITagger<IErrorTag>
     {
@@ -22,10 +24,10 @@ namespace IBatisSuperHelper.VSIntegration.BatisFilesTextViewIntegration
 
         private readonly IBufferValidator _validator;
         private readonly ITextBuffer _buffer;
-
+       
         private ITextSnapshot _currentSnapshot;
 
-        public BatisMapErrorTagger(IBufferValidator bufferValidator, ITextBuffer buffer)
+        public BatisMapErrorTagger(IBufferValidator bufferValidator, ITextView textView, ITextBuffer buffer)
         {
             _validator = bufferValidator;
 
@@ -33,8 +35,36 @@ namespace IBatisSuperHelper.VSIntegration.BatisFilesTextViewIntegration
             _currentSnapshot = _buffer.CurrentSnapshot;
             _buffer.Changed += Buffer_Changed;
 
+            textView.LayoutChanged += TextView_LayoutChanged;
+            textView.Caret.PositionChanged += Caret_PositionChanged;
+
             _validator.ValidateAllSpans();
             _validator.AddToErrorList();
+            StorageEvents.OnStoreChange += Storage_OnStoreChange;
+        }
+
+        private void Caret_PositionChanged(object sender, CaretPositionChangedEventArgs e)
+        {
+            TagsChanged?.Invoke(sender, new SnapshotSpanEventArgs(new SnapshotSpan(e.NewPosition.BufferPosition.Snapshot, 0, e.NewPosition.BufferPosition.Snapshot.Length)));
+        }
+
+        private void TextView_LayoutChanged(object sender, TextViewLayoutChangedEventArgs e)
+        {
+            TagsChanged?.Invoke(sender, new SnapshotSpanEventArgs(new SnapshotSpan(e.NewSnapshot, 0, e.NewSnapshot.Length)));
+        }
+
+        private void Storage_OnStoreChange(object sender, StoreChangeEventArgs e)
+        {
+            if (e.ChangedFileType.IsSet(ChangedFileTypeFlag.CSharp))
+            {
+                if (TagsChanged != null)
+                {
+                    var span = new SnapshotSpan(_buffer.CurrentSnapshot, 0, _buffer.CurrentSnapshot.Length);
+                    _validator.OnChange(span);
+                    _validator.AddToErrorList();
+                    TagsChanged.Invoke(sender, new SnapshotSpanEventArgs(span));
+                }
+            }
         }
 
         public IEnumerable<ITagSpan<IErrorTag>> GetTags(NormalizedSnapshotSpanCollection spans)
@@ -56,7 +86,8 @@ namespace IBatisSuperHelper.VSIntegration.BatisFilesTextViewIntegration
                 }
                 if (spans.IntersectsWith(error.Span))
                 {
-                    yield return new TagSpan<ErrorTag>(error.Span, new ErrorTag("Syntax error", error.Text));
+                    //yield return new TagSpan<IErrorTag>(error.Span, new ErrorTag(error.TaggerErrorType, error.Text));
+                    yield return new TagSpan<IErrorTag>(error.Span, new ErrorTag(PredefinedErrorTypeNames.CompilerError, error.Text));
                 }
             }
         }

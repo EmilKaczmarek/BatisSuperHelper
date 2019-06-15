@@ -1,26 +1,24 @@
 ﻿using EnvDTE;
-using IBatisSuperHelper.Helpers;
-using IBatisSuperHelper.HelpersAndExtensions;
-using IBatisSuperHelper.Indexers.Workflow.Options;
-using IBatisSuperHelper.Indexers.Workflow.Strategies.Storage.Configs;
-using IBatisSuperHelper.Indexers.Xml;
-using IBatisSuperHelper.Models;
-using IBatisSuperHelper.Parsers.Models;
+using BatisSuperHelper.Helpers;
+using BatisSuperHelper.HelpersAndExtensions;
+using BatisSuperHelper.Indexers.Workflow.Options;
+using BatisSuperHelper.Indexers.Workflow.Strategies.Storage.Configs;
+using BatisSuperHelper.Indexers.Xml;
+using BatisSuperHelper.Models;
+using BatisSuperHelper.Parsers.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace IBatisSuperHelper.Indexers.Workflow.Strategies.Config
+namespace BatisSuperHelper.Indexers.Workflow.Strategies.Config
 {
     public class DefaultConfigStrategy : IConfigStrategy
     {
         private readonly XmlIndexer _xmlIndexer = new XmlIndexer();
-        private readonly ConfigsIndexingOptions _options;
         private readonly ConfigStorageStrategyFactory _strategyFactory;
 
-        public DefaultConfigStrategy(ConfigsIndexingOptions options, ConfigStorageStrategyFactory strategyFactory)
+        public DefaultConfigStrategy(ConfigStorageStrategyFactory strategyFactory)
         {
-            _options = options;
             _strategyFactory = strategyFactory;
         }
 
@@ -39,7 +37,7 @@ namespace IBatisSuperHelper.Indexers.Workflow.Strategies.Config
         {
             var configs = GetConfigs(projectItems);
 
-            return _strategyFactory.GetStrategy(_options, configs).Store();
+            return _strategyFactory.GetStrategy(configs).Store();
         }
     }
 }

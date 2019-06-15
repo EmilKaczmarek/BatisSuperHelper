@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
-namespace IBatisSuperHelper.Constants.BatisConstants
+namespace BatisSuperHelper.Constants.BatisConstants
 {
 #pragma warning disable S1075 // URIs should not be hardcoded
     public static class XmlMapConstants

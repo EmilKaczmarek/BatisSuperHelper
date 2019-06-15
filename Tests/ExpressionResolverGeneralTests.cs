@@ -6,8 +6,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver;
 using Xunit;
 
 namespace Tests

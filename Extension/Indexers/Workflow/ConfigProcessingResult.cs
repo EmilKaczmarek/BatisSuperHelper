@@ -1,11 +1,11 @@
-﻿using IBatisSuperHelper.Parsers.Models;
+﻿using BatisSuperHelper.Parsers.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Indexers.Workflow
+namespace BatisSuperHelper.Indexers.Workflow
 {
     public class ConfigProcessingResult
     {
@@ -27,6 +27,7 @@ namespace IBatisSuperHelper.Indexers.Workflow
         public static ConfigProcessingResult FromProcessingResults(IEnumerable<SqlMapConfig> configs)
         {
             var result = new ConfigProcessingResult();
+            
             if (configs.Count() == 1)
             {
                 result.HasAtLeastOneProperConfig = true;

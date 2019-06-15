@@ -5,16 +5,17 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.Model;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
-using IBatisSuperHelper.Loggers;
-using IBatisSuperHelper.Storage;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.ResolveStrategy;
-using IBatisSuperHelper.Constants;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.Model;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using BatisSuperHelper.Loggers;
+using BatisSuperHelper.Storage;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.ResolveStrategy;
+using BatisSuperHelper.Constants;
+using BatisSuperHelper.Constants.BatisConstants;
 
-namespace IBatisSuperHelper.Helpers
+namespace BatisSuperHelper.Helpers
 {
     public class NodeHelpers
     {
@@ -53,7 +54,7 @@ namespace IBatisSuperHelper.Helpers
             return true;
         }
 
-        public bool IsIBatisMethod(InvocationExpressionSyntax analyzeNode)
+        public bool IsBatisMethod(InvocationExpressionSyntax analyzeNode)
         {
             MemberAccessExpressionSyntax nameSyntax = null;
             if (analyzeNode == null || analyzeNode.Expression == null)
@@ -64,7 +65,7 @@ namespace IBatisSuperHelper.Helpers
             if (nameSyntax == null || nameSyntax.Name == null)
                 return false;
 
-            return IBatisConstants.MethodNames.Contains(nameSyntax.Name.Identifier.ValueText);
+            return CodeConstants.MethodNames.Contains(nameSyntax.Name.Identifier.ValueText);
         }
 
         public T GetFirstParentNodeOfType<T>(SyntaxNode node) where T: SyntaxNode
@@ -77,7 +78,7 @@ namespace IBatisSuperHelper.Helpers
             return analyzeNode as T;
         }
 
-        public bool DoesSyntaxNodeContainsIBatisNamespace(SyntaxNode node)
+        public bool DoesSyntaxNodeContainsBatisNamespace(SyntaxNode node)
         {
             var type = _semanticModel.GetTypeInfo(node);
             if (type.Type != null && type.Type.ContainingNamespace != null)
@@ -88,14 +89,14 @@ namespace IBatisSuperHelper.Helpers
         }
 
         //Method is working 100% correct, but could lead to unwanted behaviour.
-        //Should work on better method to determine if it's using iBatis.
+        //Should work on better method to determine if it's using Batis.
         /// <summary>
         /// Looks for all nodes that has 'Batis' in namespace.
-        /// Used to determine if method/class etc is iBatis in iBatis namespace.
+        /// Used to determine if method/class etc is Batis in Batis namespace.
         /// </summary>
         /// <param name="SyntaxNodes">Syntax Nodes</param>
         /// <returns></returns>
-        public bool IsAnySyntaxNodeContainIBatisNamespace(IEnumerable<SyntaxNode> SyntaxNodes)
+        public bool IsAnySyntaxNodeContainBatisNamespace(IEnumerable<SyntaxNode> SyntaxNodes)
         {
             var candidates = SyntaxNodes
                 .Select(x => _semanticModel.GetTypeInfo(x).Type)
@@ -103,6 +104,7 @@ namespace IBatisSuperHelper.Helpers
                 .ToList();
             return candidates.Any(x => x.ContainingNamespace.ToDisplayString().Contains("Batis"));
         }
+
         /// <summary>
         /// Returns IEnumerable with ArgumentLists that has non empty Argument member.
         /// </summary>
@@ -121,8 +123,8 @@ namespace IBatisSuperHelper.Helpers
         /// <returns></returns>
         public ArgumentListSyntax GetProperArgumentSyntaxNode(IEnumerable<ArgumentListSyntax> ArgumentListSyntaxNodes)
         {
-            //Posibly not enough to determine if this is proper iBatis method.
-            //Placeholder for handling other iBatis method.
+            //Posibly not enough to determine if this is proper Batis method.
+            //Placeholder for handling other Batis method.
             //But what other factors could be used here?
             return ArgumentListSyntaxNodes.FirstOrDefault(e => e.Arguments.Count > 1);
         }
@@ -155,7 +157,7 @@ namespace IBatisSuperHelper.Helpers
                 {
                     //NULL type? check maybe it's function/expression?
                     if (typeInfo.ConvertedType.Name.Equals("Func")) {
-                        //this is Function! now, lets test if this contains iBatis querry
+                        //this is Function! now, lets test if this contains Batis querry
                         var nodes = argument.DescendantNodes();
                         var syntaxArguments = GetArgumentListSyntaxFromSyntaxNodesWhereArgumentsAreNotEmpty(nodes);
                         var properNodes = GetProperArgumentSyntaxNode(syntaxArguments);
@@ -180,26 +182,6 @@ namespace IBatisSuperHelper.Helpers
         }
 
         /// <summary>
-        /// Get text presentation of Query argument value
-        /// </summary>
-        /// <param name="SyntaxNodes"></param>
-        [Obsolete("Old logic for expression analysis. Use overload instead", false)]
-        public String GetQueryStringFromSyntaxNodes(IEnumerable<SyntaxNode> SyntaxNodes)
-        {
-            if (IsAnySyntaxNodeContainIBatisNamespace(SyntaxNodes))
-            {
-                var syntaxArguments = GetArgumentListSyntaxFromSyntaxNodesWhereArgumentsAreNotEmpty(SyntaxNodes);
-                var singleArgumentListSyntax = GetProperArgumentSyntaxNode(syntaxArguments);
-
-                var queryArgument = GetArgumentSyntaxOfStringType(singleArgumentListSyntax);
-                var constantValue = _semanticModel.GetConstantValue(queryArgument.Expression).Value;
-
-                return constantValue != null ? constantValue.ToString() : queryArgument.ToString().Replace("\"", "").Trim();
-            }
-            return null;
-        }
-
-        /// <summary>
         /// Get text presentation of Query argument expression if possible
         /// </summary>
         /// <param name="SyntaxNodes"></param>
@@ -207,7 +189,7 @@ namespace IBatisSuperHelper.Helpers
         /// <param name="document"></param>
         public ExpressionResult GetQueryStringFromSyntaxNodes(Document document, IEnumerable<SyntaxNode> SyntaxNodes, IEnumerable<SyntaxNode> allDocumentNodes)
         {
-            if (IsAnySyntaxNodeContainIBatisNamespace(SyntaxNodes))
+            if (IsAnySyntaxNodeContainBatisNamespace(SyntaxNodes))
             {
                 var syntaxArguments = GetArgumentListSyntaxFromSyntaxNodesWhereArgumentsAreNotEmpty(SyntaxNodes);
                 var singleArgumentListSyntax = GetProperArgumentSyntaxNode(syntaxArguments);
@@ -233,7 +215,7 @@ namespace IBatisSuperHelper.Helpers
 
         public SyntaxKind GetExpressionKindForBatisMethodArgument(IEnumerable<SyntaxNode> SyntaxNodes)
         {
-            if (IsAnySyntaxNodeContainIBatisNamespace(SyntaxNodes))
+            if (IsAnySyntaxNodeContainBatisNamespace(SyntaxNodes))
             {
                 var syntaxArguments = GetArgumentListSyntaxFromSyntaxNodesWhereArgumentsAreNotEmpty(SyntaxNodes);
                 var singleArgumentListSyntax = GetProperArgumentSyntaxNode(syntaxArguments);

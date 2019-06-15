@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Windows.RenameWindow.ViewModel
+namespace BatisSuperHelper.Windows.RenameWindow.ViewModel
 {
     public class RenameViewModel
     {

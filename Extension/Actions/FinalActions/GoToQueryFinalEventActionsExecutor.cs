@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using IBatisSuperHelper.Actions.FinalActions.SubActions.Data;
-using IBatisSuperHelper.Actions.FinalActions.SubActions.Logic;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
-using IBatisSuperHelper.Indexers.Models;
-using IBatisSuperHelper.Storage.Providers;
+using BatisSuperHelper.Actions.FinalActions.SubActions.Data;
+using BatisSuperHelper.Actions.FinalActions.SubActions.Logic;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using BatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Storage.Providers;
 
-namespace IBatisSuperHelper.Actions.FinalActions
+namespace BatisSuperHelper.Actions.FinalActions
 {
     public class GoToQueryFinalEventActionsExecutor : BaseFinalEventActionsExecutor<GoToQueryFinalEventActionsExecutor>
     {

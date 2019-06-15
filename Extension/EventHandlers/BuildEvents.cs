@@ -1,14 +1,14 @@
 ﻿using EnvDTE;
-using IBatisSuperHelper.CoreAutomation.ProjectItems;
-using IBatisSuperHelper.Helpers;
-using IBatisSuperHelper.Loggers;
-using IBatisSuperHelper.Validation.XmlValidators;
-using IBatisSuperHelper.VSIntegration.ErrorList;
+using BatisSuperHelper.CoreAutomation.ProjectItems;
+using BatisSuperHelper.Helpers;
+using BatisSuperHelper.Loggers;
+using BatisSuperHelper.Validation.XmlValidators;
+using BatisSuperHelper.VSIntegration.ErrorList;
 using Microsoft.VisualStudio.Shell;
 using NLog;
 using System;
 
-namespace IBatisSuperHelper.EventHandlers
+namespace BatisSuperHelper.EventHandlers
 {
     public class BuildEventsActions
     {

@@ -1,7 +1,7 @@
-﻿using IBatisSuperHelper.Indexers.Workflow.Options;
-using IBatisSuperHelper.Indexers.Workflow.Strategies.Storage.Configs;
-using IBatisSuperHelper.Parsers.Models;
-using IBatisSuperHelper.Storage;
+﻿using BatisSuperHelper.Indexers.Workflow.Options;
+using BatisSuperHelper.Indexers.Workflow.Strategies.Storage.Configs;
+using BatisSuperHelper.Parsers.Models;
+using BatisSuperHelper.Storage;
 using Moq;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,119 +12,14 @@ namespace Tests
     public class ConfigStorageStrategyFactoryTests
     {
         [Fact]
-        public void ShouldGetSingleDefaultStrategyForDefaultOptionsAndEmptyList()
+        public void ShouldGetSingleDefaultStrategyForEmptyList()
         {
             var packageStorageMock = new Mock<IPackageStorage>();
             var instance = new ConfigStorageStrategyFactory(packageStorageMock.Object);
-            var options = new ConfigsIndexingOptions();
             var parsedSuccessfully = Enumerable.Empty<SqlMapConfig>();
 
-            var strategy = instance.GetStrategy(options, parsedSuccessfully);
-            Assert.IsType<SingleDefaultConfigStorageStrategy>(strategy);
-        }
-
-        [Fact]
-        public void ShouldGetSingleDefaultStrategyForNonDefaultOptionsAndEmptyList()
-        {
-            var packageStorageMock = new Mock<IPackageStorage>();
-            var instance = new ConfigStorageStrategyFactory(packageStorageMock.Object);
-            var options = new ConfigsIndexingOptions
-            {
-                SupportMultipleConfigs = true,
-            };
-            var parsedSuccessfully = Enumerable.Empty<SqlMapConfig>();
-
-            var strategy = instance.GetStrategy(options, parsedSuccessfully);
-            Assert.IsType<SingleDefaultConfigStorageStrategy>(strategy);
-        }
-
-        [Fact]
-        public void ShouldGetSingleStrategyForDefaultOptionsAndListWithOneItem()
-        {
-            var packageStorageMock = new Mock<IPackageStorage>();
-            var instance = new ConfigStorageStrategyFactory(packageStorageMock.Object);
-            var options = new ConfigsIndexingOptions();
-            var parsedSuccessfully = new List<SqlMapConfig>
-            {
-                new SqlMapConfig
-                {
-                    Name = "Map1",
-                },
-            };
-
-            var strategy = instance.GetStrategy(options, parsedSuccessfully);
-            Assert.IsType<SingleConfigStorageStrategy>(strategy);
-        }
-
-        [Fact]
-        public void ShouldGetSingleStrategyForDefaultOptionsAndListWithTwoDuplicatedItems()
-        {
-            var packageStorageMock = new Mock<IPackageStorage>();
-            var instance = new ConfigStorageStrategyFactory(packageStorageMock.Object);
-            var options = new ConfigsIndexingOptions();
-
-            var parsedSuccessfully = new List<SqlMapConfig>
-            {
-                new SqlMapConfig
-                {
-                    Name = "Map1",
-                },
-                new SqlMapConfig
-                {
-                    Name = "Map1",
-                }
-            };
-            
-            var strategy = instance.GetStrategy(options, parsedSuccessfully);
-            Assert.IsType<SingleConfigStorageStrategy>(strategy);
-        }
-
-        [Fact]
-        public void ShouldGetSingleStrategyForMutlipeConfigsOptionAndListWithTwoDuplicatedItems()
-        {
-            var packageStorageMock = new Mock<IPackageStorage>();
-            var instance = new ConfigStorageStrategyFactory(packageStorageMock.Object);
-            var options = new ConfigsIndexingOptions
-            {
-                SupportMultipleConfigs = true,
-            };
-
-            var parsedSuccessfully = new List<SqlMapConfig>
-            {
-                new SqlMapConfig
-                {
-                    Name = "Map1",
-                },
-                new SqlMapConfig
-                {
-                    Name = "Map1",
-                }
-            };
-
-            var strategy = instance.GetStrategy(options, parsedSuccessfully);
-            Assert.IsType<SingleConfigStorageStrategy>(strategy);
-        }
-
-        [Fact]
-        public void ShouldGetSingleStrategyForMutlipeConfigsOptionAndListWithOneItem()
-        {
-            var packageStorageMock = new Mock<IPackageStorage>();
-            var instance = new ConfigStorageStrategyFactory(packageStorageMock.Object);
-            var options = new ConfigsIndexingOptions
-            {
-                SupportMultipleConfigs = true,
-            };
-
-            var parsedSuccessfully = new List<SqlMapConfig>
-            {
-                new SqlMapConfig
-                {
-                    Name = "Map1",
-                },
-            };
-
-            var strategy = instance.GetStrategy(options, parsedSuccessfully);
-            Assert.IsType<SingleConfigStorageStrategy>(strategy);
+            var strategy = instance.GetStrategy(parsedSuccessfully);
+            Assert.IsType<FallbackConfigStrategy>(strategy);
         }
 
         [Fact]
@@ -132,10 +27,6 @@ namespace Tests
         {
             var packageStorageMock = new Mock<IPackageStorage>();
             var instance = new ConfigStorageStrategyFactory(packageStorageMock.Object);
-            var options = new ConfigsIndexingOptions
-            {
-                SupportMultipleConfigs = true,
-            };
 
             var parsedSuccessfully = new List<SqlMapConfig>
             {
@@ -149,7 +40,7 @@ namespace Tests
                 }
             };
 
-            var strategy = instance.GetStrategy(options, parsedSuccessfully);
+            var strategy = instance.GetStrategy(parsedSuccessfully);
             Assert.IsType<MultipleConfigsStorageStrategy>(strategy);
         }
     }

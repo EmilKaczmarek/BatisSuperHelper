@@ -1,20 +1,23 @@
 ﻿using EnvDTE;
 using EnvDTE80;
+using BatisSuperHelper.Loggers;
+using NLog;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.CoreAutomation.ProjectItems
+namespace BatisSuperHelper.CoreAutomation.ProjectItems
 {
     public class ProjectItemRetreiver : IProjectItemRetreiver
     {
-        private readonly List<ProjectItem> _projectItems = new List<ProjectItem>();
-        private readonly int maxDepth = 10000;
+        private List<ProjectItem> _projectItems = new List<ProjectItem>();
+        private const int maxDepth = 10000;
         private int currentRecursiveCall = 1;
-
         private readonly DTE2 _dte;
 
         public ProjectItemRetreiver(DTE2 dte)
@@ -56,6 +59,7 @@ namespace IBatisSuperHelper.CoreAutomation.ProjectItems
         public IEnumerable<ProjectItem> GetProjectItemsFromSolutionProjects()
         {
             Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+            _projectItems.Clear();
 
             var projects = _dte.Solution.Projects;
 
@@ -72,6 +76,7 @@ namespace IBatisSuperHelper.CoreAutomation.ProjectItems
                     }
                 }
             }
+
             return _projectItems;
         }
     }

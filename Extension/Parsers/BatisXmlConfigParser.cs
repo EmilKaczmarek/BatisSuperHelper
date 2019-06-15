@@ -1,8 +1,8 @@
-﻿using IBatisSuperHelper.Constants;
-using IBatisSuperHelper.Constants.BatisConstants;
-using IBatisSuperHelper.Parsers.Models;
-using IBatisSuperHelper.Parsers.Models.XmlConfig.SqlMap;
-using IBatisSuperHelper.Parsers.XmlConfig.Models;
+﻿using BatisSuperHelper.Constants;
+using BatisSuperHelper.Constants.BatisConstants;
+using BatisSuperHelper.Parsers.Models;
+using BatisSuperHelper.Parsers.Models.XmlConfig.SqlMap;
+using BatisSuperHelper.Parsers.XmlConfig.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Parsers
+namespace BatisSuperHelper.Parsers
 {
     public class BatisXmlConfigParser : XmlParser
     {

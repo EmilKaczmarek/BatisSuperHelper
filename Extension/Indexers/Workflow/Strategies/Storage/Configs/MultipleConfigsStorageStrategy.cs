@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using IBatisSuperHelper.Constants.BatisConstants;
-using IBatisSuperHelper.Parsers.Models;
-using IBatisSuperHelper.Storage;
+using BatisSuperHelper.Constants.BatisConstants;
+using BatisSuperHelper.Parsers.Models;
+using BatisSuperHelper.Storage;
 
-namespace IBatisSuperHelper.Indexers.Workflow.Strategies.Storage.Configs
+namespace BatisSuperHelper.Indexers.Workflow.Strategies.Storage.Configs
 {
     public class MultipleConfigsStorageStrategy : IConfigStorageStrategy
     {
@@ -17,20 +17,9 @@ namespace IBatisSuperHelper.Indexers.Workflow.Strategies.Storage.Configs
             _storage = storage;
         }
 
-        private SqlMapConfig DetermineCurrentConfig()
-        {
-            var configWithKnownName = _mapConfigs.FirstOrDefault(e => e.Name == XmlConfigConstants.KnowFileName);
-            if (configWithKnownName != null)
-            {
-                return configWithKnownName;
-            }
-
-            return _mapConfigs.First();
-        }
-
         public ConfigProcessingResult Store()
         {
-            _storage.SqlMapConfigProvider.SetMultipleMapConfigs(_mapConfigs, DetermineCurrentConfig());
+            _storage.SqlMapConfigProvider.AddMultiple(_mapConfigs);
 
             return new ConfigProcessingResult
             {

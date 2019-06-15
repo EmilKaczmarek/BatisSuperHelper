@@ -4,13 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using IBatisSuperHelper.HelpersAndExtensions;
-using IBatisSuperHelper.Indexers;
-using IBatisSuperHelper.Indexers.Models;
-using IBatisSuperHelper.Storage.Interfaces;
-using IBatisSuperHelper.Storage.Providers;
+using BatisSuperHelper.HelpersAndExtensions;
+using BatisSuperHelper.Indexers;
+using BatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Storage.Interfaces;
+using BatisSuperHelper.Storage.Providers;
 
-namespace IBatisSuperHelper.Storage.Domain
+namespace BatisSuperHelper.Storage.Domain
 {
     public class CodeQueryProvider : IQueryProvider<IndexerKey, List<CSharpQuery>>
     {
@@ -115,7 +115,7 @@ namespace IBatisSuperHelper.Storage.Domain
                 .ToList();
         }
 
-        public List<IndexerKey> GetKeysByQueryId(string queryId, bool useNamespace)
+        public List<IndexerKey> GetKeys(string queryId, bool useNamespace)
         {
             return GetKeysByFullyQualifiedName(queryId);
         }

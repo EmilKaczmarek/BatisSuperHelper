@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.HelpersAndExtensions
+namespace BatisSuperHelper.HelpersAndExtensions
 {
     public static class XmlHelper
     {

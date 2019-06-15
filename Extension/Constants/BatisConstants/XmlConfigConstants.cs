@@ -1,8 +1,8 @@
-﻿namespace IBatisSuperHelper.Constants.BatisConstants
+﻿namespace BatisSuperHelper.Constants.BatisConstants
 {
     public static class XmlConfigConstants
     {
-        public const string XmlNamespace = "http://ibatis.apache.org/dataMapper";
+        public const string XmlNamespace = "http://Batis.apache.org/dataMapper";
         public const string KnowFileName = "sqlmap.config";
 
         public const string SettingXPath = "/sqlmapconfig[1]/settings[1]";

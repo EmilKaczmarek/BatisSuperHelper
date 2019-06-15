@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Actions.ActionValidators
+namespace BatisSuperHelper.Actions.ActionValidators
 {
     public interface IActionValidator
     {
