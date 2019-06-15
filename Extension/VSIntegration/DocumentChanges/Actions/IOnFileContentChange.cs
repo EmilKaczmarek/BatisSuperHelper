@@ -5,10 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.VSIntegration.DocumentChanges.Actions
+namespace BatisSuperHelper.VSIntegration.DocumentChanges.Actions
 {
     public interface IOnFileContentChange
     {
-        void HandleChange(IWpfTextView textView);
+        Task HandleChangeAsync(IWpfTextView textView);
     }
 }

@@ -3,17 +3,17 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Diagnostics;
-using IBatisSuperHelper.Actions.DocumentProcessors;
-using IBatisSuperHelper.Actions.DocumentProcessors.Factory;
-using IBatisSuperHelper.Actions.FinalActions;
-using IBatisSuperHelper.Actions.FinalActions.Factory;
-using IBatisSuperHelper.Actions.TextProviders;
-using IBatisSuperHelper.VSIntegration;
+using BatisSuperHelper.Actions.DocumentProcessors;
+using BatisSuperHelper.Actions.DocumentProcessors.Factory;
+using BatisSuperHelper.Actions.FinalActions;
+using BatisSuperHelper.Actions.FinalActions.Factory;
+using BatisSuperHelper.Actions.TextProviders;
+using BatisSuperHelper.VSIntegration;
 using NLog;
 using StackExchange.Profiling;
-using IBatisSuperHelper.Logging.MiniProfiler;
+using BatisSuperHelper.Logging.MiniProfiler;
 
-namespace IBatisSuperHelper.Actions
+namespace BatisSuperHelper.Actions
 {
     public abstract class BaseActions
     {
@@ -32,10 +32,10 @@ namespace IBatisSuperHelper.Actions
 
         private readonly Lazy<ToolWindowPane> _commandWindowLazy;
 
-        protected BaseActions(IVsTextManager textManager, IVsEditorAdaptersFactoryService editorAdapersFactory, StatusBarIntegration statusBar, ToolWindowPane commandWindow)
+        protected BaseActions(IVsTextManager textManager, IVsEditorAdaptersFactoryService editorAdapersFactory, StatusBarIntegration statusBar, Lazy<ToolWindowPane> commandWindowLazy)
             : this(textManager, editorAdapersFactory, statusBar)
         {
-            _commandWindowLazy = new Lazy<ToolWindowPane>(() => commandWindow);
+            _commandWindowLazy = commandWindowLazy;
         }
 
         protected BaseActions(IVsTextManager textManager, IVsEditorAdaptersFactoryService editorAdapersFactory, StatusBarIntegration statusBar)

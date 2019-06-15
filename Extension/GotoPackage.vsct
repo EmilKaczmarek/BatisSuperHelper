@@ -66,32 +66,11 @@
           <ButtonText>Go To Query</ButtonText>
         </Strings>
       </Button>
-      <Button guid="guidGotoAsyncPackageCmdSet" id="cmdidTestWindowCommand" priority="0x0100" type="Button">
-        <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
-        <Icon guid="guidImages1" id="bmpPic1" />
-        <Strings>
-          <ButtonText>TestWindow</ButtonText>
-        </Strings>
-      </Button>
-      <Button guid="guidGotoAsyncPackageCmdSet" id="cmdidBatisSHelperTestConsoleCommand" priority="0x0100" type="Button">
-        <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
-        <Icon guid="guidImages2" id="bmpPic1" />
-        <Strings>
-          <ButtonText>BatisSHelperTestConsole</ButtonText>
-        </Strings>
-      </Button>
       <Button guid="guidGotoAsyncPackageCmdSet" id="cmdidResultWindowCommand" priority="0x0100" type="Button">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
         <Icon guid="guidImages3" id="bmpPic1" />
         <Strings>
           <ButtonText>Find Query Results</ButtonText>
-        </Strings>
-      </Button>
-      <Button guid="guidGotoAsyncPackageCmdSet" id="cmdidRenameModalWindowCommand" priority="0x0100" type="Button">
-        <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
-        <Icon guid="guidImages4" id="bmpPic1" />
-        <Strings>
-          <ButtonText>RenameModalWindow</ButtonText>
         </Strings>
       </Button>
       <Button guid="guidGotoAsyncPackageCmdSet1" id="cmdidRenameCommand" priority="0x0100" type="Button">
@@ -111,10 +90,7 @@
             inside a button definition. An important aspect of this declaration is that the element id
             must be the actual index (1-based) of the bitmap inside the bitmap strip. -->
       <Bitmap guid="guidImages" href="Resources\Goto.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough" />
-      <Bitmap guid="guidImages1" href="Resources\TestWindowCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough" />
-      <Bitmap guid="guidImages2" href="Resources\BatisSHelperTestConsoleCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough" />
       <Bitmap guid="guidImages3" href="Resources\ResultWindowCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough" />
-      <Bitmap guid="guidImages4" href="Windows\RenameWindow\Resources\RenameModalWindowCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough" />
       <Bitmap guid="guidImages5" href="Resources\RenameCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough" />
     </Bitmaps>
   </Commands>
@@ -144,10 +120,7 @@
     </GuidSymbol>
   
     <GuidSymbol value="{16d16112-fe5d-40b1-9e67-9ae342523f8b}" name="guidGotoAsyncPackageCmdSet">
-      <IDSymbol value="256" name="cmdidTestWindowCommand" />
-      <IDSymbol value="257" name="cmdidBatisSHelperTestConsoleCommand" />
       <IDSymbol value="258" name="cmdidResultWindowCommand" />
-      <IDSymbol value="259" name="cmdidRenameModalWindowCommand" />
     </GuidSymbol>
   
     <GuidSymbol value="{388305b3-d6ef-43db-bb4e-7ba9c20ce84b}" name="guidImages1">

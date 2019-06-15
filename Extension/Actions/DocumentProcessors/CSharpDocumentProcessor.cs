@@ -6,12 +6,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using IBatisSuperHelper.Actions.ActionValidators;
-using IBatisSuperHelper.Helpers;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using BatisSuperHelper.Actions.ActionValidators;
+using BatisSuperHelper.Helpers;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace IBatisSuperHelper.Actions.DocumentProcessors
+namespace BatisSuperHelper.Actions.DocumentProcessors
 {
     public class CSharpDocumentProcessor : IDocumentProcessor
     {
@@ -86,7 +86,7 @@ namespace IBatisSuperHelper.Actions.DocumentProcessors
                 nodesAtLine = returnNode.DescendantNodesAndSelf();
             }
 
-            return _helperInstance.IsAnySyntaxNodeContainIBatisNamespace(nodesAtLine);
+            return _helperInstance.IsAnySyntaxNodeContainBatisNamespace(nodesAtLine);
         }
 
         private bool IsAnyNodeLiteralStringExpression()

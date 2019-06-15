@@ -1,4 +1,4 @@
-﻿using IBatisSuperHelper.VSIntegration.ErrorList;
+﻿using BatisSuperHelper.VSIntegration.ErrorList;
 using Microsoft.VisualStudio.Text;
 using System;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Validation.XmlValidators
+namespace BatisSuperHelper.Validation.XmlValidators
 {
     public interface IXmlValidator
     {
@@ -23,5 +23,7 @@ namespace IBatisSuperHelper.Validation.XmlValidators
         /// </summary>
         /// <param name="span"></param>
         void OnChange(SnapshotSpan newSpan);
+
+        string FilePath { get; }
     }
 }

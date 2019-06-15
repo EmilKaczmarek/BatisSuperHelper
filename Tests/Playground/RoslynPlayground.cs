@@ -9,19 +9,18 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.CodeAnalysis.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 #pragma warning disable S1481 // Unused local variables should be removed
 #pragma warning disable S125 // Sections of code should not be commented out
 
 namespace Playground
 {
-    [TestClass]
     public class RoslynPlayground
     {
-        private string _directNamespaceText;
-        private string _fieldNamespaceText;
-        private string _fieldNamespaceCtor;
+        private readonly string _directNamespaceText;
+        private readonly string _fieldNamespaceText;
+        private readonly string _fieldNamespaceCtor;
 
         private string GetString(Stream stream)
         {
@@ -31,8 +30,7 @@ namespace Playground
             }
         }
 
-        [TestInitialize]
-        public void Initialize()
+        public RoslynPlayground()
         {
             var asm = Assembly.GetExecutingAssembly();
             _directNamespaceText = GetString(asm.GetManifestResourceStream("Tests.Resources.DirectNamespace.txt"));
@@ -41,7 +39,7 @@ namespace Playground
 
         }
 
-        [TestMethod]
+        [Fact]
         public async Task SingleDirectNamespaceAsync()
         {
             var code = @"using System;

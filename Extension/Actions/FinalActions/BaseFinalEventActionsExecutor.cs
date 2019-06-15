@@ -1,19 +1,19 @@
-﻿using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
-using IBatisSuperHelper.Indexers.Models;
-using IBatisSuperHelper.Storage.Providers;
+﻿using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using BatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Storage.Providers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Actions
+namespace BatisSuperHelper.Actions
 {
     public abstract class BaseFinalEventActionsExecutor<T> where T: BaseFinalEventActionsExecutor<T>
     {
         internal Dictionary<Type, dynamic> QueryDataServices = new Dictionary<Type, dynamic>();
         internal Dictionary<Type, dynamic> LogicHandlers = new Dictionary<Type, dynamic>();
-        internal NamespaceHandlingType NamespaceHandlingLogicType;
+        internal bool UseNamespace;
 
         protected BaseFinalEventActionsExecutor() { }
 
@@ -30,9 +30,9 @@ namespace IBatisSuperHelper.Actions
         }
 
 
-        public virtual T WithNamespaceHandlingLogicType(NamespaceHandlingType namespaceHandlingLogicType)
+        public virtual T WithUseNamespace(bool useNamespace)
         {
-            NamespaceHandlingLogicType = namespaceHandlingLogicType;
+            UseNamespace = useNamespace;
             return (T)this;
         }
 

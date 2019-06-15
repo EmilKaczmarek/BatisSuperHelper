@@ -1,28 +1,24 @@
 ﻿using EnvDTE;
-using IBatisSuperHelper.Helpers;
-using IBatisSuperHelper.Loggers;
-using IBatisSuperHelper.Validation.XmlValidators;
-using IBatisSuperHelper.VSIntegration.ErrorList;
+using BatisSuperHelper.CoreAutomation.ProjectItems;
+using BatisSuperHelper.Helpers;
+using BatisSuperHelper.Loggers;
+using BatisSuperHelper.Validation.XmlValidators;
+using BatisSuperHelper.VSIntegration.ErrorList;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Text;
 using NLog;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.EventHandlers
+namespace BatisSuperHelper.EventHandlers
 {
-    public class BuildEvents
+    public class BuildEventsActions
     {
         public void OnBuildBegin(vsBuildScope Scope, vsBuildAction Action)
         {
             try
             {
                 ThreadHelper.ThrowIfNotOnUIThread();
-                var projectItemHelper = new ProjectItemHelper();
-                var projectItems = projectItemHelper.GetProjectItemsFromSolutionProjects(GotoAsyncPackage.EnvDTE.Solution.Projects);
+                var projectItemHelper = new ProjectItemRetreiver(GotoAsyncPackage.EnvDTE);
+                var projectItems = projectItemHelper.GetProjectItemsFromSolutionProjects();
 
                 foreach (var xmlFile in DocumentHelper.GetXmlFiles(projectItems))
                 {

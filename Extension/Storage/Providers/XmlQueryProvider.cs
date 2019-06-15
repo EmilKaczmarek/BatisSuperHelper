@@ -3,26 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using IBatisSuperHelper.HelpersAndExtensions;
-using IBatisSuperHelper.Indexers;
-using IBatisSuperHelper.Indexers.Models;
-using IBatisSuperHelper.Storage.Interfaces;
-using IBatisSuperHelper.Storage.Providers;
+using BatisSuperHelper.HelpersAndExtensions;
+using BatisSuperHelper.Indexers;
+using BatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Storage.Interfaces;
+using BatisSuperHelper.Storage.Providers;
 
-namespace IBatisSuperHelper.Storage.Domain
+namespace BatisSuperHelper.Storage.Domain
 {
-    public class XmlQueryProvider : IProvider<IndexerKey, XmlQuery>
+    public class XmlQueryProvider : IQueryProvider<IndexerKey, XmlQuery>
     {
-        private Dictionary<IndexerKey, XmlQuery> xmlStatments = new Dictionary<IndexerKey, XmlQuery>();
+        private readonly Dictionary<IndexerKey, XmlQuery> _xmlStatments = new Dictionary<IndexerKey, XmlQuery>();
 
         public XmlQuery GetValue(IndexerKey key)
         {
-            return xmlStatments[key];
+            return _xmlStatments[key];
         }
 
         public XmlQuery GetValueOrNull(IndexerKey key)
         {
-            if (xmlStatments.ContainsKey(key))
+            if (_xmlStatments.ContainsKey(key))
             {
                 return GetValue(key);
             }
@@ -31,9 +31,9 @@ namespace IBatisSuperHelper.Storage.Domain
 
         public void Add(IndexerKey key, XmlQuery value)
         {          
-            if (!xmlStatments.ContainsKey(key))
+            if (!_xmlStatments.ContainsKey(key))
             {
-                xmlStatments.Add(key, value);
+                _xmlStatments.Add(key, value);
             }
         }
 
@@ -56,7 +56,7 @@ namespace IBatisSuperHelper.Storage.Domain
 
             foreach (var value in values)
             {
-                AddWithoutKey(value as XmlQuery);
+                AddWithoutKey(value);
             }
         }
 
@@ -70,47 +70,43 @@ namespace IBatisSuperHelper.Storage.Domain
 
         public List<XmlQuery> GetAllStatmentsByFileName(string fileName)
         {
-            return xmlStatments.Values.Where(x => x.QueryFileName.Equals(fileName, StringComparison.CurrentCultureIgnoreCase)).ToList();
+            return _xmlStatments.Values.Where(x => x.QueryFileName.Equals(fileName, StringComparison.CurrentCultureIgnoreCase)).ToList();
         }
 
-        private List<IndexerKey> GetKeysByQueryId(string queryId)
+        private List<IndexerKey> GetKeysByQueryId(string queryId, bool useNamespace)
         {
-            return xmlStatments.Keys.Where(e => e.StatmentName.Equals(queryId)).ToList();
+            return _xmlStatments
+               .Where(e => e.Key.StatmentName.Equals(queryId))
+               .Where(e => e.Value.Config.Settings.UseStatementNamespaces == useNamespace)
+               .Select(e => e.Key)
+               .ToList();
         }
 
-        private List<IndexerKey> GetKeysByFullyQualifiedName(string queryId)
+        private List<IndexerKey> GetKeysByFullyQualifiedName(string queryId, bool useNamespace)
         {
-            return xmlStatments.Keys.Where(e => e.StatmentFullyQualifiedName.Equals(queryId)).ToList();
+            return _xmlStatments
+                .Where(e => e.Key.StatmentFullyQualifiedName.Equals(queryId))
+                .Where(e => e.Value.Config.Settings.UseStatementNamespaces == useNamespace)
+                .Select(e => e.Key)
+                .ToList();
         }
 
-        public List<IndexerKey> GetKeysByQueryId(string queryId, NamespaceHandlingType handlingType)
+        public List<IndexerKey> GetKeys(string queryId, bool useNamespace)
         {
-            switch (handlingType)
-            {
-                case NamespaceHandlingType.IGNORE_NAMESPACE:
-                    return GetKeysByQueryId(MapNamespaceHelper.GetQueryWithoutNamespace(queryId));
-                case NamespaceHandlingType.WITH_NAMESPACE:
-                    return GetKeysByFullyQualifiedName(queryId);
-                case NamespaceHandlingType.HYBRID_NAMESPACE:
-                    var withoutNamespace = GetKeysByQueryId(MapNamespaceHelper.GetQueryWithoutNamespace(queryId));
-                    var withNamespace = GetKeysByFullyQualifiedName(queryId);
-                    return withNamespace.Concat(withoutNamespace).Distinct().ToList();
-                default:
-                    return new List<IndexerKey>();
-            }
+            return useNamespace? GetKeysByFullyQualifiedName(queryId, useNamespace): GetKeysByQueryId(queryId, useNamespace);
         }
 
         public void RemoveStatmentByValue(XmlQuery value)
         {
-            xmlStatments.Remove(new IndexerKey { StatmentName = value.QueryId, VsProjectName = value.QueryFileName, StatmentFullyQualifiedName = value.FullyQualifiedQuery });
+            _xmlStatments.Remove(new IndexerKey { StatmentName = value.QueryId, VsProjectName = value.QueryFileName, StatmentFullyQualifiedName = value.FullyQualifiedQuery });
         }
 
         public void RemoveStatmentsForFilePath(string filePath)
         {
-            var statmentsToRemove = xmlStatments.Where(e => e.Value.QueryFilePath.Equals(filePath, StringComparison.CurrentCultureIgnoreCase));
+            var statmentsToRemove = _xmlStatments.Where(e => e.Value.QueryFilePath.Equals(filePath, StringComparison.CurrentCultureIgnoreCase));
             foreach (var statment in statmentsToRemove.ToList())
             {
-                xmlStatments.Remove(statment.Key);
+                _xmlStatments.Remove(statment.Key);
             }
         }
 
@@ -127,27 +123,27 @@ namespace IBatisSuperHelper.Storage.Domain
             AddMultiple(keyValuePairs);
         }
 
-        public void UpdateStatmentForFileWihoutKey(List<XmlQuery> results)
+        public void UpdateStatmentForFileWihoutKey(List<XmlQuery> values)
         {
-            if (!results.Any())
+            if (!values.Any())
                 return;
-            RemoveStatmentsForFilePath(results.First().QueryFilePath);
-            AddMultipleWithoutKey(results);
+            RemoveStatmentsForFilePath(values.First().QueryFilePath);
+            AddMultipleWithoutKey(values);
         }
 
         public void RenameStatmentsForFile(string oldFileName, string newFileName)
         {
-            var oldFileXmlStatments = xmlStatments.Where(e => e.Value.QueryFileName.Equals(oldFileName, StringComparison.CurrentCultureIgnoreCase)).ToList();
+            var oldFileXmlStatments = _xmlStatments.Where(e => e.Value.QueryFileName.Equals(oldFileName, StringComparison.CurrentCultureIgnoreCase)).ToList();
             foreach (var xmlFileStatment in oldFileXmlStatments)
             {
-                xmlStatments[xmlFileStatment.Key].QueryFileName = newFileName;
-                xmlStatments[xmlFileStatment.Key].QueryFilePath = xmlStatments[xmlFileStatment.Key].QueryFilePath.Replace(oldFileName, newFileName);
+                _xmlStatments[xmlFileStatment.Key].QueryFileName = newFileName;
+                _xmlStatments[xmlFileStatment.Key].QueryFilePath = _xmlStatments[xmlFileStatment.Key].QueryFilePath.Replace(oldFileName, newFileName);
             }
         }
 
         public void RenameQuery(IndexerKey key, string newQueryId)
         {
-            var statmentInfo = xmlStatments[key];
+            var statmentInfo = _xmlStatments[key];
             var newKey = new IndexerKey {
                 StatmentName = MapNamespaceHelper.GetQueryWithoutNamespace(newQueryId),
                 VsProjectName = key.VsProjectName,
@@ -155,23 +151,23 @@ namespace IBatisSuperHelper.Storage.Domain
             };
 
             statmentInfo.QueryId = newQueryId;
-            xmlStatments.Remove(key);
-            xmlStatments.Add(newKey, statmentInfo);
+            _xmlStatments.Remove(key);
+            _xmlStatments.Add(newKey, statmentInfo);
         }
 
         public void Clear()
         {
-            xmlStatments.Clear();
+            _xmlStatments.Clear();
         }
 
         public List<XmlQuery> GetAllValues()
         {
-            return xmlStatments.Select(e => e.Value).ToList();
+            return _xmlStatments.Select(e => e.Value).ToList();
         }
 
         public List<IndexerKey> GetAllKeys()
         {
-            return xmlStatments.Keys.ToList();
+            return _xmlStatments.Keys.ToList();
         }
     }
 }

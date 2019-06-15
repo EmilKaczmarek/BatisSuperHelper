@@ -6,21 +6,21 @@ using System.Threading.Tasks;
 using System.Windows.Documents;
 using EnvDTE;
 using EnvDTE80;
-using IBatisSuperHelper.Actions.FinalActions.SubActions.Data;
-using IBatisSuperHelper.Actions.FinalActions.SubActions.Logic.Rename;
-using IBatisSuperHelper.Helpers;
-using IBatisSuperHelper.HelpersAndExtensions;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
-using IBatisSuperHelper.HelpersAndExtensions.VisualStudio;
-using IBatisSuperHelper.Indexers.Models;
-using IBatisSuperHelper.Windows.RenameWindow;
-using IBatisSuperHelper.Windows.RenameWindow.ViewModel;
+using BatisSuperHelper.Actions.FinalActions.SubActions.Data;
+using BatisSuperHelper.Actions.FinalActions.SubActions.Logic.Rename;
+using BatisSuperHelper.Helpers;
+using BatisSuperHelper.HelpersAndExtensions;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using BatisSuperHelper.HelpersAndExtensions.VisualStudio;
+using BatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Windows.RenameWindow;
+using BatisSuperHelper.Windows.RenameWindow.ViewModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.VisualStudio.LanguageServices;
 
-namespace IBatisSuperHelper.Actions.FinalActions
+namespace BatisSuperHelper.Actions.FinalActions
 {
     public class RenameFinalActionsExecutor : BaseFinalEventActionsExecutor<RenameFinalActionsExecutor>
     {
@@ -59,8 +59,8 @@ namespace IBatisSuperHelper.Actions.FinalActions
 
         public override void Execute(string queryResult, ExpressionResult expressionResult)
         {
-            var codeKeyValuePairs = _codeQueryDataService.GetKeyStatmentPairs(queryResult, NamespaceHandlingLogicType);
-            var xmlKeys = _xmlQueryDataService.GetStatmentKeys(queryResult, NamespaceHandlingLogicType);
+            var codeKeyValuePairs = _codeQueryDataService.GetKeyStatmentPairs(queryResult, UseNamespace);
+            var xmlKeys = _xmlQueryDataService.GetStatmentKeys(queryResult, UseNamespace);
 
             var namespaceQueryPair = MapNamespaceHelper.DetermineMapNamespaceQueryPairFromCodeInput(queryResult);
 

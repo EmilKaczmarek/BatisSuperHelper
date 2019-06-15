@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Shell;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
-using IBatisSuperHelper.Indexers.Models;
-using IBatisSuperHelper.VSIntegration;
-using IBatisSuperHelper.VSIntegration.Navigation;
-using IBatisSuperHelper.Windows.ResultWindow.ViewModel;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using BatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.VSIntegration;
+using BatisSuperHelper.VSIntegration.Navigation;
+using BatisSuperHelper.Windows.ResultWindow.ViewModel;
 
-namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Logic
+namespace BatisSuperHelper.Actions.FinalActions.SubActions.Logic
 {
     public class GoToCodeLogicHandler : GoToBaseLogicHandler<CSharpQuery>
     {

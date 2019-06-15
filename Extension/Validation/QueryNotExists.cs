@@ -1,16 +1,12 @@
-﻿using IBatisSuperHelper.Helpers;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver;
-using IBatisSuperHelper.Storage;
+﻿using BatisSuperHelper;
+using BatisSuperHelper.Helpers;
+using BatisSuperHelper.HelpersAndExtensions;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace VSIXProject5.Validation
 {
@@ -23,7 +19,7 @@ namespace VSIXProject5.Validation
             DiagnosticId,
             "Query not exist in any map",
             "Query '{0}' do not exist in any map file",
-            "iBatis",
+            "Batis",
             DiagnosticSeverity.Warning,
             true
             );
@@ -39,21 +35,18 @@ namespace VSIXProject5.Validation
         {
             NodeHelpers helper = new NodeHelpers(context.SemanticModel);
 
-            if (helper.IsIBatisMethod(context.Node as InvocationExpressionSyntax))
+            if (helper.IsBatisMethod(context.Node as InvocationExpressionSyntax) &&
+                helper.TryGetArgumentNodeFromInvocation(context.Node as InvocationExpressionSyntax, 0, out ExpressionSyntax expressionSyntax))
             {
-                if (helper.TryGetArgumentNodeFromInvocation(context.Node as InvocationExpressionSyntax, 0, out ExpressionSyntax expressionSyntax))
+                var resolverResult = new ExpressionResolver().GetStringValueOfExpression(expressionSyntax, context.SemanticModel);
+                if (resolverResult.IsSolved)
                 {
-                    var resolverResult = new ExpressionResolver().GetStringValueOfExpression(expressionSyntax, context.SemanticModel);
-                    if (resolverResult.IsSolved)
+                    var queryKeys = GotoAsyncPackage.Storage.XmlQueries.GetKeys(resolverResult.TextResult, MapNamespaceHelper.IsQueryWithNamespace(resolverResult.TextResult));
+                    if (queryKeys.Count < 1)
                     {
-                        var queryKeys = PackageStorage.XmlQueries.GetKeysByQueryId(resolverResult.TextResult, IBatisSuperHelper.Storage.Providers.NamespaceHandlingType.HYBRID_NAMESPACE);
-                        if (queryKeys.Count < 1)
-                        {
-                            context.ReportDiagnostic(Diagnostic.Create(QueryNotExistsRule, expressionSyntax.GetLocation(), resolverResult.TextResult));
-                        }
+                        context.ReportDiagnostic(Diagnostic.Create(QueryNotExistsRule, expressionSyntax.GetLocation(), resolverResult.TextResult));
                     }
                 }
-
             }
         }
     }

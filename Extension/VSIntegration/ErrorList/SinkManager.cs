@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.VSIntegration.ErrorList
+namespace BatisSuperHelper.VSIntegration.ErrorList
 {
     public class SinkManager : IDisposable
     {

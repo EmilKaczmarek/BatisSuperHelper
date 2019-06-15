@@ -4,17 +4,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using IBatisSuperHelper.HelpersAndExtensions;
-using IBatisSuperHelper.Indexers;
-using IBatisSuperHelper.Indexers.Models;
-using IBatisSuperHelper.Storage.Interfaces;
-using IBatisSuperHelper.Storage.Providers;
+using BatisSuperHelper.HelpersAndExtensions;
+using BatisSuperHelper.Indexers;
+using BatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Storage.Interfaces;
+using BatisSuperHelper.Storage.Providers;
 
-namespace IBatisSuperHelper.Storage.Domain
+namespace BatisSuperHelper.Storage.Domain
 {
-    public class CodeQueryProvider : IProvider<IndexerKey, List<CSharpQuery>>
+    public class CodeQueryProvider : IQueryProvider<IndexerKey, List<CSharpQuery>>
     {
-        private Dictionary<IndexerKey, List<CSharpQuery>> codeStatments = new Dictionary<IndexerKey, List<CSharpQuery>>();
+        private readonly Dictionary<IndexerKey, List<CSharpQuery>> codeStatments = new Dictionary<IndexerKey, List<CSharpQuery>>();
 
         public void Add(IndexerKey key, List<CSharpQuery> value)
         {
@@ -108,13 +108,6 @@ namespace IBatisSuperHelper.Storage.Domain
             return codeStatments.Values.Where(predictable).ToList();
         }
 
-        private List<IndexerKey> GetKeysByQueryId(string queryId)
-        {
-            return codeStatments.Keys
-                .Where(e => e.StatmentName == queryId)
-                .ToList();
-        }
-
         private List<IndexerKey> GetKeysByFullyQualifiedName(string queryId)
         {
             return codeStatments.Keys
@@ -122,21 +115,9 @@ namespace IBatisSuperHelper.Storage.Domain
                 .ToList();
         }
 
-        public List<IndexerKey> GetKeysByQueryId(string queryId, NamespaceHandlingType handlingType)
+        public List<IndexerKey> GetKeys(string queryId, bool useNamespace)
         {
-            switch (handlingType)
-            {
-                case NamespaceHandlingType.IGNORE_NAMESPACE:
-                    return GetKeysByQueryId(MapNamespaceHelper.GetQueryWithoutNamespace(queryId));
-                case NamespaceHandlingType.WITH_NAMESPACE:
-                    return GetKeysByFullyQualifiedName(queryId);
-                case NamespaceHandlingType.HYBRID_NAMESPACE:
-                    var withoutNamespace = GetKeysByQueryId(MapNamespaceHelper.GetQueryWithoutNamespace(queryId));
-                    var withNamespace = GetKeysByFullyQualifiedName(queryId);
-                    return withNamespace.Concat(withoutNamespace).Distinct().ToList();
-                default:
-                    return new List<IndexerKey>();
-            }
+            return GetKeysByFullyQualifiedName(queryId);
         }
 
         public void RemoveStatmentByValue(List<CSharpQuery> value)

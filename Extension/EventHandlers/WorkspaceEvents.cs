@@ -4,55 +4,52 @@ using NLog;
 using StackExchange.Profiling;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using IBatisSuperHelper.Indexers;
-using IBatisSuperHelper.Loggers;
-using IBatisSuperHelper.Logging.MiniProfiler;
-using IBatisSuperHelper.Storage;
+using BatisSuperHelper.Loggers;
+using BatisSuperHelper.Logging.MiniProfiler;
+using BatisSuperHelper.Storage;
 using Microsoft.VisualStudio.Threading;
+using BatisSuperHelper.Indexers.Code;
+using Microsoft.VisualStudio.Shell;
 
-namespace IBatisSuperHelper.Events
+namespace BatisSuperHelper.Events
 {
-    public static class WorkspaceEvents
+    public class WorkspaceEvents
     {
-        private static ProjectIndexingQueue _indexingQueue = new ProjectIndexingQueue();
+        private ProjectIndexingQueue _indexingQueue;
 
-        public static async Task BuildIndexerWithCSharpResultsAsync(Solution solution)
+        public WorkspaceEvents() : this(new ProjectIndexingQueue())
         {
-            var solutionFiles = solution.Projects.SelectMany(x => x.Documents).ToList();
-            await PackageStorage.AnalyzeAndStoreAsync(solutionFiles);
+
         }
 
-        public static async Task BuildIndexerUsingProjectWithCSharpResultsAsync(Project project)
+        public WorkspaceEvents(ProjectIndexingQueue indexingQueue)
         {
-            var solutionFiles = project.Documents.ToList();
-            await PackageStorage.AnalyzeAndStoreAsync(solutionFiles);
+            _indexingQueue = indexingQueue;
         }
 
-        private static async Task DocumentsAddedActionAsync(IEnumerable<Document> addedDocuments)
+        private async System.Threading.Tasks.Task DocumentsAddedActionAsync(IEnumerable<Document> addedDocuments)
         {
             if (addedDocuments == null)
                 return;
 
             foreach (var document in addedDocuments)
             {
-                await PackageStorage.AnalyzeAndStoreSingleAsync(document);
+                await GotoAsyncPackage.Storage.AnalyzeAndStoreSingleAsync(document);
             }
         }
-        private static async Task DocumentRemovedActionAsync(IEnumerable<DocumentId> removedDocumentsIds)
+        private async System.Threading.Tasks.Task DocumentRemovedActionAsync(IEnumerable<DocumentId> removedDocumentsIds)
         {
             foreach(var documentId in removedDocumentsIds)
             {
-                await Task.Run(() => PackageStorage.CodeQueries.RemoveStatmentsByDefinedObject(documentId));
+                await System.Threading.Tasks.Task.Run(() => GotoAsyncPackage.Storage.CodeQueries.RemoveStatmentsByDefinedObject(documentId));
             }
         }
 
-        public static async void WorkspaceChanged(object sender, WorkspaceChangeEventArgs e)
+        public async System.Threading.Tasks.Task WorkspaceChangedAsync(object sender, WorkspaceChangeEventArgs e)
         {
-            var profiler = MiniProfiler.StartNew(nameof(WorkspaceChanged));
+            var profiler = MiniProfiler.StartNew(nameof(WorkspaceChangedAsync));
             profiler.Storage = new NLogStorage(LogManager.GetLogger("profiler"));
             var workspace = sender as VisualStudioWorkspace;
             switch (e.Kind)
@@ -62,12 +59,13 @@ namespace IBatisSuperHelper.Events
                     {
                         using (profiler.Step(WorkspaceChangeKind.SolutionAdded.ToString()))
                         {
-                            await _indexingQueue.EnqueueMultipleAsync(e.NewSolution.Projects.Any() ? e.NewSolution.Projects : workspace.CurrentSolution.Projects);
+                            await _indexingQueue.EnqueueMultipleAsync(workspace.CurrentSolution.Projects);
                         }
                     }
                     catch (Exception ex)
                     {
                         LogManager.GetLogger("error").Error(ex, "WorkspaceChangeKind.SolutionAdded");
+                        await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                         OutputWindowLogger.WriteLn($"Exception occured during adding solution: {ex.Message}");
                     }
                     break;
@@ -84,7 +82,7 @@ namespace IBatisSuperHelper.Events
                     {
                         using (profiler.Step(WorkspaceChangeKind.SolutionAdded.ToString()))
                         {
-                            await _indexingQueue.EnqueueMultipleAsync(e.NewSolution.Projects);
+                            await _indexingQueue.EnqueueMultipleAsync(workspace.CurrentSolution.Projects);
                         }
                     }
                     catch (Exception ex)
@@ -127,7 +125,7 @@ namespace IBatisSuperHelper.Events
                 default:
                     break;
             }
-            profiler.Stop();
+            await profiler.StopAsync();
         }
     }
 }

@@ -5,18 +5,30 @@ using Microsoft.VisualStudio.TextManager.Interop;
 using NLog;
 using StackExchange.Profiling;
 using System;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
-using IBatisSuperHelper.Loggers;
-using IBatisSuperHelper.Logging.MiniProfiler;
-using IBatisSuperHelper.VSIntegration;
-using IBatisSuperHelper.Storage;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using BatisSuperHelper.Loggers;
+using BatisSuperHelper.Logging.MiniProfiler;
+using BatisSuperHelper.VSIntegration;
+using BatisSuperHelper.Storage;
+using Microsoft.VisualStudio.LanguageServices;
+using System.Linq;
+using BatisSuperHelper.CoreAutomation.ProjectItems;
+using BatisSuperHelper.HelpersAndExtensions;
 
-namespace IBatisSuperHelper.Actions
+namespace BatisSuperHelper.Actions
 {
     public class GoToQueryActions2 : BaseActions
     {
-        public GoToQueryActions2(GotoAsyncPackage package) : base(package.TextManager, package.EditorAdaptersFactory, new StatusBarIntegration(package.IStatusBar), package.ResultWindow)
+        GotoAsyncPackage _package;
+        public GoToQueryActions2(GotoAsyncPackage package) : 
+            base(
+                package.TextManager, 
+                package.EditorAdaptersFactory, 
+                new StatusBarIntegration(package.IStatusBar), 
+                new Lazy<ToolWindowPane>(() => package.FindToolWindow(typeof(ResultWindow), 0, true))
+           )
         {
+            _package = package;
         }
 
         public override void BeforeQuery(object sender, EventArgs e)
@@ -46,7 +58,7 @@ namespace IBatisSuperHelper.Actions
                 {
                     _documentProcessor.TryResolveQueryValueAtCurrentSelectedLine(out ExpressionResult expressionResult, out string queryValue);
                     _finalActionFactory
-                        .GetFinalGoToQueryActionsExecutor(StatusBar, _commandWindow)
+                        .GetFinalGoToQueryActionsExecutor(StatusBar, _commandWindow, MapNamespaceHelper.IsQueryWithNamespace(queryValue))
                         .Execute(queryValue, expressionResult);
                 }
             }

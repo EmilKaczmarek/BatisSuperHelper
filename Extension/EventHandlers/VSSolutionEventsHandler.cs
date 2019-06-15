@@ -1,23 +1,28 @@
-﻿using IBatisSuperHelper.Loggers;
-using IBatisSuperHelper.VSIntegration.ErrorList;
+﻿using BatisSuperHelper.EventHandlers;
+using BatisSuperHelper.EventHandlers.SolutionEventsActions;
+using BatisSuperHelper.Indexers.Workflow;
+using BatisSuperHelper.Loggers;
+using BatisSuperHelper.VSIntegration.ErrorList;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using NLog;
 using System;
-using static IBatisSuperHelper.Constants.EventConstats.VS;
+using System.Diagnostics;
+using static BatisSuperHelper.Constants.EventConstats.VS;
 
-namespace IBatisSuperHelper.Events
+namespace BatisSuperHelper.Events
 {
     public class VSSolutionEventsHandler
     {
         internal class SolutionEventsHandler : IVsSolutionLoadEvents, IVsSolutionEvents
         {
-            private readonly Action<SolutionLoad> _handler;
+            private readonly IVSSolutionEventsActions _actions;
 
-            public SolutionEventsHandler(Action<SolutionLoad> handlerAction, IVsSolution solution)
+            public SolutionEventsHandler(IVSSolutionEventsActions actions)
             {
-                _handler = handlerAction ?? throw new ArgumentNullException(nameof(handlerAction));
+                _actions = actions;
             }
+
             public int OnBeforeOpenSolution(string pszSolutionFilename)
             {
                 return VSConstants.S_OK;
@@ -46,10 +51,11 @@ namespace IBatisSuperHelper.Events
 
             public int OnAfterBackgroundSolutionLoadComplete()
             {
+                Debug.WriteLine("OnAfterBackgroundSolutionLoadComplete()");
                 try
                 {
                     //Load Xml files from indexer
-                    _handler(SolutionLoad.SolutionLoadComplete);
+                    _actions.OnSolutionLoadComplete();
                 }
                 catch (Exception ex)
                 {
@@ -99,7 +105,7 @@ namespace IBatisSuperHelper.Events
                 try
                 {
                     //Remove everything from indexer instance
-                    _handler(SolutionLoad.SolutionOnClose);
+                    _actions.SolutionOnClose();
                     //Remove Errors
                     TableDataSource.Instance.CleanAllErrors();
                 }

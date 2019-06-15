@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Indexers.Models
+namespace BatisSuperHelper.Indexers.Models
 {
     public abstract class BaseIndexerValue
     {

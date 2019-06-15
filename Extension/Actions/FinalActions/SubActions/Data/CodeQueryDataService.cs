@@ -3,49 +3,42 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using IBatisSuperHelper.HelpersAndExtensions;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
-using IBatisSuperHelper.Indexers;
-using IBatisSuperHelper.Indexers.Models;
-using IBatisSuperHelper.Storage;
-using IBatisSuperHelper.Storage.Providers;
-using IBatisSuperHelper.Windows.ResultWindow.ViewModel;
+using BatisSuperHelper.HelpersAndExtensions;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using BatisSuperHelper.Indexers;
+using BatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Storage;
+using BatisSuperHelper.Storage.Providers;
+using BatisSuperHelper.Windows.ResultWindow.ViewModel;
 
-namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Data
+namespace BatisSuperHelper.Actions.FinalActions.SubActions.Data
 {
     public class CodeQueryDataService : IQueryDataService<CSharpQuery>
     {
-        public List<ExpressionResult> GetResultsForGenericQueries(string queryResult, NamespaceHandlingType namespaceHandlingLogic)
+        public List<ExpressionResult> GetResultsForGenericQueries(string queryResult, bool useNamespace)
         {
-            var genericResult = new List<ExpressionResult>();
-            if (namespaceHandlingLogic == NamespaceHandlingType.WITH_NAMESPACE || namespaceHandlingLogic == NamespaceHandlingType.HYBRID_NAMESPACE)
-                genericResult.AddRange(PackageStorage.GenericMethods.GetByPredictate(e => e.TextResult == queryResult));
-
-            if (namespaceHandlingLogic == NamespaceHandlingType.IGNORE_NAMESPACE || namespaceHandlingLogic == NamespaceHandlingType.HYBRID_NAMESPACE)
-                genericResult.AddRange(PackageStorage.GenericMethods.GetByPredictate(e => MapNamespaceHelper.GetQueryWithoutNamespace(e.TextResult) == MapNamespaceHelper.GetQueryWithoutNamespace(queryResult)));
-
-            return genericResult;
+            return GotoAsyncPackage.Storage.GenericMethods.GetByPredictate(e => e.TextResult == queryResult).ToList();
         }
 
-        public List<KeyValuePair<IndexerKey, List<CSharpQuery>>> GetKeyStatmentPairs(string queryResult, NamespaceHandlingType namespaceHandlingLogicType)
+        public List<KeyValuePair<IndexerKey, List<CSharpQuery>>> GetKeyStatmentPairs(string queryResult, bool useNamespace)
         {
-            var keys = GetStatmentKeys(queryResult, namespaceHandlingLogicType);
+            var keys = GetStatmentKeys(queryResult, useNamespace);
             return keys.Select(e => new KeyValuePair<IndexerKey, List<CSharpQuery>>(e, GetSingleStatmentFromKey(e))).ToList();
         }
 
-        public List<IndexerKey> GetStatmentKeys(string queryResult, NamespaceHandlingType namespaceHandlingLogicType)
+        public List<IndexerKey> GetStatmentKeys(string query, bool useNamespace)
         {
-            return PackageStorage.CodeQueries.GetKeysByQueryId(queryResult, namespaceHandlingLogicType);
+            return GotoAsyncPackage.Storage.CodeQueries.GetKeys(query, useNamespace);
         }
 
         public List<CSharpQuery> GetStatmentsFromKeys(List<IndexerKey> keys)
         {
-            return keys.Select(PackageStorage.CodeQueries.GetValue).SelectMany(x => x).ToList();
+            return keys.Select(GotoAsyncPackage.Storage.CodeQueries.GetValue).SelectMany(x => x).ToList();
         }
 
         public List<CSharpQuery> GetSingleStatmentFromKey(IndexerKey key)
         {
-            return PackageStorage.CodeQueries.GetValueOrNull(key);
+            return GotoAsyncPackage.Storage.CodeQueries.GetValueOrNull(key);
         }
 
         public List<ResultWindowViewModel> PrepareViewModels(List<ExpressionResult> genericResults, ExpressionResult expressionResult, List<CSharpQuery> nonGenericResults)
@@ -70,7 +63,7 @@ namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Data
 
         public void Rename(IndexerKey key, string value)
         {
-            PackageStorage.CodeQueries.RenameQuery(key, value);
+            GotoAsyncPackage.Storage.CodeQueries.RenameQuery(key, value);
         }
     }
 }

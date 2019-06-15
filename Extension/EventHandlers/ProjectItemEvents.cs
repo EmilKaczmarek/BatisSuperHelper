@@ -5,24 +5,24 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using IBatisSuperHelper.Indexers;
-using IBatisSuperHelper.Models;
-using IBatisSuperHelper.Parsers;
-using IBatisSuperHelper.Storage;
+using BatisSuperHelper.Indexers;
+using BatisSuperHelper.Models;
+using BatisSuperHelper.Parsers;
+using BatisSuperHelper.Storage;
 using NLog;
-using IBatisSuperHelper.Loggers;
+using BatisSuperHelper.Loggers;
 
-namespace IBatisSuperHelper.EventHandlers
+namespace BatisSuperHelper.EventHandlers
 {
-    public class ProjectItemEventsEx
+    public class ProjectItemEventsActions
     {
         public void ItemRenamed(ProjectItem ProjectItem, string OldName)
         {
             try
             {
                 Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
-                PackageStorage.CodeQueries.RenameStatmentsForFile(OldName, ProjectItem.Name);
-                PackageStorage.XmlQueries.RenameStatmentsForFile(OldName, ProjectItem.Name);
+                GotoAsyncPackage.Storage.CodeQueries.RenameStatmentsForFile(OldName, ProjectItem.Name);
+                GotoAsyncPackage.Storage.XmlQueries.RenameStatmentsForFile(OldName, ProjectItem.Name);
             }
             catch (Exception ex)
             {
@@ -37,8 +37,8 @@ namespace IBatisSuperHelper.EventHandlers
             {
                 Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
                 string fileName = ProjectItem.Name;
-                PackageStorage.XmlQueries.RemoveStatmentsForFilePath(fileName);
-                PackageStorage.CodeQueries.RemoveStatmentsForFilePath(fileName);
+                GotoAsyncPackage.Storage.XmlQueries.RemoveStatmentsForFilePath(fileName);
+                GotoAsyncPackage.Storage.CodeQueries.RemoveStatmentsForFilePath(fileName);
             }
             catch (Exception ex)
             {
@@ -55,7 +55,7 @@ namespace IBatisSuperHelper.EventHandlers
                 string projectItemExtension = Path.GetExtension(ProjectItem.Name);
                 if (projectItemExtension == ".xml")
                 {
-                    PackageStorage.AnalyzeAndStoreSingle(new XmlFileInfo
+                    GotoAsyncPackage.Storage.AnalyzeAndStoreSingle(new XmlFileInfo
                     {
                         FilePath = ProjectItem.FileNames[0],
                         ProjectName = ProjectItem.ContainingProject.Name

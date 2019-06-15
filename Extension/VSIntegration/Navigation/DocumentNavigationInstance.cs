@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.VSIntegration.Navigation
+namespace BatisSuperHelper.VSIntegration.Navigation
 {
     public class DocumentNavigationInstance
     {

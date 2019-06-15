@@ -2,15 +2,15 @@
 using System;
 using System.IO;
 using System.Reflection;
-using IBatisSuperHelper.Logging;
+using BatisSuperHelper.Logging;
 
-namespace IBatisSuperHelper.Loggers
+namespace BatisSuperHelper.Loggers
 {
     public static class OutputWindowLogger
     {
         private static IVsOutputWindowPane _outputWindowPane;
         private static SVsOutputWindow _SVsOutputWindow;
-        private static readonly string _tabName = "iBatis Super Helper";
+        private static readonly string _tabName = "Batis Super Helper";
 
         public static void Init(SVsOutputWindow outputWindow)
         {

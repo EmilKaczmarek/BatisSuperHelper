@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.VSIntegration.ErrorList
+namespace BatisSuperHelper.VSIntegration.ErrorList
 {
     public class TableEntriesSnapshot : TableEntriesSnapshotBase
     {
@@ -107,7 +107,8 @@ namespace IBatisSuperHelper.VSIntegration.ErrorList
         private string GetProjectNameUnsafe(string filePath)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-            var projectItem = GotoAsyncPackage.EnvDTE.Solution.FindProjectItem(filePath);
+
+            var projectItem = GotoAsyncPackage.EnvDTE?.Solution.FindProjectItem(filePath);
             return projectItem != null && projectItem.ContainingProject != null
                 ? projectItem.ContainingProject.Name
                 : null;

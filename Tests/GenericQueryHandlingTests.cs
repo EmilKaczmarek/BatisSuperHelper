@@ -1,24 +1,20 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using IBatisSuperHelper.Indexers;
 using System.Threading.Tasks;
+using BatisSuperHelper.Indexers.Code;
+using Xunit;
 
 namespace Tests
 {
-    [TestClass]
     public class GenericIndexingTests
     {
-        private string _directNamespaceText;
-        private string _fieldNamespaceText;
-        private string _fieldNamespaceCtor;
+        private readonly string _directNamespaceText;
+        private readonly string _fieldNamespaceText;
+        private readonly string _fieldNamespaceCtor;
 
         private string GetString(Stream stream)
         {
@@ -28,8 +24,7 @@ namespace Tests
             }
         }
 
-        [TestInitialize]
-        public void Initialize()
+        public GenericIndexingTests()
         {
             var asm = Assembly.GetExecutingAssembly();
             _directNamespaceText = GetString(asm.GetManifestResourceStream("Tests.Resources.DirectNamespace.txt"));
@@ -38,7 +33,7 @@ namespace Tests
 
         }
 
-        [TestMethod, ]
+        [Fact]
         public async Task SingleDirectNamespaceAsync()
         {
             ProjectId pid = ProjectId.CreateNewId();
@@ -56,19 +51,19 @@ namespace Tests
             var results = await new CSharpIndexer()
                 .BuildFromDocumentAsync(genericDocument);
 
-            Assert.IsNotNull(results);
-            Assert.AreEqual(1, results.Generics.Count);
-            Assert.AreEqual(0, results.Queries.Count);
+            Assert.NotNull(results);
+            Assert.Single(results.Generics);
+            Assert.Empty(results.Queries);
 
             var indexerResult = results.Generics.FirstOrDefault();
 
-            Assert.IsNotNull(indexerResult);
-            Assert.IsFalse(indexerResult.IsSolved);
-            Assert.IsTrue(indexerResult.CanBeUsedAsQuery);
-            Assert.AreEqual("T.SelectNumber", indexerResult.TextResult);
+            Assert.NotNull(indexerResult);
+            Assert.False(indexerResult.IsSolved);
+            Assert.True(indexerResult.CanBeUsedAsQuery);
+            Assert.Equal("T.SelectNumber", indexerResult.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public async Task SingleFieldNamespaceAsync()
         {
             ProjectId pid = ProjectId.CreateNewId();
@@ -86,19 +81,19 @@ namespace Tests
             var results = await new CSharpIndexer()
                 .BuildFromDocumentAsync(genericDocument);
 
-            Assert.IsNotNull(results);
-            Assert.AreEqual(1, results.Generics.Count);
-            Assert.AreEqual(0, results.Queries.Count);
+            Assert.NotNull(results);
+            Assert.Single(results.Generics);
+            Assert.Empty(results.Queries);
 
             var indexerResult = results.Generics.FirstOrDefault();
 
-            Assert.IsNotNull(indexerResult);
-            Assert.IsFalse(indexerResult.IsSolved);
-            Assert.IsTrue(indexerResult.CanBeUsedAsQuery);
-            Assert.AreEqual("T.SelectNumber", indexerResult.TextResult);
+            Assert.NotNull(indexerResult);
+            Assert.False(indexerResult.IsSolved);
+            Assert.True(indexerResult.CanBeUsedAsQuery);
+            Assert.Equal("T.SelectNumber", indexerResult.TextResult);
         }
 
-        [TestMethod]
+        [Fact]
         public async Task SingleFieldAssignedByCtorNamespaceAsync()
         {
             ProjectId pid = ProjectId.CreateNewId();
@@ -116,16 +111,16 @@ namespace Tests
             var results = await new CSharpIndexer()
                 .BuildFromDocumentAsync(genericDocument);
 
-            Assert.IsNotNull(results);
-            Assert.AreEqual(1, results.Generics.Count);
-            Assert.AreEqual(0, results.Queries.Count);
+            Assert.NotNull(results);
+            Assert.Single(results.Generics);
+            Assert.Empty(results.Queries);
 
             var indexerResult = results.Generics.FirstOrDefault();
 
-            Assert.IsNotNull(indexerResult);
-            Assert.IsFalse(indexerResult.IsSolved);
-            Assert.IsTrue(indexerResult.CanBeUsedAsQuery);
-            Assert.AreEqual("T.SelectNumber", indexerResult.TextResult);
+            Assert.NotNull(indexerResult);
+            Assert.False(indexerResult.IsSolved);
+            Assert.True(indexerResult.CanBeUsedAsQuery);
+            Assert.Equal("T.SelectNumber", indexerResult.TextResult);
         }
     }
 }

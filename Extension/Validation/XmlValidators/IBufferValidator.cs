@@ -1,4 +1,4 @@
-﻿using IBatisSuperHelper.VSIntegration.ErrorList;
+﻿using BatisSuperHelper.VSIntegration.ErrorList;
 using Microsoft.VisualStudio.Text;
 using System;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Validation.XmlValidators
+namespace BatisSuperHelper.Validation.XmlValidators
 {
     public interface IBufferValidator
     {
@@ -33,5 +33,7 @@ namespace IBatisSuperHelper.Validation.XmlValidators
         /// Adds errors to ErrorList
         /// </summary>
         void AddToErrorList();
+
+        string FilePath { get; }
     }
 }

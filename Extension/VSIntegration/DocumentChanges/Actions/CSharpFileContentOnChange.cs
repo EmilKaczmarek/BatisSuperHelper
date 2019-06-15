@@ -8,21 +8,23 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using NLog;
 using StackExchange.Profiling;
-using IBatisSuperHelper.Indexers;
-using IBatisSuperHelper.Indexers.Models;
-using IBatisSuperHelper.Loggers;
-using IBatisSuperHelper.Logging.MiniProfiler;
-using IBatisSuperHelper.Storage;
+using BatisSuperHelper.Indexers;
+using BatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Loggers;
+using BatisSuperHelper.Logging.MiniProfiler;
+using BatisSuperHelper.Storage;
+using Microsoft.VisualStudio.Shell;
 
-namespace IBatisSuperHelper.VSIntegration.DocumentChanges.Actions
+namespace BatisSuperHelper.VSIntegration.DocumentChanges.Actions
 {
     public class CSharpFileContentOnChange : IOnFileContentChange
     {
-        public void HandleChange(IWpfTextView textView)
+        public async System.Threading.Tasks.Task HandleChangeAsync(IWpfTextView textView)
         {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             try
             {
-                var profiler = MiniProfiler.StartNew(nameof(HandleChange));
+                var profiler = MiniProfiler.StartNew(nameof(HandleChangeAsync));
                 profiler.Storage = new NLogStorage(LogManager.GetLogger("profiler"));
                 using (profiler.Step("HandleChangeCode"))
                 {
@@ -34,7 +36,7 @@ namespace IBatisSuperHelper.VSIntegration.DocumentChanges.Actions
                         return;
                     }
 
-                    PackageStorage.AnalyzeAndUpdateSingle(roslynDocument);
+                    await GotoAsyncPackage.Storage.AnalyzeAndUpdateSingleAsync(roslynDocument);
                 }
             }
             catch (Exception ex)

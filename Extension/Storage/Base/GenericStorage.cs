@@ -5,11 +5,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Storage
+namespace BatisSuperHelper.Storage
 {
     public class GenericStorage<T, T1> : IEnumerable<KeyValuePair<T, T1>>
     {
         private readonly ConcurrentDictionary<T, Lazy<T1>> keyValuePairs = new ConcurrentDictionary<T, Lazy<T1>>();
+
+        public GenericStorage()
+        {
+
+        }
+
+        public GenericStorage(IEnumerable<KeyValuePair<T, T1>> pairList)
+        {
+            this.AddMultiple(pairList);
+        }
 
         public IEnumerator<KeyValuePair<T, T1>> GetEnumerator()
         {

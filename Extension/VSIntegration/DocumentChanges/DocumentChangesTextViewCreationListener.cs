@@ -2,12 +2,13 @@
 using Microsoft.VisualStudio.Utilities;
 using System;
 using System.Reactive.Linq;
-using IBatisSuperHelper.HelpersAndExtensions.VisualStudio;
-using IBatisSuperHelper.VSIntegration.DocumentChanges.Actions;
+using BatisSuperHelper.HelpersAndExtensions.VisualStudio;
+using BatisSuperHelper.VSIntegration.DocumentChanges.Actions;
 using Microsoft.VisualStudio.Text;
 using System.ComponentModel.Composition;
+using Microsoft.VisualStudio.Shell;
 
-namespace IBatisSuperHelper.VSIntegration.DocumentChanges
+namespace BatisSuperHelper.VSIntegration.DocumentChanges
 {
     [Export(typeof(IWpfTextViewCreationListener))]
     [ContentType("XML")]
@@ -28,7 +29,7 @@ namespace IBatisSuperHelper.VSIntegration.DocumentChanges
                .Throttle(TimeSpan.FromMilliseconds(500))
                .Subscribe(e =>
                {
-                   fileAction.HandleChange(textView);
+                   ThreadHelper.JoinableTaskFactory.RunAsync(async () => await fileAction.HandleChangeAsync(textView));
                });
         }
     }

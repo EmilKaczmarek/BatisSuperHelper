@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 
-namespace IBatisSuperHelper.Actions.TextProviders
+namespace BatisSuperHelper.Actions.TextProviders
 {
     public class TextManagerPropertiesProvider : IDocumentPropertiesProvider
     {

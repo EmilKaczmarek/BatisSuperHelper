@@ -31,65 +31,46 @@ using System.Timers;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
-using IBatisSuperHelper.Constants;
-using IBatisSuperHelper.EventHandlers;
-using IBatisSuperHelper.Events;
-using IBatisSuperHelper.Helpers;
-using IBatisSuperHelper.Indexers;
-using IBatisSuperHelper.Loggers;
-using IBatisSuperHelper.Logging;
-using IBatisSuperHelper.Parsers;
-using IBatisSuperHelper.Storage;
-using IBatisSuperHelper.VSIntegration.Navigation;
-using IBatisSuperHelper.Windows.RenameWindow;
-using static IBatisSuperHelper.Events.VSSolutionEventsHandler;
+using BatisSuperHelper.Constants;
+using BatisSuperHelper.EventHandlers;
+using BatisSuperHelper.Events;
+using BatisSuperHelper.Helpers;
+using BatisSuperHelper.Indexers;
+using BatisSuperHelper.Loggers;
+using BatisSuperHelper.Logging;
+using BatisSuperHelper.Parsers;
+using BatisSuperHelper.Storage;
+using BatisSuperHelper.VSIntegration.Navigation;
+using BatisSuperHelper.Windows.RenameWindow;
+using static BatisSuperHelper.Events.VSSolutionEventsHandler;
 using Microsoft;
+using BatisSuperHelper.Indexers.Xml;
+using BatisSuperHelper.HelpersAndExtensions;
+using BatisSuperHelper.EventHandlers.SolutionEventsActions;
+using BatisSuperHelper.Indexers.Workflow;
+using BatisSuperHelper.Indexers.Workflow.Options;
+using BatisSuperHelper.CoreAutomation.ProjectItems;
+using BatisSuperHelper.Indexers.Workflow.Strategies.Config;
+using BatisSuperHelper.Indexers.Workflow.Strategies.Storage.Configs;
+using BatisSuperHelper.Indexers.Code;
 
-namespace IBatisSuperHelper
+namespace BatisSuperHelper
 {
-    /// <summary>
-    /// This is the class that implements the package exposed by this assembly.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// The minimum requirement for a class to be considered a valid package for Visual Studio
-    /// is to implement the IVsPackage interface and register itself with the shell.
-    /// This package uses the helper classes defined inside the Managed Package Framework (MPF)
-    /// to do it: it derives from the Package class that provides the implementation of the
-    /// IVsPackage interface and uses the registration attributes defined in the framework to
-    /// register itself and its components with the shell. These attributes tell the pkgdef creation
-    /// utility what data to put into .pkgdef file.
-    /// </para>
-    /// <para>
-    /// To get loaded into VS, the package must be referred by &lt;Asset Type="Microsoft.VisualStudio.VsPackage" ...&gt; in .vsixmanifest file.
-    /// </para>
-    /// </remarks>
-    /// 
 #pragma warning disable S1450 // Private fields only used as local variables in methods should become local variables
-    [ProvideAutoLoad("{f1536ef8-92ec-443c-9ed7-fdadf150da82}")]
-    [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionExistsAndFullyLoaded_string)]   
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)] // Info on this package for Help/About
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [Guid(GotoAsyncPackage.PackageGuidString)]
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
+    [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionExistsAndFullyLoaded_string, PackageAutoLoadFlags.BackgroundLoad)]
     [ProvideToolWindow(typeof(ResultWindow))]
     public sealed class GotoAsyncPackage : AsyncPackage
     {
-        /// <summary>
-        /// GotoAsyncPackage GUID string.
-        /// </summary>
         public const string PackageGuidString = "0d0c7a5a-951b-4d78-ab1d-870fa377376f";
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Goto"/> class.
-        /// </summary>
         public GotoAsyncPackage()
         {
-            // Inside this method you can place any initialization code that does not require
-            // any Visual Studio service because at this point the package object is created but
-            // not sited yet inside Visual Studio environment. The place to do all the other
-            // initialization is the Initialize method.
+
         }
 
         #region Package Members
@@ -99,16 +80,29 @@ namespace IBatisSuperHelper
         private Events2 _envDteEvents;
         private ProjectItemsEvents _envDteProjectItemsEvents;
         private EnvDTE.BuildEvents _buildEvents;
-        //Public fields
-        public IVsSolution Solution;
-        public static DTE2 EnvDTE;
-        public IVsTextManager TextManager;
-        public IVsEditorAdaptersFactoryService EditorAdaptersFactory;
-        public IVsStatusbar IStatusBar;
-        public ToolWindowPane ResultWindow;
-        public Window SolutionExplorer;
-        public VisualStudioWorkspace Workspace;
-        public static GotoAsyncPackage Instance; 
+
+
+        public IVsSolution Solution { get; private set; }
+        public IVsTextManager TextManager { get; private set; }
+        public IVsEditorAdaptersFactoryService EditorAdaptersFactory { get; private set; }
+        public IVsStatusbar IStatusBar { get; private set; }
+        //public ToolWindowPane ResultWindow { get; private set; }
+        public VisualStudioWorkspace Workspace { get; private set; }
+
+        public static SemaphoreSlim DteSemaphore = new SemaphoreSlim(0, 1);
+        public static DTE2 EnvDTE { get; private set; }
+
+        private static IPackageStorage _packageStorage;
+        public static IPackageStorage Storage {
+            get
+            {
+                return _packageStorage ?? new PackageStorage();
+            }
+            private set
+            {
+                _packageStorage = value;
+            }
+        }
 
         protected override async System.Threading.Tasks.Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
@@ -121,87 +115,80 @@ namespace IBatisSuperHelper
             EnvDTE = await GetServiceAsync(typeof(DTE)) as DTE2;
             Assumes.Present(EnvDTE);
 
+            DteSemaphore.Release();
+
+            Storage = new PackageStorage();
+
             var componentModel = await GetServiceAsync(typeof(SComponentModel)) as IComponentModel;
             Assumes.Present(componentModel);
 
             //Initialize public components, initialize instances that are dependent on any component
             TextManager = await GetServiceAsync(typeof(SVsTextManager)) as IVsTextManager;
             EditorAdaptersFactory = componentModel.GetService<IVsEditorAdaptersFactoryService>();
-            ResultWindow = FindToolWindow(typeof(ResultWindow), 0, true);
 
             DocumentNavigationInstance.InjectDTE(EnvDTE);
             //Prepare package events
+            var indexingQueue = new ProjectIndexingQueue();
+            var workspaceEvents = new WorkspaceEvents(indexingQueue);
+
             Workspace = componentModel.GetService<VisualStudioWorkspace>();
-            Workspace.WorkspaceChanged += WorkspaceEvents.WorkspaceChanged;
+            Workspace.WorkspaceChanged += (s,e) => ThreadHelper.JoinableTaskFactory.RunAsync(async () => await workspaceEvents.WorkspaceChangedAsync(s,e));
 
-            Observable.FromEventPattern<WorkspaceChangeEventArgs>(Workspace, "WorkspaceChanged")
-               //.Select(e => e.EventArgs.Changes)
-               .DistinctUntilChanged()
-               .Throttle(TimeSpan.FromMilliseconds(500))
-               .Subscribe(e =>
-               {
-
-               });
-
-          
+            var indexingWorkflow = new IndexingWorkflow(Storage.IndexingWorkflowOptions, new ProjectItemRetreiver(EnvDTE), Storage);
 
             _envDteEvents = EnvDTE.Events as Events2;
             if (_envDteEvents != null)
             {
-                ProjectItemEventsEx projectItemEvents = new ProjectItemEventsEx();
+                ProjectItemEventsActions projectItemEvents = new ProjectItemEventsActions();
                 _envDteProjectItemsEvents = _envDteEvents.ProjectItemsEvents;
                 _envDteProjectItemsEvents.ItemAdded += projectItemEvents.ItemAdded;
                 _envDteProjectItemsEvents.ItemRemoved += projectItemEvents.ItemRemoved;
                 _envDteProjectItemsEvents.ItemRenamed += projectItemEvents.ItemRenamed;
 
-                EventHandlers.BuildEvents buildEvents = new EventHandlers.BuildEvents();
+                EventHandlers.BuildEventsActions buildEvents = new EventHandlers.BuildEventsActions();
                 _buildEvents = _envDteEvents.BuildEvents;
                 _buildEvents.OnBuildBegin += buildEvents.OnBuildBegin;
                 
             }
 
-            OutputWindowLogger.Init(await GetServiceAsync(typeof(SVsOutputWindow)) as SVsOutputWindow);
+            var solutionEventsActions = new VSSolutionEventsActions(indexingWorkflow);
 
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
+            await ResultWindowCommand.InitializeAsync(this);
+            OutputWindowLogger.Init(await GetServiceAsync(typeof(SVsOutputWindow)) as SVsOutputWindow);
             IStatusBar = await GetServiceAsync(typeof(SVsStatusbar)) as IVsStatusbar;
 
-            Solution = await GetServiceAsync(typeof(SVsSolution)) as IVsSolution;
+            var svsSolution = await GetServiceAsync(typeof(SVsSolution));
+            Solution = svsSolution as IVsSolution;
             Assumes.Present(Solution);
 
-            _solutionEventsHandler = new SolutionEventsHandler(
-                new Action<EventConstats.VS.SolutionLoad>(HandleSolutionEvent),
-                Solution
-            );
+            await HandleSolutionAsync(svsSolution, solutionEventsActions, indexingQueue);
+
+
+            _solutionEventsHandler = new SolutionEventsHandler(solutionEventsActions);
             Solution.AdviseSolutionEvents(_solutionEventsHandler, out _solutionEventsCookie);
 
-            Goto.Initialize(this);
-            RenameModalWindowCommand.Initialize(this);
-            RenameCommand.Initialize(this);
-            Instance = this;
+            await Goto.InitializeAsync(this);
+            await RenameModalWindowCommand.InitializeAsync(this);
+            await RenameCommand.InitializeAsync(this);
+
         }
 
-        internal void HandleSolutionEvent(EventConstats.VS.SolutionLoad eventNumber)
+        private async System.Threading.Tasks.Task HandleSolutionAsync(object solutionService, VSSolutionEventsActions solutionEventsActions, ProjectIndexingQueue indexingQueue)
         {
-            switch (eventNumber)
+            var solution = solutionService as IVsSolution;
+
+            solution.GetProperty((int)__VSPROPID.VSPROPID_IsSolutionOpen, out object isSolutionOpenedValue);
+            var isSolutionOpened = isSolutionOpenedValue is bool isSolutionOpenedBool && isSolutionOpenedBool;
+            if (isSolutionOpened)
             {
-                case EventConstats.VS.SolutionLoad.SolutionLoadComplete:
-                    ThreadHelper.ThrowIfNotOnUIThread();
-                    var projectItemHelper = new ProjectItemHelper();
-                    var projectItems = projectItemHelper.GetProjectItemsFromSolutionProjects(EnvDTE.Solution.Projects);
-                    XmlIndexer xmlIndexer = new XmlIndexer();
-                    var xmlFiles = DocumentHelper.GetXmlFiles(projectItems);
-                    var xmlIndexerResult = xmlIndexer.BuildIndexer(xmlFiles);
-                    PackageStorage.XmlQueries.AddMultipleWithoutKey(xmlIndexerResult);
-                    break;
-                case EventConstats.VS.SolutionLoad.SolutionOnClose:
-                    PackageStorage.CodeQueries.Clear();
-                    PackageStorage.XmlQueries.Clear();
-                    break;
-                default:
-                    break;
+                solutionEventsActions.OnSolutionLoadComplete();
+                await indexingQueue.EnqueueMultipleAsync(Workspace.CurrentSolution.Projects);
             }
+
         }
+
         #endregion
     }
 }

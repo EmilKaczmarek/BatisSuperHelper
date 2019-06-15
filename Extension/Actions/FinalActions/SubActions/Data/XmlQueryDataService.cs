@@ -3,35 +3,35 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
-using IBatisSuperHelper.Indexers;
-using IBatisSuperHelper.Indexers.Models;
-using IBatisSuperHelper.Storage;
-using IBatisSuperHelper.Storage.Providers;
-using IBatisSuperHelper.Windows.ResultWindow.ViewModel;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using BatisSuperHelper.Indexers;
+using BatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Storage;
+using BatisSuperHelper.Storage.Providers;
+using BatisSuperHelper.Windows.ResultWindow.ViewModel;
 
-namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Data
+namespace BatisSuperHelper.Actions.FinalActions.SubActions.Data
 {
     public class XmlQueryDataService : IQueryDataService<XmlQuery>
     {
-        public List<ExpressionResult> GetResultsForGenericQueries(string queryResult, NamespaceHandlingType namespaceHandlingLogic)
+        public List<ExpressionResult> GetResultsForGenericQueries(string queryResult, bool useNamespace)
         {
             return new List<ExpressionResult>();
         }
 
-        public List<IndexerKey> GetStatmentKeys(string query, NamespaceHandlingType namespaceHandlingLogic)
+        public List<IndexerKey> GetStatmentKeys(string query, bool useNamespace)
         {
-            return PackageStorage.XmlQueries.GetKeysByQueryId(query, namespaceHandlingLogic);
+            return GotoAsyncPackage.Storage.XmlQueries.GetKeys(query, useNamespace);
         }
 
         public List<XmlQuery> GetStatmentsFromKeys(List<IndexerKey> keys)
         {
-            return keys.Select(PackageStorage.XmlQueries.GetValueOrNull).ToList();
+            return keys.Select(GotoAsyncPackage.Storage.XmlQueries.GetValueOrNull).ToList();
         }
 
         public XmlQuery GetSingleStatmentFromKey(IndexerKey key)
         {
-            return PackageStorage.XmlQueries.GetValueOrNull(key);
+            return GotoAsyncPackage.Storage.XmlQueries.GetValueOrNull(key);
         }
 
         public List<ResultWindowViewModel> PrepareViewModels(List<ExpressionResult> genericResults, ExpressionResult expressionResult, List<XmlQuery> nonGenericResults)
@@ -48,7 +48,7 @@ namespace IBatisSuperHelper.Actions.FinalActions.SubActions.Data
 
         public void Rename(IndexerKey key, string value)
         {
-            PackageStorage.XmlQueries.RenameQuery(key, value);
+            GotoAsyncPackage.Storage.XmlQueries.RenameQuery(key, value);
         }
     }
 }

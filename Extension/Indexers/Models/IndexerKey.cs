@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace IBatisSuperHelper.Indexers
+namespace BatisSuperHelper.Indexers
 {
     public class IndexerKey
     {

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using IBatisNet.DataMapper;
+using BatisNet.DataMapper;
 
-namespace IBatisSample
+namespace BatisSample
 {
     public class GenericDataAccess<T>
     {

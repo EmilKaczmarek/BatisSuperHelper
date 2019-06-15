@@ -1,152 +1,95 @@
-﻿using System;
+﻿using HtmlAgilityPack;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
-using HtmlAgilityPack;
-using IBatisSuperHelper.Constants;
-using IBatisSuperHelper.Helpers;
-using IBatisSuperHelper.HelpersAndExtensions;
-using IBatisSuperHelper.Indexers.Models;
 
-namespace IBatisSuperHelper.Parsers
+namespace BatisSuperHelper.Parsers
 {
     public class XmlParser
     {
-        private Lazy<string> _xmlNamespace => new Lazy<string>(GetDocumentXmlNamespace);
-        public string XmlNamespace => _xmlNamespace.Value;
+        public string XmlNamespace => IsLazy ? _xmlNamespaceLazy.Value : GetXmlNamespace();
+        public string FilePath { get; private set; }
+        public string FileName { get; private set; }
+        public string FileProjectName { get; private set; }
 
-        private Lazy<string> _mapNamespace => new Lazy<string>(GetDocumentMapNamespace);
-        public string MapNamespace =>_mapNamespace.Value;
-
-        private Lazy<bool> _useStatementNamespaces => new Lazy<bool>(IsFileUsingStatementNamespaces);
-        public bool IsUsingStatementNamespaces => _useStatementNamespaces.Value;
-
-        private HtmlDocument _xmlDocument;
-        private string _filePath;
-        private string _fileName;
-        private string _fileProjectName;
         private StringReader _stringReader;
+        internal HtmlDocument _xmlDocument;
 
+        private Lazy<string> _xmlNamespaceLazy;
+        protected bool IsLazy = false;//I am...
+        
         public XmlParser()
+        {
+            InitializeEmpty();
+        }
+
+        public XmlParser(XmlParser otherInstance)
+        {
+            FilePath = otherInstance.FilePath;
+            FileName = otherInstance.FileName;
+            FileProjectName = otherInstance.FileProjectName;
+            _stringReader = otherInstance._stringReader;
+            _xmlDocument = otherInstance._xmlDocument;
+            IsLazy = otherInstance.IsLazy;
+        }
+
+        public XmlParser(StringReader stringReader)
+        {
+            InitializeWithStringReader(stringReader);
+        }
+
+        public XmlParser(string filePath, string fileProjectName)
+        {
+            InitializeWithFilePathAndProjectName(filePath, fileProjectName);
+        }
+
+        public void InitializeEmpty()
         {
             _xmlDocument = new HtmlDocument();
         }
 
-        public XmlParser WithStringReader(StringReader stringReader)
+        public void InitializeWithStringReader(StringReader stringReader)
         {
             _stringReader = stringReader;
-            return this;
         }
 
-        public XmlParser WithFileInfo(string filePath, string fileProjectName)
+        public void InitializeWithFilePathAndProjectName(string filePath, string fileProjectName)
         {
-            _filePath = filePath;
-            _fileName = Path.GetFileName(filePath);
-            _fileProjectName = fileProjectName;
-            return this;
+            FilePath = filePath;
+            FileName = Path.GetFileName(filePath);
+            FileProjectName = fileProjectName;
+        }
+
+        public void LazyLoading()
+        {
+            IsLazy = true;
+            _xmlNamespaceLazy = new Lazy<string>(() => GetXmlNamespace());
         }
 
         public XmlParser Load()
         {
+            InitializeEmpty();
             if (_stringReader != null)
             {
                 _xmlDocument.Load(_stringReader);
             }
             else
             {
-                _xmlDocument.Load(_filePath);
+                _xmlDocument.Load(FilePath);
             }
+
             return this;
         }
 
-        public List<XmlQuery> GetMapFileStatments()
+        public HtmlDocument GetDocument()
         {
-            var statementChildNodes = GetChildNodesOfParentByXPath(IBatisConstants.StatementsRootElementXPath);
-            return statementChildNodes.Where(e => IBatisHelper.IsIBatisStatment(e.Name)).Select(e => new XmlQuery
-            {
-                QueryFileName = _fileName,
-                QueryFilePath = _filePath,
-                QueryId = e.Id,
-                FullyQualifiedQuery = IsUsingStatementNamespaces ? MapNamespaceHelper.CreateFullQueryString(MapNamespace, e.Id) : e.Id,
-                QueryLineNumber = e.Line,
-                QueryVsProjectName = _fileProjectName,
-                MapNamespace = MapNamespace
-            }).ToList();
+            return _xmlDocument;
         }
 
-        public List<XmlQuery> GetMapFileStatmentsWithIdAttributeColumnInfo()
+        public IEnumerable<HtmlNode> GetChildNodesOfParentByXPath(string xPath)
         {
-            var statementChildNodes = GetChildNodesOfParentByXPath(IBatisConstants.StatementsRootElementXPath);
-            return statementChildNodes.Where(e => IBatisHelper.IsIBatisStatment(e.Name)).Select(e => new XmlQuery
-            {
-                XmlLine = e.Attributes.FirstOrDefault(x => x.Name == "id")?.Line,
-                XmlLineColumn = e.Attributes.FirstOrDefault(x=>x.Name == "id")?.LinePosition,
-                QueryFileName = _fileName,
-                QueryFilePath = _filePath,
-                QueryId = e.Id,
-                FullyQualifiedQuery = IsUsingStatementNamespaces ? MapNamespaceHelper.CreateFullQueryString(MapNamespace, e.Id) : e.Id,
-                QueryLineNumber = e.Line,
-                QueryVsProjectName = _fileProjectName,
-                MapNamespace = MapNamespace
-            }).ToList();
-        }
-
-        public string GetQueryAtLineOrNull(int lineNumber, bool forceNoNamespace)
-        {
-            if (forceNoNamespace)
-            {
-                var nodes = _xmlDocument.DocumentNode.Descendants();
-                var lineNode = GetFirstStatmentNodeForLineOrNull(nodes, lineNumber);
-
-                return lineNode?.Id;
-            }
-
-            return GetQueryAtLineOrNull(lineNumber);
-        }
-
-        public string GetQueryAtLineOrNull(int lineNumber)
-        {
-            var nodes = _xmlDocument.DocumentNode.Descendants();
-            var lineNode = GetFirstStatmentNodeForLineOrNull(nodes, lineNumber);
-
-            return IsUsingStatementNamespaces? MapNamespaceHelper.CreateFullQueryString(MapNamespace, lineNode?.Id):lineNode?.Id;
-        }
-
-        public List<int> GetStatmentElementsLineNumber()
-        {
-            var statementChildNodes = GetChildNodesOfParentByXPath(IBatisConstants.StatementsRootElementXPath);
-            return statementChildNodes.Where(e => e.Name != "#text").Select(e => e.Line).ToList();
-        }
-
-        public bool HasSelectedLineValidQuery(int lineNumber)
-        {
-            var nodes = _xmlDocument.DocumentNode.Descendants();
-            var line = GetFirstStatmentNodeForLineOrNull(nodes, lineNumber);
-
-            return line?.Name != null && IBatisConstants.StatementNames.Contains(line.Name);          
-        }
-
-        private HtmlNode GetFirstStatmentNodeForLineOrNull(IEnumerable<HtmlNode> nodes, int lineNumber)
-        {
-            nodes = nodes.Where(e => e.NodeType != HtmlNodeType.Text);
-            var line = nodes.FirstOrDefault(e => e.Line == lineNumber) ?? nodes.FirstOrDefault(e => e.Line == nodes.Select(x => x.Line).DetermineClosestInt(lineNumber));
-
-            while (line != null)
-            {
-                if (IBatisConstants.StatementNames.Contains(line.Name))
-                {
-                    return line;
-                }
-                line = line.ParentNode;
-            }
-
-            return null;
-        }
-
-        private IEnumerable<HtmlNode> GetChildNodesOfParentByXPath(string xPath)
-        {
-            var statementRootNode = _xmlDocument.DocumentNode.SelectSingleNode(xPath);
+            var statementRootNode = GetSingleNode(xPath);
 
             if (statementRootNode == null)
             {
@@ -155,39 +98,20 @@ namespace IBatisSuperHelper.Parsers
             return statementRootNode.Descendants();
         }
 
-        private string GetDocumentXmlNamespace()
+        public IEnumerable<HtmlNode> GetAllDescendantsNodes()
         {
-            var fileRootNode = GetMapDocumentRootNode();
-            if (fileRootNode == null)
-                return null;
-
-            return fileRootNode.Attributes.FirstOrDefault(e => e.Name == "xmlns")?.Value;
+            return _xmlDocument.DocumentNode.Descendants();
         }
 
-        private string GetDocumentMapNamespace()
+        public HtmlNode GetSingleNode(string xpath)
         {
-            var fileRootNode = GetMapDocumentRootNode();
-            if (fileRootNode == null)
-                return null;
-
-            return fileRootNode.Attributes.FirstOrDefault(e => e.Name == "namespace")?.Value;
+            return _xmlDocument.DocumentNode.SelectSingleNode(xpath);
         }
 
-        private HtmlNode GetMapDocumentRootNode()
+        public string GetXmlNamespace()
         {
-            return _xmlDocument.DocumentNode.SelectSingleNode(IBatisConstants.MapFileRootElementXPath);
+            return _xmlDocument.DocumentNode.ChildNodes.Count != 2 ? null :_xmlDocument.DocumentNode.ChildNodes.Last().GetAttributeValue("xmlns", null);
         }
 
-        private bool IsFileUsingStatementNamespaces()
-        {
-            var useStatmentNamespaceNodes = GetChildNodesOfParentByXPath(IBatisConstants.SettingRootElementXPath)?.FirstOrDefault(e => e.Name != "#text");
-            
-            if (useStatmentNamespaceNodes != null)
-            {
-                return useStatmentNamespaceNodes.GetAttributeValue(IBatisConstants.UseStatmentNameSpaceSettingAttributeName, false);
-            }
-         
-            return false;
-        }
     }
 }

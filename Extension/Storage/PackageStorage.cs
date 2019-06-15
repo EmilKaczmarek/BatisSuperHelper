@@ -3,35 +3,81 @@ using StackExchange.Profiling;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.Model;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
-using IBatisSuperHelper.Indexers;
-using IBatisSuperHelper.Indexers.Models;
-using IBatisSuperHelper.Models;
-using IBatisSuperHelper.Storage.Domain;
-using IBatisSuperHelper.Storage.Interfaces;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.Model;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using BatisSuperHelper.Indexers;
+using BatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Models;
+using BatisSuperHelper.Storage.Domain;
+using BatisSuperHelper.Storage.Interfaces;
 using Microsoft.VisualStudio.Shell;
+using BatisSuperHelper.Parsers.XmlConfig.Models;
+using BatisSuperHelper.Indexers.Xml;
+using BatisSuperHelper.Indexers.Code;
+using BatisSuperHelper.Parsers.Models.XmlConfig.SqlMap;
+using BatisSuperHelper.Parsers.Models;
+using BatisSuperHelper.Storage.Providers;
+using BatisSuperHelper.Indexers.Workflow.Options;
+using BatisSuperHelper.Storage.Event;
+using System.Diagnostics;
 
-namespace IBatisSuperHelper.Storage
+namespace BatisSuperHelper.Storage
 {
-    public static class PackageStorage
+    public class PackageStorage : IPackageStorage
     {
-        public static IProvider<IndexerKey, List<CSharpQuery>> CodeQueries = new CodeQueryProvider();
-        public static IProvider<IndexerKey, XmlQuery> XmlQueries = new XmlQueryProvider();
+        public long Initialized { get; private set; }
+        public IQueryProvider<IndexerKey, List<CSharpQuery>> CodeQueries { get; private set; }
+        public IQueryProvider<IndexerKey, XmlQuery> XmlQueries { get; private set; }
 
-        public static XmlIndexer XmlFileAnalyzer = new XmlIndexer();
-        public static CSharpIndexer CodeFileAnalyzer = new CSharpIndexer();
+        public XmlIndexer XmlFileAnalyzer { get; private set; }
+        public CSharpIndexer CodeFileAnalyzer { get; private set; }
 
-        public static GenericStorage<MethodInfo, ExpressionResult> GenericMethods = new GenericStorage<MethodInfo, ExpressionResult>();
+        public GenericStorage<MethodInfo, ExpressionResult> GenericMethods { get; private set; }
 
-        public static readonly GenericStorage<string, object> RuntimeConfiguration = new GenericStorage<string, object>
+        public ISqlMapConfigProvider SqlMapConfigProvider { get; private set; }
+
+        public GenericStorage<string, object> RuntimeConfiguration { get; private set; }
+
+        public IndexingWorkflowOptions IndexingWorkflowOptions { get; private set; }
+
+        public event EventHandler<StoreChangeEventArgs> OnStoreChange;
+
+        public PackageStorage()
         {
-            new KeyValuePair<string, object>("HybridNamespaceEnabled", true),
-        };
-        
-        public static async System.Threading.Tasks.Task AnalyzeAndStoreAsync(List<Document> documents)
+            Initialized = DateTime.Now.Ticks;
+            CodeQueries = new CodeQueryProvider();
+            XmlQueries = new XmlQueryProvider();
+            XmlFileAnalyzer = new XmlIndexer();
+            CodeFileAnalyzer = new CSharpIndexer();
+            GenericMethods = new GenericStorage<MethodInfo, ExpressionResult>();
+            SqlMapConfigProvider = new SqlMapConfigProvider();
+            IndexingWorkflowOptions = new IndexingWorkflowOptions
+            {
+                MapsOptions = new SqlMapIndexingOptions
+                {
+                    IndexOnlyMapsInConfig = true,
+                    IndexAllMapsOnError = true,
+                },
+            };
+        }
+
+        public PackageStorage(IQueryProvider<IndexerKey, List<CSharpQuery>> codeQueries, IQueryProvider<IndexerKey, XmlQuery> xmlQueries, XmlIndexer xmlFileAnalyzer, CSharpIndexer codeFileAnalyzer, GenericStorage<MethodInfo, ExpressionResult> genericMethods, ISqlMapConfigProvider sqlMapConfigProvider, GenericStorage<string, object> runtimeConfiguration)
+        {
+            CodeQueries = codeQueries;
+            XmlQueries = xmlQueries;
+            XmlFileAnalyzer = xmlFileAnalyzer;
+            CodeFileAnalyzer = codeFileAnalyzer;
+            GenericMethods = genericMethods;
+            SqlMapConfigProvider = sqlMapConfigProvider;
+            RuntimeConfiguration = runtimeConfiguration;
+        }
+
+        private void OnStoreChangeHandler(ChangedFileTypeFlag flag)
+        {
+            StorageEvents.TriggerStoreChange(this, new StoreChangeEventArgs(flag));
+        }
+
+        public async System.Threading.Tasks.Task AnalyzeAndStoreAsync(List<Document> documents)
         {
             using (MiniProfiler.Current.Step(nameof(AnalyzeAndStoreAsync)))
             {
@@ -39,33 +85,52 @@ namespace IBatisSuperHelper.Storage
                 var generics = codeResults.SelectMany(e => e.Generics).Select(e => new KeyValuePair<MethodInfo, ExpressionResult>(e.NodeInformation.MethodInfo, e));
                 await GenericMethods.AddMultipleAsync(generics);
                 CodeQueries.AddMultipleWithoutKey(codeResults.Select(e => e.Queries).ToList());
+                OnStoreChangeHandler(ChangedFileTypeFlag.CSharp);
             }
         }
 
-        public static void AnalyzeAndStoreSingle(XmlFileInfo xmlFile)
+        public void AnalyzeAndStoreSingle(XmlFileInfo xmlFile)
         {
             var xmlFileResult = XmlFileAnalyzer.ParseSingleFile(xmlFile);
             XmlQueries.AddMultipleWithoutKey(xmlFileResult);
+            OnStoreChangeHandler(ChangedFileTypeFlag.Xml);
         }
 
-        public static void AnalyzeAndUpdateSingle(Document document)
+        public void AnalyzeAndUpdateSingle(Document document)
         {
             var codeResult = ThreadHelper.JoinableTaskFactory.Run(async () => await CodeFileAnalyzer.BuildFromDocumentAsync(document));
             CodeQueries.UpdateStatmentForFileWihoutKey(new List<List<CSharpQuery>> { codeResult.Queries });
             foreach (var generic in codeResult.Generics)
             {
                 GenericMethods.Update(generic.NodeInformation.MethodInfo, generic);
-            }  
+            }
+            OnStoreChangeHandler(ChangedFileTypeFlag.CSharp);
         }
 
-        public static async System.Threading.Tasks.Task AnalyzeAndStoreSingleAsync(Document document)
+        public async System.Threading.Tasks.Task AnalyzeAndUpdateSingleAsync(Document document)
         {
+            var codeResult = await CodeFileAnalyzer.BuildFromDocumentAsync(document);
+            CodeQueries.UpdateStatmentForFileWihoutKey(new List<List<CSharpQuery>> { codeResult.Queries });
+            foreach (var generic in codeResult.Generics)
+            {
+                await GenericMethods.UpdateAsync(generic.NodeInformation.MethodInfo, generic);
+            }
+            OnStoreChangeHandler(ChangedFileTypeFlag.CSharp);
+        }
+
+        public async System.Threading.Tasks.Task AnalyzeAndStoreSingleAsync(Document document)
+        {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+            Debug.WriteLine($"AnalyzeAndStoreSingleAsync for file {document.Name}");
             using (MiniProfiler.Current.Step(nameof(AnalyzeAndStoreSingleAsync)))
             {
                 var codeResult = await CodeFileAnalyzer.BuildAsync(document);
                 await GenericMethods.AddMultipleAsync(codeResult.Generics.Select(e => new KeyValuePair<MethodInfo, ExpressionResult>(e.NodeInformation.MethodInfo, e)));
                 CodeQueries.AddWithoutKey(codeResult.Queries);
+                OnStoreChangeHandler(ChangedFileTypeFlag.CSharp);
             }
         }
+
     }
 }

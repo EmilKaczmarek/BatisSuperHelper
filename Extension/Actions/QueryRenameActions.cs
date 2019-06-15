@@ -4,12 +4,12 @@ using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
-using IBatisSuperHelper.VSIntegration;
+using BatisSuperHelper.VSIntegration;
 using NLog;
-using IBatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
-using IBatisSuperHelper.Loggers;
+using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
+using BatisSuperHelper.Loggers;
 
-namespace IBatisSuperHelper.Actions
+namespace BatisSuperHelper.Actions
 {
     public class QueryRenameActions : BaseActions
     {
