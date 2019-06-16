@@ -1,6 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using StackExchange.Profiling;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.Model;
@@ -27,7 +26,7 @@ namespace BatisSuperHelper.Storage
     {
         public long Initialized { get; private set; }
         public IQueryProvider<IndexerKey, List<CSharpQuery>> CodeQueries { get; private set; }
-        public IQueryProvider<IndexerKey, XmlQuery> XmlQueries { get; private set; }
+        public IQueryProvider<IndexerKey, Statement> XmlQueries { get; private set; }
 
         public XmlIndexer XmlFileAnalyzer { get; private set; }
         public CSharpIndexer CodeFileAnalyzer { get; private set; }
@@ -46,7 +45,7 @@ namespace BatisSuperHelper.Storage
         {
             Initialized = DateTime.Now.Ticks;
             CodeQueries = new CodeQueryProvider();
-            XmlQueries = new XmlQueryProvider();
+            XmlQueries = new StatementProvider();
             XmlFileAnalyzer = new XmlIndexer();
             CodeFileAnalyzer = new CSharpIndexer();
             GenericMethods = new GenericStorage<MethodInfo, ExpressionResult>();
@@ -61,7 +60,7 @@ namespace BatisSuperHelper.Storage
             };
         }
 
-        public PackageStorage(IQueryProvider<IndexerKey, List<CSharpQuery>> codeQueries, IQueryProvider<IndexerKey, XmlQuery> xmlQueries, XmlIndexer xmlFileAnalyzer, CSharpIndexer codeFileAnalyzer, GenericStorage<MethodInfo, ExpressionResult> genericMethods, ISqlMapConfigProvider sqlMapConfigProvider, GenericStorage<string, object> runtimeConfiguration)
+        public PackageStorage(IQueryProvider<IndexerKey, List<CSharpQuery>> codeQueries, IQueryProvider<IndexerKey, Statement> xmlQueries, XmlIndexer xmlFileAnalyzer, CSharpIndexer codeFileAnalyzer, GenericStorage<MethodInfo, ExpressionResult> genericMethods, ISqlMapConfigProvider sqlMapConfigProvider, GenericStorage<string, object> runtimeConfiguration)
         {
             CodeQueries = codeQueries;
             XmlQueries = xmlQueries;

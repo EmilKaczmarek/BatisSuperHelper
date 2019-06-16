@@ -24,7 +24,7 @@ namespace BatisSuperHelper.Storage
         GenericStorage<string, object> RuntimeConfiguration { get; }
         ISqlMapConfigProvider SqlMapConfigProvider { get; }
         XmlIndexer XmlFileAnalyzer { get; }
-        IQueryProvider<IndexerKey, XmlQuery> XmlQueries { get; }
+        IQueryProvider<IndexerKey, Statement> XmlQueries { get; }
         IndexingWorkflowOptions IndexingWorkflowOptions { get; }
 
         Task AnalyzeAndStoreAsync(List<Document> documents);

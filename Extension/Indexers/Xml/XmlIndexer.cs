@@ -13,7 +13,7 @@ namespace BatisSuperHelper.Indexers.Xml
     {
         public List<XmlQuery> BuildIndexer(IDictionary<SqlMapConfig, IEnumerable<XmlFileInfo>> configFileInfosPairs)
         {
-            var result = new List<XmlQuery>();
+            var result = new List<Statement>();
             Stopwatch sw = new Stopwatch();
             sw.Start();
             foreach (var configFilesPair in configFileInfosPairs)
@@ -34,7 +34,7 @@ namespace BatisSuperHelper.Indexers.Xml
             return result;
         }
 
-        public List<XmlQuery> ParseSingleFile(XmlFileInfo xmlDocument)
+        public List<Statement> ParseSingleFile(XmlFileInfo xmlDocument)
         {
             BatisXmlMapParser parser = new BatisXmlMapParser().WithFileInfo(xmlDocument.FilePath, xmlDocument.ProjectName).Load();
 
@@ -43,7 +43,7 @@ namespace BatisSuperHelper.Indexers.Xml
             {
                 return parser.GetMapFileStatments();
             }
-            return new List<XmlQuery>();
+            return new List<Statement>();
         }
 
         public SqlMapConfig ParseSingleConfigFile(XmlFileInfo xmlDocument)

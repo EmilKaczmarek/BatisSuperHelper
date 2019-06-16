@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BatisSuperHelper.Parsers.Models.XmlConfig.SqlMap
 {
-    public class UriSqlMap : SqlMap
+    public class UriSqlMapDefinition : SqlMapDefinition
     {
         public string Uri { get; set; }
     }

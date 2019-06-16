@@ -16,7 +16,7 @@ namespace BatisSuperHelper.Actions.FinalActions.SubActions.Logic.Rename
 {
     public class RenameXmlLogicHandler
     {
-        public bool ExecuteRename(XmlQuery query, RenameViewModel renameViewModel, DTE2 envDte)
+        public bool ExecuteRename(Statement query, RenameViewModel renameViewModel, DTE2 envDte)
         {
             try
             {
@@ -32,7 +32,7 @@ namespace BatisSuperHelper.Actions.FinalActions.SubActions.Logic.Rename
                 textSelection.GotoLine(query.QueryLineNumber, true);
 
                 var line = textSelection.GetText();
-                line = line.Replace(MapNamespaceHelper.GetQueryWithoutNamespace(query), MapNamespaceHelper.GetQueryWithoutNamespace(renameViewModel.QueryText));
+                line = line.Replace(MapNamespaceHelper.GetQueryWithoutNamespace(query.QueryId), MapNamespaceHelper.GetQueryWithoutNamespace(renameViewModel.QueryText));
 
                 textSelection.Insert(line, (int)vsInsertFlags.vsInsertFlagsContainNewText);
                 projectItem.Document.Save();

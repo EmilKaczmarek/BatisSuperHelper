@@ -27,7 +27,7 @@ namespace BatisSuperHelper.Actions.FinalActions
         public static RenameFinalActionsExecutor Create() => new RenameFinalActionsExecutor();
 
         private CodeQueryDataService _codeQueryDataService => QueryDataServices[typeof(CSharpQuery)];
-        private XmlQueryDataService _xmlQueryDataService => QueryDataServices[typeof(XmlQuery)];
+        private XmlQueryDataService _xmlQueryDataService => QueryDataServices[typeof(Statement)];
         private DTE2 _envDte;
         private VisualStudioWorkspace _workspace;
         private RenameCodeLogicHandler _codeLogicHandler;

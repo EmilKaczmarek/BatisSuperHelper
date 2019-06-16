@@ -17,8 +17,8 @@ namespace BatisSuperHelper.Actions.FinalActions.Factory
         {
             return GoToQueryFinalEventActionsExecutor
                 .Create()
-                .WithLogicHandler(typeof(XmlQuery), new GoToXmlLogicHandler(statusBar, toolWindowPane))
-                .WithQueryDataService(typeof(XmlQuery), new XmlQueryDataService())
+                .WithLogicHandler(typeof(Statement), new GoToXmlLogicHandler(statusBar, toolWindowPane))
+                .WithQueryDataService(typeof(Statement), new XmlQueryDataService())
                 .WithUseNamespace(useNamespace);
         }
 
@@ -27,7 +27,7 @@ namespace BatisSuperHelper.Actions.FinalActions.Factory
             return RenameFinalActionsExecutor
                .Create()
                .WithQueryDataService(typeof(CSharpQuery), new CodeQueryDataService())
-               .WithQueryDataService(typeof(XmlQuery), new XmlQueryDataService())
+               .WithQueryDataService(typeof(Statement), new XmlQueryDataService())
                .WithCodeLogicHandler(new RenameCodeLogicHandler())
                .WithXmlLogicHandler(new RenameXmlLogicHandler())
                .WithEnvDte(dte)

@@ -56,7 +56,7 @@ namespace BatisSuperHelper.Validation
             }
         }
 
-        private async Task<Document> SwitchQueryAsync(Document document, LiteralExpressionSyntax stringLiteralExpression, XmlQuery newQuery, CancellationToken cancellationToken)
+        private async Task<Document> SwitchQueryAsync(Document document, LiteralExpressionSyntax stringLiteralExpression, Statement newQuery, CancellationToken cancellationToken)
         {
             var editor = await DocumentEditor.CreateAsync(document, cancellationToken);
             editor.ReplaceNode(stringLiteralExpression,

@@ -14,7 +14,7 @@ namespace BatisSuperHelper.Parsers.Models
         public bool ParsedSuccessfully { get; set; }
         public string Name { get; set; }
         public Settings Settings { get; set; } = new Settings();
-        public IEnumerable<SqlMap> Maps { get; set; } = Enumerable.Empty<SqlMap>();
+        public IEnumerable<SqlMapDefinition> Maps { get; set; } = Enumerable.Empty<SqlMapDefinition>();
         //TODO: Providers, Aliases etc
 
         public override bool Equals(object obj)
@@ -25,7 +25,7 @@ namespace BatisSuperHelper.Parsers.Models
                    ParsedSuccessfully == config.ParsedSuccessfully &&
                    Name == config.Name &&
                    EqualityComparer<Settings>.Default.Equals(Settings, config.Settings) &&
-                   EqualityComparer<IEnumerable<SqlMap>>.Default.Equals(Maps, config.Maps);
+                   EqualityComparer<IEnumerable<SqlMapDefinition>>.Default.Equals(Maps, config.Maps);
         }
 
         public override int GetHashCode()
@@ -35,7 +35,7 @@ namespace BatisSuperHelper.Parsers.Models
             hashCode = hashCode * -1521134295 + ParsedSuccessfully.GetHashCode();
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Name);
             hashCode = hashCode * -1521134295 + EqualityComparer<Settings>.Default.GetHashCode(Settings);
-            hashCode = hashCode * -1521134295 + EqualityComparer<IEnumerable<SqlMap>>.Default.GetHashCode(Maps);
+            hashCode = hashCode * -1521134295 + EqualityComparer<IEnumerable<SqlMapDefinition>>.Default.GetHashCode(Maps);
             return hashCode;
         }
     }

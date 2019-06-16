@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace BatisSuperHelper.Parsers.Models.XmlConfig.SqlMap
 {
-    public class EmbeddedSqlMap : SqlMap
+    public class ResourceSqlMapDefinition : SqlMapDefinition
     {
-        public string Assembly { get; set; }
+        public string Path { get; set; }
     }
 }

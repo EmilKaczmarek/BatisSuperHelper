@@ -40,7 +40,7 @@ namespace BatisSuperHelper.HelpersAndExtensions
             return DetermineMapNamespaceQueryPairFromCodeInput(queryWithNamespace)?.Item2;
         }
 
-        public static string GetQueryWithoutNamespace(XmlQuery xmlIndexerResult)
+        public static string GetQueryWithoutNamespace(Statement xmlIndexerResult)
         {
             if(xmlIndexerResult != null && xmlIndexerResult.MapNamespace != null)
             {

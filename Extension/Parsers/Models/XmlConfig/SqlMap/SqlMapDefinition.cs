@@ -5,7 +5,7 @@ using static BatisSuperHelper.Constants.BatisConstants.XmlConfigConstants;
 
 namespace BatisSuperHelper.Parsers.Models.XmlConfig.SqlMap
 {
-    public class SqlMap
+    public class SqlMapDefinition
     {
         public string RawValue { get; set; }
         public string Value { get; set; }
@@ -45,26 +45,26 @@ namespace BatisSuperHelper.Parsers.Models.XmlConfig.SqlMap
             switch (attributeName)
             {
                 case ResourceAttributeName:
-                    return new SqlMap
+                    return new SqlMapDefinition
                     {
                         RawValue = attribueValue,
                         ResourceType = SqlMapResourceType.RESOURCE,
                     };
                 case EmbeddedAttributeName:
-                    return new SqlMap
+                    return new SqlMapDefinition
                     {
                         Value = GetFileNameFromAssembly(GetFileNameFromEmbeddedRawValue(attribueValue)),
                         RawValue = attribueValue,
                         ResourceType = SqlMapResourceType.EMBEDDED,
                     };
                 case UriAttributeName:
-                    return new SqlMap
+                    return new SqlMapDefinition
                     {
                         RawValue = attribueValue,
                         ResourceType = SqlMapResourceType.URI,
                     };
                 default:
-                    return new SqlMap
+                    return new SqlMapDefinition
                     {
                         ResourceType = SqlMapResourceType.UNKNOWN,
                     };
@@ -73,7 +73,7 @@ namespace BatisSuperHelper.Parsers.Models.XmlConfig.SqlMap
 
         public override bool Equals(object obj)
         {
-            var map = obj as SqlMap;
+            var map = obj as SqlMapDefinition;
             return map != null &&
                    RawValue == map.RawValue &&
                    Value == map.Value &&

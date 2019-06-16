@@ -11,16 +11,16 @@ using BatisSuperHelper.Storage.Providers;
 
 namespace BatisSuperHelper.Storage.Domain
 {
-    public class XmlQueryProvider : IQueryProvider<IndexerKey, XmlQuery>
+    public class StatementProvider : IQueryProvider<IndexerKey, Statement>
     {
-        private readonly Dictionary<IndexerKey, XmlQuery> _xmlStatments = new Dictionary<IndexerKey, XmlQuery>();
+        private readonly Dictionary<IndexerKey, Statement> _xmlStatments = new Dictionary<IndexerKey, Statement>();
 
-        public XmlQuery GetValue(IndexerKey key)
+        public Statement GetValue(IndexerKey key)
         {
             return _xmlStatments[key];
         }
 
-        public XmlQuery GetValueOrNull(IndexerKey key)
+        public Statement GetValueOrNull(IndexerKey key)
         {
             if (_xmlStatments.ContainsKey(key))
             {
@@ -29,7 +29,7 @@ namespace BatisSuperHelper.Storage.Domain
             return null;
         }
 
-        public void Add(IndexerKey key, XmlQuery value)
+        public void Add(IndexerKey key, Statement value)
         {          
             if (!_xmlStatments.ContainsKey(key))
             {
@@ -37,7 +37,7 @@ namespace BatisSuperHelper.Storage.Domain
             }
         }
 
-        public void AddWithoutKey(XmlQuery value)
+        public void AddWithoutKey(Statement value)
         {
             IndexerKey key = new IndexerKey
             {
@@ -49,7 +49,7 @@ namespace BatisSuperHelper.Storage.Domain
             Add(key, value);
         }
 
-        public void AddMultipleWithoutKey(List<XmlQuery> values)
+        public void AddMultipleWithoutKey(List<Statement> values)
         {
             if (!values.Any())
                 return;
@@ -60,7 +60,7 @@ namespace BatisSuperHelper.Storage.Domain
             }
         }
 
-        public void AddMultiple(List<KeyValuePair<IndexerKey, XmlQuery>> keyValuePairs)
+        public void AddMultiple(List<KeyValuePair<IndexerKey, Statement>> keyValuePairs)
         {
             foreach (var keyValuePair in keyValuePairs)
             {
@@ -68,7 +68,7 @@ namespace BatisSuperHelper.Storage.Domain
             }
         }
 
-        public List<XmlQuery> GetAllStatmentsByFileName(string fileName)
+        public List<Statement> GetAllStatmentsByFileName(string fileName)
         {
             return _xmlStatments.Values.Where(x => x.QueryFileName.Equals(fileName, StringComparison.CurrentCultureIgnoreCase)).ToList();
         }
@@ -96,7 +96,7 @@ namespace BatisSuperHelper.Storage.Domain
             return useNamespace? GetKeysByFullyQualifiedName(queryId, useNamespace): GetKeysByQueryId(queryId, useNamespace);
         }
 
-        public void RemoveStatmentByValue(XmlQuery value)
+        public void RemoveStatmentByValue(Statement value)
         {
             _xmlStatments.Remove(new IndexerKey { StatmentName = value.QueryId, VsProjectName = value.QueryFileName, StatmentFullyQualifiedName = value.FullyQualifiedQuery });
         }
@@ -115,7 +115,7 @@ namespace BatisSuperHelper.Storage.Domain
             RemoveStatmentsForFilePath(obj as string);
         }
 
-        public void UpdateStatmentsForFile(List<KeyValuePair<IndexerKey, XmlQuery>> keyValuePairs)
+        public void UpdateStatmentsForFile(List<KeyValuePair<IndexerKey, Statement>> keyValuePairs)
         {
             if (!keyValuePairs.Any())
                 return;
@@ -123,7 +123,7 @@ namespace BatisSuperHelper.Storage.Domain
             AddMultiple(keyValuePairs);
         }
 
-        public void UpdateStatmentForFileWihoutKey(List<XmlQuery> values)
+        public void UpdateStatmentForFileWihoutKey(List<Statement> values)
         {
             if (!values.Any())
                 return;
@@ -160,7 +160,7 @@ namespace BatisSuperHelper.Storage.Domain
             _xmlStatments.Clear();
         }
 
-        public List<XmlQuery> GetAllValues()
+        public List<Statement> GetAllValues()
         {
             return _xmlStatments.Select(e => e.Value).ToList();
         }

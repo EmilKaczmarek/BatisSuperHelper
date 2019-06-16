@@ -120,7 +120,7 @@ namespace BatisSuperHelper.Validation.XmlValidators
             _isRunning = false;
         }
 
-        private void AddError(XmlQuery query, string message)
+        private void AddError(Statement query, string message)
         {
             var error = new BatisError
             {

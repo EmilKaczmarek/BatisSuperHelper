@@ -10,7 +10,7 @@ using BatisSuperHelper.VSIntegration;
 
 namespace BatisSuperHelper.Actions.FinalActions.SubActions.Logic
 {
-    public class GoToXmlLogicHandler : GoToBaseLogicHandler<XmlQuery>
+    public class GoToXmlLogicHandler : GoToBaseLogicHandler<Statement>
     {
         public GoToXmlLogicHandler(StatusBarIntegration statusBar, ToolWindowPane toolWindowPane) : base(statusBar, toolWindowPane)
         {
