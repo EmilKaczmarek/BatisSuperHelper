@@ -9,6 +9,8 @@ using BatisSuperHelper.Constants.BatisConstants;
 using BatisSuperHelper.Helpers;
 using BatisSuperHelper.HelpersAndExtensions;
 using BatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Parsers.Models;
+using BatisSuperHelper.Parsers.Models.SqlMap;
 
 namespace BatisSuperHelper.Parsers
 {
@@ -56,7 +58,7 @@ namespace BatisSuperHelper.Parsers
         public List<Statement> GetMapFileStatments()
         {
             var statementChildNodes = GetChildNodesOfParentByXPath(XmlMapConstants.StatementsRootElementXPath);
-            return statementChildNodes.Where(e => BatisConstantsHelper.IsBatisStatment(e.Name)).Select(e => new XmlQuery
+            return statementChildNodes.Where(e => BatisConstantsHelper.IsBatisStatment(e.Name)).Select(e => new Statement
             {
                 QueryFileName = FileName,
                 QueryFilePath = FilePath,
@@ -80,7 +82,7 @@ namespace BatisSuperHelper.Parsers
         public List<Statement> GetMapFileStatmentsWithIdAttributeColumnInfo()
         {
             var statementChildNodes = GetChildNodesOfParentByXPath(XmlMapConstants.StatementsRootElementXPath);
-            return statementChildNodes.Where(e => BatisConstantsHelper.IsBatisStatment(e.Name)).Select(e => new XmlQuery
+            return statementChildNodes.Where(e => BatisConstantsHelper.IsBatisStatment(e.Name)).Select(e => new Statement
             {
                 XmlLine = e.Attributes.FirstOrDefault(x => x.Name == "id")?.Line,
                 XmlLineColumn = e.Attributes.FirstOrDefault(x => x.Name == "id")?.LinePosition,

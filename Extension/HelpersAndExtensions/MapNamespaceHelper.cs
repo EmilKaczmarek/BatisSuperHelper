@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Parsers.Models.SqlMap;
 
 namespace BatisSuperHelper.HelpersAndExtensions
 {

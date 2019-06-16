@@ -1,4 +1,5 @@
 ﻿using BatisSuperHelper.Constants.BatisConstants;
+using BatisSuperHelper.Parsers.Models.SqlMap;
 using System.Collections.Generic;
 using System.Linq;
 using static BatisSuperHelper.Constants.BatisConstants.XmlConfigConstants;
@@ -40,7 +41,7 @@ namespace BatisSuperHelper.Parsers.Models.XmlConfig.SqlMap
             return $"{splited[splited.Length - 2]}.{splited[splited.Length - 1]}";
         }
 
-        public static SqlMap FromAttribute(string attributeName, string attribueValue)
+        public static SqlMapDefinition FromAttribute(string attributeName, string attribueValue)
         {
             switch (attributeName)
             {

@@ -8,6 +8,7 @@ using BatisSuperHelper.Indexers.Models;
 using BatisSuperHelper.Storage;
 using BatisSuperHelper.Storage.Providers;
 using BatisSuperHelper.Windows.ResultWindow.ViewModel;
+using BatisSuperHelper.Parsers.Models.SqlMap;
 
 namespace BatisSuperHelper.Actions.FinalActions.SubActions.Data
 {

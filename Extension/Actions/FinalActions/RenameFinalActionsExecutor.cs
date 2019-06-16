@@ -19,6 +19,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.VisualStudio.LanguageServices;
+using BatisSuperHelper.Parsers.Models.SqlMap;
 
 namespace BatisSuperHelper.Actions.FinalActions
 {

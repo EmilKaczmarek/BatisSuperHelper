@@ -21,6 +21,7 @@ using BatisSuperHelper.Helpers;
 using BatisSuperHelper.Validation.Helpers;
 using BatisSuperHelper.Indexers;
 using BatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Parsers.Models.SqlMap;
 
 namespace BatisSuperHelper.Validation
 {

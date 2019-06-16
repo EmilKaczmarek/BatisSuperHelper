@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Parsers.Models.SqlMap
+namespace BatisSuperHelper.Parsers.Models.SqlMap
 {
   //  <xs:element name = "result" >
   //  < xs:complexType>

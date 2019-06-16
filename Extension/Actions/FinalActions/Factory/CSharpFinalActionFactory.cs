@@ -8,6 +8,7 @@ using BatisSuperHelper.VSIntegration;
 using EnvDTE80;
 using Microsoft.VisualStudio.LanguageServices;
 using BatisSuperHelper.Actions.FinalActions.SubActions.Logic.Rename;
+using BatisSuperHelper.Parsers.Models.SqlMap;
 
 namespace BatisSuperHelper.Actions.FinalActions.Factory
 {

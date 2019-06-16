@@ -1,11 +1,8 @@
-﻿using IBatisSuperHelper.Indexers.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using BatisSuperHelper;
+using BatisSuperHelper.Indexers.Models;
+using BatisSuperHelper.Parsers.Models;
 
-namespace IBatisSuperHelper.Parsers.Models.SqlMap
+namespace BatisSuperHelper.Parsers.Models.SqlMap
 {
     public class Statement : BaseIndexerValue
     {
@@ -17,6 +14,7 @@ namespace IBatisSuperHelper.Parsers.Models.SqlMap
         public string ResultMap { get; set; }
         public string CacheModel { get; set; }
         public StatmentType Type { get; set; }
+        public SqlMapConfig Config => GotoAsyncPackage.Storage.SqlMapConfigProvider.GetConfigForMapFile(QueryFileName);
 
         public string MapNamespace { get; set; }
         public string FullyQualifiedQuery { get; set; }

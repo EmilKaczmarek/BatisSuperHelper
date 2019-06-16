@@ -6,12 +6,13 @@ using BatisSuperHelper.Loggers;
 using BatisSuperHelper.Models;
 using BatisSuperHelper.Parsers;
 using BatisSuperHelper.Parsers.Models;
+using BatisSuperHelper.Parsers.Models.SqlMap;
 
 namespace BatisSuperHelper.Indexers.Xml
 {
     public class XmlIndexer
     {
-        public List<XmlQuery> BuildIndexer(IDictionary<SqlMapConfig, IEnumerable<XmlFileInfo>> configFileInfosPairs)
+        public List<Statement> BuildIndexer(IDictionary<SqlMapConfig, IEnumerable<XmlFileInfo>> configFileInfosPairs)
         {
             var result = new List<Statement>();
             Stopwatch sw = new Stopwatch();

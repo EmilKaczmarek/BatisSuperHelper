@@ -11,6 +11,7 @@ using BatisSuperHelper.Indexers.Xml;
 using BatisSuperHelper.Models;
 using BatisSuperHelper.Storage.Interfaces;
 using BatisSuperHelper.Storage.Providers;
+using BatisSuperHelper.Parsers.Models.SqlMap;
 using Microsoft.CodeAnalysis;
 
 namespace BatisSuperHelper.Storage

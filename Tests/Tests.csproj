@@ -44,7 +44,6 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BatisXmlMapParserTests.cs" />
     <Compile Include="ConfigurationFilesHelperTests.cs" />
     <Compile Include="ExpressionResolverCrashTests.cs" />
     <Compile Include="ExpressionResolverGeneralTests.cs" />

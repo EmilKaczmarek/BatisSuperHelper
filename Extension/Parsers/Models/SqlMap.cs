@@ -1,8 +1,8 @@
-﻿using IBatisSuperHelper.Parsers.Models.Shared;
-using IBatisSuperHelper.Parsers.Models.SqlMap;
+﻿using BatisSuperHelper.Parsers.Models.Shared;
+using BatisSuperHelper.Parsers.Models.SqlMap;
 using System.Collections.Generic;
 
-namespace IBatisSuperHelper.Parsers.Models
+namespace BatisSuperHelper.Parsers.Models
 {
     public class SqlMapModel
     {

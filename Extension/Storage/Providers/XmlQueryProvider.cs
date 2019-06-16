@@ -8,6 +8,7 @@ using BatisSuperHelper.Indexers;
 using BatisSuperHelper.Indexers.Models;
 using BatisSuperHelper.Storage.Interfaces;
 using BatisSuperHelper.Storage.Providers;
+using BatisSuperHelper.Parsers.Models.SqlMap;
 
 namespace BatisSuperHelper.Storage.Domain
 {

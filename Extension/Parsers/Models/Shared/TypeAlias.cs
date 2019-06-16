@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IBatisSuperHelper.Parsers.Models.Shared
+namespace BatisSuperHelper.Parsers.Models.Shared
 {
     public class TypeAlias
     {

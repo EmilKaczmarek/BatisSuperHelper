@@ -11,7 +11,7 @@ using BatisSuperHelper.Actions;
 
 namespace BatisSuperHelper
 {
-    sealed class Goto
+    sealed class Goto 
     {
         public const int CommandId = 0x0100;
         public static readonly Guid CommandSet = new Guid("74b835d6-70a4-4629-9d2c-520ce16236b5");

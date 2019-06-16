@@ -7,6 +7,7 @@ using Microsoft.VisualStudio.Shell;
 using BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolverModels;
 using BatisSuperHelper.Indexers.Models;
 using BatisSuperHelper.VSIntegration;
+using BatisSuperHelper.Parsers.Models.SqlMap;
 
 namespace BatisSuperHelper.Actions.FinalActions.SubActions.Logic
 {
