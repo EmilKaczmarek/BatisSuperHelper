@@ -28,7 +28,7 @@ namespace BatisSuperHelper.HelpersAndExtensions
             }
 
             var otherConfigs = FilterDotNetCommonConfigFileNames(allConfigFiles);
-            var sqlMapConfigsWithDifferentName = otherConfigs.Where(e => new XmlParser(e.FilePath, e.ProjectName).Load().GetXmlNamespace()?.Equals(XmlConfigConstants.XmlNamespace) ?? false);
+            var sqlMapConfigsWithDifferentName = otherConfigs.Where(e => new XmlParser(e.FilePath, e.ProjectName).Load().GetXmlNamespace() == BatisXmlFileTypeEnum.SqlMapConfig);
 
             if (sqlMapConfigsWithDifferentName.Any())
             {

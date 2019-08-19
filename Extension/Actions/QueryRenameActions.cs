@@ -32,7 +32,7 @@ namespace BatisSuperHelper.Actions
                 var validator = _documentProcessor.GetValidator();
 
                 menuCommand.Visible = true;
-                menuCommand.Enabled = validator.CanRenameQueryInLin(_documentPropertiesProvider.GetSelectionLineNumber());
+                menuCommand.Enabled = validator.CanRenameQueryInLine(_documentPropertiesProvider.GetSelectionLineNumber());
             }
         }
 

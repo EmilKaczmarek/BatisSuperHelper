@@ -24,7 +24,7 @@ namespace BatisSuperHelper.Constants.BatisConstants
 
         public const string StatmentIdAttributeName = "id";
 
-        public const string MapFileRootElementName = "sqlMap";
+        public const string RootElementName = "sqlMap";
         public const string MapFileRootElementXPath = "/sqlmap[1]";
 
     }

@@ -27,13 +27,11 @@ namespace BatisSuperHelper.Storage
         XmlIndexer XmlFileAnalyzer { get; }
         IQueryProvider<IndexerKey, Statement> XmlQueries { get; }
         IndexingWorkflowOptions IndexingWorkflowOptions { get; }
-
+        void Clear();
         Task AnalyzeAndStoreAsync(List<Document> documents);
         void AnalyzeAndStoreSingle(XmlFileInfo xmlFile);
         Task AnalyzeAndStoreSingleAsync(Document document);
         void AnalyzeAndUpdateSingle(Document document);
         Task AnalyzeAndUpdateSingleAsync(Document document);
-
-        event EventHandler<StoreChangeEventArgs> OnStoreChange;
     }
 }

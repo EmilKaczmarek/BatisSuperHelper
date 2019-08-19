@@ -17,7 +17,12 @@ namespace BatisSuperHelper.Actions.FinalActions.SubActions.Data
     {
         public List<ExpressionResult> GetResultsForGenericQueries(string queryResult, bool useNamespace)
         {
-            return GotoAsyncPackage.Storage.GenericMethods.GetByPredictate(e => e.TextResult == queryResult).ToList();
+            return GotoAsyncPackage.Storage.GenericMethods.GetByPredictate(e => e.TextResult?.Contains(queryResult) ?? false).ToList();
+        }
+
+        public List<IndexerKey> GetStatmentKeysIgnoringNamespace(string query)
+        {
+            return GotoAsyncPackage.Storage.CodeQueries.GetAllKeys().Where(e => e.StatmentName == MapNamespaceHelper.GetQueryWithoutNamespace(query)).ToList();
         }
 
         public List<KeyValuePair<IndexerKey, List<CSharpQuery>>> GetKeyStatmentPairs(string queryResult, bool useNamespace)

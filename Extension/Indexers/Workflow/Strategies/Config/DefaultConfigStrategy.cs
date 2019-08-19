@@ -9,6 +9,7 @@ using BatisSuperHelper.Parsers.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BatisSuperHelper.Loggers;
 
 namespace BatisSuperHelper.Indexers.Workflow.Strategies.Config
 {
@@ -30,7 +31,10 @@ namespace BatisSuperHelper.Indexers.Workflow.Strategies.Config
         private IEnumerable<SqlMapConfig> GetConfigs(IEnumerable<ProjectItem> projectItems)
         {
             var configs = GetConfigsFiles(projectItems);
-            return configs.Select(config => _xmlIndexer.ParseSingleConfigFile(config)).Where(e => e.ParsedSuccessfully);
+            OutputWindowLogger.WriteLn($"Found config candidates: {string.Join(" ", configs.Select(e=>e.FilePath))}");
+            var parsedConfigs = configs.Select(config => _xmlIndexer.ParseSingleConfigFile(config)).Where(e => e.ParsedSuccessfully);
+            OutputWindowLogger.WriteLn($"Parsed configs: {string.Join(" ", parsedConfigs.Select(e=>e.Name))}");
+            return parsedConfigs;
         }
 
         public ConfigProcessingResult Process(IEnumerable<ProjectItem> projectItems)

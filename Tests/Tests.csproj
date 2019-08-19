@@ -53,6 +53,7 @@
     <Compile Include="NodeHelperTests.cs" />
     <Compile Include="ParsersTests\BatisConfigParserTests.cs" />
     <Compile Include="Playground\RoslynPlayground.cs" />
+    <Compile Include="PrettyPrintTests\PrettyPrintServiceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MapNamespaceHelperTests.cs" />
     <Compile Include="WorkflowTests\ConfigStorageStrategyFactoryTests.cs" />

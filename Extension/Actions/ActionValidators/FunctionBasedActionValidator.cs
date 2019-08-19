@@ -51,7 +51,7 @@ namespace BatisSuperHelper.Actions.ActionValidators
             return _toExecute["jump"].All(e => e(lineNumber));
         }
 
-        public bool CanRenameQueryInLin(int lineNumber)
+        public bool CanRenameQueryInLine(int lineNumber)
         {
             return _toExecute["rename"].All(e => e(lineNumber));
         }

@@ -52,7 +52,7 @@ namespace BatisSuperHelper.Actions
         {
             try
             {
-                var profiler = MiniProfiler.StartNew($"{nameof(GoToQueryActions2)}.{nameof(MenuItemCallback)}");
+                var profiler = MiniProfiler.StartNew($"{nameof(GoToQueryActions2)}.{nameof(MenuItemCallback)}"); 
                 profiler.Storage = new NLogStorage(LogManager.GetLogger("profiler"));
                 using (profiler.Step("Event start"))   
                 {

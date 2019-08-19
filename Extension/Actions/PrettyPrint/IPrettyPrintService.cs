@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BatisSuperHelper.Indexers.Workflow
+namespace BatisSuperHelper.Actions.PrettyPrint
 {
-    public class MapProcessingResult
+    interface IPrettyPrintService
     {
-        public List<string> ProcessedFiles;
-
+        string PrettyPrint(string sql);
     }
 }

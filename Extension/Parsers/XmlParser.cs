@@ -1,4 +1,5 @@
-﻿using HtmlAgilityPack;
+﻿using BatisSuperHelper.Constants.BatisConstants;
+using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +9,7 @@ namespace BatisSuperHelper.Parsers
 {
     public class XmlParser
     {
-        public string XmlNamespace => IsLazy ? _xmlNamespaceLazy.Value : GetXmlNamespace();
+        public BatisXmlFileTypeEnum BatisXmlFileType => IsLazy ? _xmlNamespaceLazy.Value : GetXmlNamespace();
         public string FilePath { get; private set; }
         public string FileName { get; private set; }
         public string FileProjectName { get; private set; }
@@ -16,7 +17,7 @@ namespace BatisSuperHelper.Parsers
         private StringReader _stringReader;
         internal HtmlDocument _xmlDocument;
 
-        private Lazy<string> _xmlNamespaceLazy;
+        private Lazy<BatisXmlFileTypeEnum> _xmlNamespaceLazy;
         protected bool IsLazy = false;//I am...
         
         public XmlParser()
@@ -47,6 +48,7 @@ namespace BatisSuperHelper.Parsers
         public void InitializeEmpty()
         {
             _xmlDocument = new HtmlDocument();
+            _xmlDocument.OptionOutputAsXml = true;
         }
 
         public void InitializeWithStringReader(StringReader stringReader)
@@ -64,7 +66,7 @@ namespace BatisSuperHelper.Parsers
         public void LazyLoading()
         {
             IsLazy = true;
-            _xmlNamespaceLazy = new Lazy<string>(() => GetXmlNamespace());
+            _xmlNamespaceLazy = new Lazy<BatisXmlFileTypeEnum>(() => GetXmlNamespace());
         }
 
         public XmlParser Load()
@@ -108,9 +110,19 @@ namespace BatisSuperHelper.Parsers
             return _xmlDocument.DocumentNode.SelectSingleNode(xpath);
         }
 
-        public string GetXmlNamespace()
+        public BatisXmlFileTypeEnum GetXmlNamespace()
         {
-            return _xmlDocument.DocumentNode.ChildNodes.Count != 2 ? null :_xmlDocument.DocumentNode.ChildNodes.Last().GetAttributeValue("xmlns", null);
+            if (_xmlDocument.DocumentNode.ChildNodes.SingleOrDefault(e=>e.OriginalName == XmlMapConstants.RootElementName) != null)
+            {
+                return BatisXmlFileTypeEnum.SqlMap; 
+            }
+
+            if(_xmlDocument.DocumentNode.ChildNodes.SingleOrDefault(e=>e.OriginalName == XmlConfigConstants.RootElementName) != null)
+            {
+                return BatisXmlFileTypeEnum.SqlMapConfig; 
+            }
+
+            return BatisXmlFileTypeEnum.Other;
         }
 
     }

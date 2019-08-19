@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BatisSuperHelper.Indexers.Workflow
+namespace BatisSuperHelper.Parsers
 {
-    public class MapProcessingResult
+    public enum BatisXmlFileTypeEnum
     {
-        public List<string> ProcessedFiles;
-
+        Other,
+        SqlMap,
+        SqlMapConfig
     }
 }

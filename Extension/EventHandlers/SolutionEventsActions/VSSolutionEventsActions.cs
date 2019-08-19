@@ -33,8 +33,7 @@ namespace BatisSuperHelper.EventHandlers.SolutionEventsActions
 
         public void SolutionOnClose()
         {
-            GotoAsyncPackage.Storage.CodeQueries.Clear();
-            GotoAsyncPackage.Storage.XmlQueries.Clear();
+            GotoAsyncPackage.Storage.Clear();
         }
     }
 }

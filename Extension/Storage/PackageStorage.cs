@@ -78,13 +78,20 @@ namespace BatisSuperHelper.Storage
             StorageEvents.TriggerStoreChange(this, new StoreChangeEventArgs(flag));
         }
 
+        public void Clear()
+        {
+            CodeQueries.Clear();
+            XmlQueries.Clear();
+            GenericMethods.Clear();
+        }
+
         public async System.Threading.Tasks.Task AnalyzeAndStoreAsync(List<Document> documents)
         {
             using (MiniProfiler.Current.Step(nameof(AnalyzeAndStoreAsync)))
             {
                 var codeResults = await CodeFileAnalyzer.BuildIndexerAsync(documents);
                 var generics = codeResults.SelectMany(e => e.Generics).Select(e => new KeyValuePair<MethodInfo, ExpressionResult>(e.NodeInformation.MethodInfo, e));
-                await GenericMethods.AddMultipleAsync(generics);
+                await GenericMethods.AddMultipleAsync(generics.Where(e => e.Value.CanBeUsedAsQuery));
                 CodeQueries.AddMultipleWithoutKey(codeResults.Select(e => e.Queries).ToList());
                 OnStoreChangeHandler(ChangedFileTypeFlag.CSharp);
             }

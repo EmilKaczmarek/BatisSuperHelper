@@ -306,5 +306,16 @@ namespace Tests
             var result = Execute(insideMethodCode, insideClassCode, outsideClassCode, inReturnUnknowMethodExpression, true);
             Assert.Equal(".test", result.TextResult);
         }
+
+        [Fact]
+        public void StringReplaceOnNullString()
+        {
+            string insideMethodCode = @"nullString.Replace("""","""")";
+            string insideClassCode = @"string nullString;";
+            string outsideClassCode = @"";
+            string inReturnUnknowMethodExpression = @"$""""";
+            var result = Execute(insideMethodCode, insideClassCode, outsideClassCode, inReturnUnknowMethodExpression);
+            Assert.Equal(null, result.TextResult);
+        }
     }
 }

@@ -21,6 +21,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BatisSuperHelper.Loggers;
 
 namespace BatisSuperHelper.Indexers.Workflow
 {
@@ -61,7 +62,7 @@ namespace BatisSuperHelper.Indexers.Workflow
 
             if (_options.MapsOptions.IndexAllMaps)
             {
-                return HandleMaps(xmlFiles, configs);
+                return HandleCorrectMapFiles(xmlFiles, configs);
             }
 
             if (_options.MapsOptions.IndexOnlyMapsInConfig)
@@ -69,13 +70,15 @@ namespace BatisSuperHelper.Indexers.Workflow
                 var fileNames = configs.SelectMany(e => e.Maps).Select(e => e.Value);
                 var filteredXmlFiles = GetExistingInMaps(xmlFiles, fileNames);
 
-                if (fileNames.Any(e => e.IndexOfAny(Path.GetInvalidFileNameChars()) > 0))
+                if (fileNames.Any(e => e.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0))
                 {
-                    //Fallback scenario, when path/filename is invaild than just index all maps in solution, ignoring config.
-                    return HandleMaps(xmlFiles, configs);
+                    //Fallback scenario, when path/filename is invaild than just index all maps in solution,
+                    //maps that are are not referenced in config, will be assigned to default config.
+                    OutputWindowLogger.WriteLn("Found invaild character for file. Parsing all maps found in solution.");
+                    return HandleAllMapFiles(xmlFiles, configs);
                 }
 
-                return HandleMaps(filteredXmlFiles, configs);
+                return HandleCorrectMapFiles(filteredXmlFiles, configs);
             }
 
             return new MapProcessingResult();
@@ -85,7 +88,7 @@ namespace BatisSuperHelper.Indexers.Workflow
             return configs.ToDictionary(config => config, config => xmlFiles.Where(e => config.Maps.Select(x => x.Value).Contains(Path.GetFileName(e.FilePath))));
         }
 
-        private MapProcessingResult HandleMaps(IEnumerable<XmlFileInfo> filesInfos, IEnumerable<SqlMapConfig> configs)
+        private MapProcessingResult HandleCorrectMapFiles(IEnumerable<XmlFileInfo> filesInfos, IEnumerable<SqlMapConfig> configs)
         {
             var indexingResult = _xmlIndexer.BuildIndexer(CreateMapFileInfosPairs(filesInfos, configs));
 
@@ -93,13 +96,33 @@ namespace BatisSuperHelper.Indexers.Workflow
 
             return new MapProcessingResult
             {
-                ProcessedFiles = indexingResult.Select(e => e.QueryFileName),
+                ProcessedFiles = indexingResult.Select(e => e.QueryFileName).ToList(),
+            };
+        }
+
+        private MapProcessingResult HandleAllMapFiles(IEnumerable<XmlFileInfo> filesInfos, IEnumerable<SqlMapConfig> configs)
+        {
+            var mapFileInfosPair = CreateMapFileInfosPairs(filesInfos, configs);
+
+            var unmatchedFileInfos = filesInfos.Except(mapFileInfosPair.Values.SelectMany(e => e)).ToList();
+            if (unmatchedFileInfos.Any())
+            {
+                mapFileInfosPair.Add(new SqlMapConfig(), unmatchedFileInfos);
+            }
+
+            var indexingResult = _xmlIndexer.BuildIndexer(mapFileInfosPair);
+
+            GotoAsyncPackage.Storage.XmlQueries.AddMultipleWithoutKey(indexingResult);
+
+            return new MapProcessingResult
+            {
+                ProcessedFiles = indexingResult.Select(e => e.QueryFileName).ToList(),
             };
         }
 
         //Step 1: Config(s)
         //Step 2: Maps
-        //Step 3: Code
+        //Step 3: Code(todo, currently independant)
         public void ExecuteIndexing()
         {
             var configResult = _configStrategy.Process(_projectItems);

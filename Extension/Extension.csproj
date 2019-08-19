@@ -124,10 +124,15 @@
     <Compile Include="Actions\FinalActions\SubActions\Logic\Rename\RenameXmlLogicHandler.cs" />
     <Compile Include="Actions\GoToQueryActions.cs" />
     <Compile Include="Actions\FinalActions\IFinalAction.cs" />
+    <Compile Include="Actions\PrettyPrintActions.cs" />
+    <Compile Include="Actions\PrettyPrint\IndentPerserveService.cs" />
+    <Compile Include="Actions\PrettyPrint\IPrettyPrintService.cs" />
+    <Compile Include="Actions\PrettyPrint\PrettyPrintService.cs" />
     <Compile Include="Actions\TextProviders\IDocumentPropertiesProvider.cs" />
     <Compile Include="Actions\TextProviders\TextManagerPropertiesProvider.cs" />
     <Compile Include="Actions\QueryRenameActions.cs" />
     <Compile Include="Constants\BatisConstants\XmlConfigConstants.cs" />
+    <Compile Include="Constants\BatisConstants\XmlConstants.cs" />
     <Compile Include="Constants\BatisConstants\XmlMapConstants.cs" />
     <Compile Include="Constants\EventConstats.cs" />
     <Compile Include="CoreAutomation\ProjectItems\IProjectItemRetreiver.cs" />
@@ -152,6 +157,11 @@
     <Compile Include="HelpersAndExtensions\Roslyn\ExpressionResolver\ResolveStrategy\InterpolatedStringStrategy.cs" />
     <Compile Include="HelpersAndExtensions\Roslyn\ExpressionResolver\ResolveStrategy\InvocationStrategy.cs" />
     <Compile Include="HelpersAndExtensions\Roslyn\ExpressionResolver\ResolveStrategy\IResolveStrategy.cs" />
+    <Compile Include="HelpersAndExtensions\Roslyn\ExpressionResolver\ResolveStrategy\KnownMethodResolvers\IKnownMethodResolver.cs" />
+    <Compile Include="HelpersAndExtensions\Roslyn\ExpressionResolver\ResolveStrategy\KnownMethodResolvers\KnownMethodResolverFactory.cs" />
+    <Compile Include="HelpersAndExtensions\Roslyn\ExpressionResolver\ResolveStrategy\KnownMethodResolvers\StringFormatResolver.cs" />
+    <Compile Include="HelpersAndExtensions\Roslyn\ExpressionResolver\ResolveStrategy\KnownMethodResolvers\StringReplaceResolver.cs" />
+    <Compile Include="HelpersAndExtensions\Roslyn\ExpressionResolver\ResolveStrategy\KnownMethodResolvers\UnsupportedMethodResolver.cs" />
     <Compile Include="HelpersAndExtensions\Roslyn\ExpressionResolver\ResolveStrategy\SimpleMemberAccessStrategy.cs" />
     <Compile Include="HelpersAndExtensions\Roslyn\ExpressionResolver\ResolveStrategy\StringLiteralStrategy.cs" />
     <Compile Include="CoreAutomation\ProjectItems\ProjectItemRetreiver.cs" />
@@ -178,6 +188,7 @@
     <Compile Include="Logging\NLogConfigurationService.cs" />
     <Compile Include="Logging\OutputWindowLogger.cs" />
     <Compile Include="Models\XmlFileInfo.cs" />
+    <Compile Include="Parsers\BatisXmlFileTypeEnum.cs" />
     <Compile Include="Parsers\Models\Shared\TypeAlias.cs" />
     <Compile Include="Parsers\Models\SqlMapConfig.cs" />
     <Compile Include="Parsers\Models\SqlMap\Parameter.cs" />
@@ -195,6 +206,7 @@
     <Compile Include="Parsers\XmlParser.cs" />
     <Compile Include="Parsers\BatisXmlConfigParser.cs" />
     <Compile Include="Parsers\BatisXmlMapParser.cs" />
+    <Compile Include="PrettyPrintCommand.cs" />
     <Compile Include="RenameCommand.cs" />
     <Compile Include="Storage\Event\ChangedFileType.cs" />
     <Compile Include="Storage\Event\StorageEvents.cs" />
@@ -344,6 +356,9 @@
     </PackageReference>
     <PackageReference Include="NLog">
       <Version>4.5.11</Version>
+    </PackageReference>
+    <PackageReference Include="PoorMansTSQLFormatter">
+      <Version>1.4.3.1</Version>
     </PackageReference>
     <PackageReference Include="Ruzzie.FuzzyStrings">
       <Version>3.0.0.23</Version>

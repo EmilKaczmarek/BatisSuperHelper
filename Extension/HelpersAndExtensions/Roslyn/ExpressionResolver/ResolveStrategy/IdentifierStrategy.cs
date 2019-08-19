@@ -44,11 +44,31 @@ namespace BatisSuperHelper.HelpersAndExtensions.Roslyn.ExpressionResolver.Resolv
                         var firstReturnStatement = getterBody.Statements.FirstOrDefault(e => e.IsKind(SyntaxKind.ReturnStatement)) as ReturnStatementSyntax;
                         return expressionResolverInstance.GetStringValueOfExpression(document, firstReturnStatement.Expression, nodes, semanticModel);
                     }
+
                 }
 
                 if (variableDeclaration?.Initializer != null)
                 {
                     return expressionResolverInstance.GetStringValueOfExpression(document, variableDeclaration.Initializer.Value, nodes, semanticModel);
+                }
+
+                //Field/variable is in other document than currently analyzed
+                if (identifierNameSyntax.SyntaxTree.FilePath != expressionSyntax.SyntaxTree.FilePath)
+                {
+                    return expressionResolverInstance.GetStringValueOfExpression(null, identifierNameSyntax, identifierNameSyntax.SyntaxTree.GetRoot().DescendantNodes(), null);
+                }
+
+                //Field/variable could still be in other document, but expression is not saying this. Unsafe 
+                if (semanticModel != null)
+                {
+                    var symbol = semanticModel.GetSymbolInfo(identifierNameSyntax);
+                    if (symbol.Symbol != null)
+                    {
+                        if (symbol.Symbol.Locations.Count() == 1 && identifierNameSyntax.SyntaxTree.FilePath != symbol.Symbol.Locations[0].SourceTree.FilePath)
+                        {
+                            return expressionResolverInstance.GetStringValueOfExpression(null, identifierNameSyntax, symbol.Symbol.Locations[0].SourceTree.GetRoot().DescendantNodes(), null);
+                        }
+                    }
                 }
 
                 var assigmentsInDocument = nodes.OfType<AssignmentExpressionSyntax>();

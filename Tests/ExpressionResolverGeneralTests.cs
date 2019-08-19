@@ -63,6 +63,9 @@ namespace Tests
                             var case26 = TestMethod(PrivateFieldStringUnitTestWithGetter,"""");
                             var case27 = TestMethod(PublicFieldStringUnitTestWithGetterNonDirectReturn,"""");
                             var case28 = TestMethod(PrivateFieldStringUnitTestWithGetterNonDirectReturn,"""");
+                            var case29 = TestMethod(constUnit.Replace(""unit"", ""unittest""),"""");       
+                            var case30 = TestMethod(constUnit.Replace(constUnit, ""unittest""),"""");   
+                            var case31 = TestMethod(constUnit.Replace(constUnit, constString),"""");   
 
                             var constString = ""unittest"";
                             var constUnit = ""unit"";
@@ -414,6 +417,36 @@ namespace Tests
         public void C28PrivateIndentifierWithGetterOutsideMethodNonDirectReturn()
         {
             var testNode = GetNodeFromSource(38);
+            Trace.WriteLine(testNode.GetText());
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
+        }
+
+        [Fact]
+        public void C29StringReplaceWithTwoLiterals()
+        {
+            var testNode = GetNodeFromSource(39);
+            Trace.WriteLine(testNode.GetText());
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
+        }
+
+        [Fact]
+        public void C30StringReplaceWithLiteralAndVariable()
+        {
+            var testNode = GetNodeFromSource(40);
+            Trace.WriteLine(testNode.GetText());
+            var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
+            Assert.NotEqual("", result.TextResult);
+            Assert.Equal("unittest", result.TextResult);
+        }
+
+        [Fact]
+        public void C31StringReplaceWithTwoVariables()
+        {
+            var testNode = GetNodeFromSource(41);
             Trace.WriteLine(testNode.GetText());
             var result = new ExpressionResolver().GetStringValueOfExpression(_document, testNode.Expression, _documentNodes, _semanticModel);
             Assert.NotEqual("", result.TextResult);

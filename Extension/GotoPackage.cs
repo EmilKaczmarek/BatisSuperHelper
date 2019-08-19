@@ -1,10 +1,4 @@
-﻿//------------------------------------------------------------------------------
-// <copyright file="GotoAsyncPackage.cs" company="Company">
-//     Copyright (c) Company.  All rights reserved.
-// </copyright>
-//------------------------------------------------------------------------------
-
-using EnvDTE;
+﻿using EnvDTE;
 using EnvDTE80;
 using HtmlAgilityPack;
 using Microsoft.CodeAnalysis;
@@ -172,6 +166,7 @@ namespace BatisSuperHelper
             await Goto.InitializeAsync(this);
             await RenameModalWindowCommand.InitializeAsync(this);
             await RenameCommand.InitializeAsync(this);
+            await PrettyPrintCommand.InitializeAsync(this);
 
         }
 

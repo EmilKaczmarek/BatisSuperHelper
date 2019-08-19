@@ -65,7 +65,6 @@ namespace BatisSuperHelper.Actions
                     case "CSharp":
                         processorFactory = new CSharpDocumentProcessorFactory();
                         _finalActionFactory = new CSharpFinalActionFactory();
-                        
                         break;
                     case "XML":
                         processorFactory = new XmlDocumentProcessorFactory();

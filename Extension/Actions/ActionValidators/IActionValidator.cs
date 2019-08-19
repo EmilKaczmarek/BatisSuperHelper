@@ -9,6 +9,6 @@ namespace BatisSuperHelper.Actions.ActionValidators
     public interface IActionValidator
     {
         bool CanJumpToQueryInLine(int lineNumber);
-        bool CanRenameQueryInLin(int lineNumber);
+        bool CanRenameQueryInLine(int lineNumber);
     }
 }

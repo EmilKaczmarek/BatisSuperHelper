@@ -94,7 +94,7 @@ namespace Tests
             string content = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\r\n<sqlMapConfig xmlns=\"http://Batis.apache.org/dataMapper\"\r\nxmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n\r\n  <settings>\r\n    <setting useStatementNamespaces=\"true\" />\r\n    <setting cacheModelsEnabled=\"true\" />\r\n    <setting validateSqlMap=\"true\" />\r\n  </settings>\r\n\r\n  <database>\r\n    <provider name=\"sqlServer\" />\r\n    <dataSource name=\"Store\" connectionString=\"\"/>\r\n  </database>\r\n\r\n  <sqlMaps>\r\n    <sqlMap embedded=\"sqlMap1.xml, CoolApp\" />\r\n  </sqlMaps>\r\n</sqlMapConfig>";
             var parser = new BatisXmlConfigParser().WithStringReader(new StringReader(content)).Load();
 
-            Assert.Equal("http://Batis.apache.org/dataMapper", parser.XmlNamespace);
+            Assert.Equal(BatisXmlFileTypeEnum.SqlMapConfig, parser.BatisXmlFileType);
         }
 
     }

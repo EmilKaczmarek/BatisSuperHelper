@@ -69,6 +69,8 @@
       <Button guid="guidGotoAsyncPackageCmdSet" id="cmdidResultWindowCommand" priority="0x0100" type="Button">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
         <Icon guid="guidImages3" id="bmpPic1" />
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
         <Strings>
           <ButtonText>Find Query Results</ButtonText>
         </Strings>
@@ -76,8 +78,19 @@
       <Button guid="guidGotoAsyncPackageCmdSet1" id="cmdidRenameCommand" priority="0x0100" type="Button">
         <Parent guid="guidCommand1PackageCmdSet" id="MyMenuGroup" />
         <Icon guid="guidImages5" id="bmpPic1" />
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
         <Strings>
           <ButtonText>Rename query</ButtonText>
+        </Strings>
+      </Button>
+       <Button guid="guidGotoAsyncPackageCmdSet2" id="cmdidPrettyPrintCommand" priority="0x0100" type="Button">
+        <Parent guid="guidCommand1PackageCmdSet" id="MyMenuGroup" />
+        <Icon guid="guidImages5" id="bmpPic1" />
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
+        <Strings>
+          <ButtonText>Pretty print this query</ButtonText>
         </Strings>
       </Button>
     </Buttons>
@@ -108,6 +121,7 @@
       <IDSymbol name="MyMenuGroup" value="0x1020" />
       <IDSymbol name="GoToId" value="0x0100" />
       <IDSymbol name="cmdidRenameCommand" value="0x0100" />
+      <IDSymbol name="cmdidPrettyPrintCommand" value="0x0100" />
     </GuidSymbol>
 
     <GuidSymbol name="guidImages" value="{f203d830-7c1e-436c-bdc9-44ef8db344cc}">
@@ -163,7 +177,12 @@
       <IDSymbol value="4128" name="MyMenuGroup" />
       <IDSymbol value="256" name="cmdidRenameCommand" />
     </GuidSymbol>
-  
+    
+    <GuidSymbol value="{EA0E0C33-3583-460F-BEA0-89BA2AAA4CAD}" name="guidGotoAsyncPackageCmdSet2">
+      <IDSymbol value="4128" name="MyMenuGroup" />
+      <IDSymbol value="257" name="cmdidPrettyPrintCommand" />
+    </GuidSymbol>
+
     <GuidSymbol value="{5522f03c-90dc-41da-8d77-42afa3170fbc}" name="guidImages5">
       <IDSymbol name="bmpPic1" value="1" />
       <IDSymbol name="bmpPic2" value="2" />

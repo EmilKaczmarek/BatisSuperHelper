@@ -51,7 +51,7 @@ namespace BatisSuperHelper.Indexers.Xml
         {
             BatisXmlConfigParser parser = new BatisXmlConfigParser().WithFileInfo(xmlDocument.FilePath, xmlDocument.ProjectName).Load();
 
-            if (parser.XmlNamespace == Constants.BatisConstants.XmlConfigConstants.XmlNamespace)
+            if (parser.BatisXmlFileType == BatisXmlFileTypeEnum.SqlMapConfig)
             {
                 return parser.Result;
             }

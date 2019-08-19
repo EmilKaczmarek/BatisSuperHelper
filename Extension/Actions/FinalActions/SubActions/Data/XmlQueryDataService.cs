@@ -9,6 +9,7 @@ using BatisSuperHelper.Storage;
 using BatisSuperHelper.Storage.Providers;
 using BatisSuperHelper.Windows.ResultWindow.ViewModel;
 using BatisSuperHelper.Parsers.Models.SqlMap;
+using BatisSuperHelper.HelpersAndExtensions;
 
 namespace BatisSuperHelper.Actions.FinalActions.SubActions.Data
 {
@@ -16,12 +17,17 @@ namespace BatisSuperHelper.Actions.FinalActions.SubActions.Data
     {
         public List<ExpressionResult> GetResultsForGenericQueries(string queryResult, bool useNamespace)
         {
-            return new List<ExpressionResult>();
+            return GotoAsyncPackage.Storage.GenericMethods.GetByPredictate(e => e.TextResult == queryResult).ToList();
         }
 
         public List<IndexerKey> GetStatmentKeys(string query, bool useNamespace)
         {
             return GotoAsyncPackage.Storage.XmlQueries.GetKeys(query, useNamespace);
+        }
+
+        public List<IndexerKey> GetStatmentKeysIgnoringNamespace(string query)
+        {
+            return GotoAsyncPackage.Storage.XmlQueries.GetAllKeys().Where(e => e.StatmentName == MapNamespaceHelper.GetQueryWithoutNamespace(query)).ToList();
         }
 
         public List<Statement> GetStatmentsFromKeys(List<IndexerKey> keys)

@@ -29,6 +29,11 @@ namespace BatisSuperHelper.Actions.FinalActions
                 var keys = queryDataService.GetStatmentKeys(queryResult, UseNamespace);
                 keysCount = keys.Count;
 
+                if ((!expressionResult.IsSolved && expressionResult.CanBeUsedAsQuery) || keysCount == 0)
+                {
+                    keys.AddRange(queryDataService.GetStatmentKeysIgnoringNamespace(queryResult));
+                }
+
                 var statments = queryDataService.GetStatmentsFromKeys(keys);
 
                 var viewModels = queryDataService.PrepareViewModels(genericQueries, expressionResult, statments);

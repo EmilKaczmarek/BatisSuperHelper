@@ -48,8 +48,11 @@ namespace BatisSuperHelper.Actions.FinalActions.SubActions.Logic
             {
                 var windowContent = (ResultWindowControl)ToolWindowPane.Content;
                 windowContent.ShowResults(windowViewModels);
-                IVsWindowFrame windowFrame = (IVsWindowFrame)ToolWindowPane.Frame;
-                ErrorHandler.ThrowOnFailure(windowFrame.Show());
+                if (windowViewModels.Count > 1)
+                {
+                    IVsWindowFrame windowFrame = (IVsWindowFrame)ToolWindowPane.Frame;
+                    ErrorHandler.ThrowOnFailure(windowFrame.Show());
+                }
             }
         }
     }

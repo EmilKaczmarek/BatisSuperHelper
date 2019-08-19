@@ -9,6 +9,7 @@ namespace BatisSuperHelper.Actions.TextProviders
     public interface IDocumentPropertiesProvider
     {
         string GetContentType();
+        string GetPath();
         int GetSelectionLineNumber();
         object GetDocumentRepresentation();
         Type DocumentRepresentationType();

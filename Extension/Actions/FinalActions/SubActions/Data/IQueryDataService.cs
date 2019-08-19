@@ -15,6 +15,7 @@ namespace BatisSuperHelper.Actions.FinalActions.SubActions.Data
     {
         List<IndexerKey> GetStatmentKeys(string query, bool useNamespace);
         List<T> GetStatmentsFromKeys(List<IndexerKey> keys);
+        List<IndexerKey> GetStatmentKeysIgnoringNamespace(string query);
         List<ExpressionResult> GetResultsForGenericQueries(string queryResult, bool useNamespace);
         List<ResultWindowViewModel> PrepareViewModels(List<ExpressionResult> genericResults, ExpressionResult expressionResult, List<T> nonGenericResults);
         void Rename(IndexerKey key, string value);

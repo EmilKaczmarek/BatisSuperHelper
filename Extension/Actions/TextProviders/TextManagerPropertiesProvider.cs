@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Editor;
+using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
@@ -40,6 +41,19 @@ namespace BatisSuperHelper.Actions.TextProviders
         private SnapshotPoint GetSnaphotPoint()
         { 
             return _editorAdapersFactory.GetWpfTextView(_textView).Caret.Position.BufferPosition;
+        }
+
+        public string GetPath()
+        {
+            _snapshotPoint.Snapshot.TextBuffer.Properties.TryGetProperty(typeof(IVsTextBuffer), out IVsTextBuffer bufferAdapter);
+
+            if (bufferAdapter is IPersistFileFormat)
+            {
+                (bufferAdapter as IPersistFileFormat).GetCurFile(out string filePath, out var formatIndex);
+                return filePath;
+            }
+
+            return null;
         }
 
         public string GetContentType()

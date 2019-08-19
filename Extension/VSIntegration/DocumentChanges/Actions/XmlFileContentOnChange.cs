@@ -34,13 +34,13 @@ namespace BatisSuperHelper.VSIntegration.DocumentChanges.Actions
                         var project = GotoAsyncPackage.EnvDTE.Solution.FindProjectItem(textDoc.FilePath)?.ContainingProject?.Name;
                         XmlParser baseParser = new XmlParser(stringReader).Load();
                         
-                        if (baseParser.XmlNamespace == XmlMapConstants.XmlNamespace)
+                        if (baseParser.BatisXmlFileType == BatisXmlFileTypeEnum.SqlMap)
                         {
                             BatisXmlMapParser parser = new BatisXmlMapParser(baseParser).WithFileInfo(textDoc.FilePath, project);
                             var newStatments = parser.GetMapFileStatments();
                             GotoAsyncPackage.Storage.XmlQueries.UpdateStatmentForFileWihoutKey(newStatments);
                         }
-                        if (baseParser.XmlNamespace == XmlConfigConstants.XmlNamespace)
+                        if (baseParser.BatisXmlFileType == BatisXmlFileTypeEnum.SqlMapConfig)
                         {
                             BatisXmlConfigParser parser = new BatisXmlConfigParser(baseParser).WithFileInfo(textDoc.FilePath, project);
                             GotoAsyncPackage.Storage.SqlMapConfigProvider.UpdateOrAddConfig(parser.Result);

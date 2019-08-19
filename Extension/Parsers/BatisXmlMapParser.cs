@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using HtmlAgilityPack;
-using BatisSuperHelper.Constants;
 using BatisSuperHelper.Constants.BatisConstants;
 using BatisSuperHelper.Helpers;
 using BatisSuperHelper.HelpersAndExtensions;
-using BatisSuperHelper.Indexers.Models;
 using BatisSuperHelper.Parsers.Models;
 using BatisSuperHelper.Parsers.Models.SqlMap;
 
@@ -54,6 +51,47 @@ namespace BatisSuperHelper.Parsers
         }
         #endregion
 
+        private string TrimRedundantNewLines(string text)
+        {
+            var charList = text.ToList();
+
+            if (charList[0] == '\r' && charList[1] == '\n')
+            {
+                charList = charList.Skip(2).ToList();
+            }
+
+            var len = charList.Count;
+            if (charList[len - 3]== '\r' && charList[len - 2] == '\n' && charList[len-1] == '\t')
+            {
+                charList = charList.Take(len - 3).ToList();
+            }
+
+            return string.Join("", charList);
+        }
+
+        private Statement CovertNodeToStatement(HtmlNode node)
+        {
+            return new Statement
+            {
+                XmlLine = node.Attributes.FirstOrDefault(x => x.Name == "id")?.Line,
+                XmlLineColumn = node.Attributes.FirstOrDefault(x => x.Name == "id")?.LinePosition,
+                QueryFileName = FileName,
+                QueryFilePath = FilePath,
+                QueryId = node.Id,
+                FullyQualifiedQuery = MapNamespaceHelper.CreateFullQueryString(MapNamespace, node.Id),
+                QueryLineNumber = node.Line,
+                QueryVsProjectName = FileProjectName,
+                MapNamespace = MapNamespace,
+                CacheModel = node.GetAttributeValue("cacheModel", null),
+                ListClass = node.GetAttributeValue("listClass", null),
+                ParameterClass = node.GetAttributeValue("parameterClass", null),
+                ParameterMap = node.GetAttributeValue("parameterMap", null),
+                ResultClass = node.GetAttributeValue("resultClass", null),
+                ResultMap = node.GetAttributeValue("resultMap", null),
+                //Type = e.GetAttributeValue("type", null),
+                Content = TrimRedundantNewLines(node.InnerHtml)
+            };
+        }
 
         public List<Statement> GetMapFileStatments()
         {
@@ -102,6 +140,26 @@ namespace BatisSuperHelper.Parsers
                 //Type = e.GetAttributeValue("type", null),
                 Content = e.InnerHtml,
             }).ToList();
+        }
+
+        public string Dump()
+        {
+            return _xmlDocument.Text;
+        }
+
+        public void ReplaceContentForLineNode(int lineNumber, string newContent)
+        {
+            var nodes = GetAllDescendantsNodes();
+            var lineNode = GetFirstStatmentNodeForLineOrNull(nodes, lineNumber);
+            lineNode.InnerHtml = newContent;
+        }
+
+        public Statement GetStatementAtLineOrNull(int lineNumber)
+        {
+            var nodes = GetAllDescendantsNodes();
+            var lineNode = GetFirstStatmentNodeForLineOrNull(nodes, lineNumber);
+
+            return CovertNodeToStatement(lineNode);
         }
 
         public string GetQueryAtLineOrNull(int lineNumber, bool useNamespace)

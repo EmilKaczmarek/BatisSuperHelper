@@ -31,6 +31,11 @@ namespace BatisSuperHelper.Storage
             return Enumerable.Empty<KeyValuePair<T, T1>>().GetEnumerator();
         }
 
+        public void Clear()
+        {
+            keyValuePairs.Clear();
+        }
+
         public void Add(KeyValuePair<T, T1> keyValuePair)
         {
             if (keyValuePair.Key == null)

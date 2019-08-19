@@ -42,6 +42,24 @@ namespace Playground
         [Fact]
         public async Task SingleDirectNamespaceAsync()
         {
+            //            var code = @"using System;
+            //using System.Collections.Generic;
+            //using System.Linq;
+            //using System.Text;
+            //using System.Threading.Tasks;
+
+            //namespace GenericTest
+            //{
+            //    public class GenericTableCalls
+            //    {
+            //        public void CallGeneric()
+            //        {
+            //            var genericDA = new GenericDataAccess<SomeTable>();
+            //            var result = genericDA.GetAll();
+            //        }
+            //    }
+            //}
+            //";
             var code = @"using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,11 +70,10 @@ namespace GenericTest
 {
     public class GenericTableCalls
     {
-
         public void CallGeneric()
         {
-            var genericDA = new GenericDataAccess<SomeTable>();
-            var result = genericDA.GetAll();
+            var query = ""Query"";
+            var query2 = query + ""2"";
         }
     }
 }
@@ -74,7 +91,7 @@ namespace GenericTest
                     SourceText.From(_fieldNamespaceCtor))
                  .AddDocument(mainId, "main.cs", SourceText.From(code));
                 
-            var document = workspace.GetDocument(did);
+            var document = workspace.GetDocument(mainId);
 
             var semanticModel = await document.GetSemanticModelAsync();
 
@@ -87,10 +104,10 @@ namespace GenericTest
             var nodesAtLine = (await syntaxTree.GetRootAsync()).DescendantNodes(span).OfType<VariableDeclarationSyntax>().FirstOrDefault();
 
 
-            var test1 = nodesAtLine.Ancestors();
-            var test2 = nodesAtLine.ChildNodes();
+            //var test1 = nodesAtLine.Ancestors();
+            //var test2 = nodesAtLine.ChildNodes();
 
-            var initializer = (await syntaxTree.GetRootAsync()).DescendantNodes(text.Lines[12].Span);
+            var initializer = (await syntaxTree.GetRootAsync()).DescendantNodes(text.Lines[13].Span);
 
 
             List<List<ISymbol>> xx = new List<List<ISymbol>>();
@@ -100,25 +117,41 @@ namespace GenericTest
 
             foreach (var node in initializer)
             {
-                
-                if (node is StatementSyntax)
+                try
                 {
                     cfl.Add(node, semanticModel.AnalyzeControlFlow(node));
-                    dfl.Add(node, semanticModel.AnalyzeDataFlow(node));
                 }
-                if (node is ExpressionSyntax)
+                catch (Exception)
+                {
+                    cfl.Add(node, null);
+                }
+
+                try
                 {
                     dfl.Add(node, semanticModel.AnalyzeDataFlow(node));
                 }
+                catch (Exception)
+                {
+                    dfl.Add(node, null);
+                }
+                //if (node is StatementSyntax)
+                //{
+                //    cfl.Add(node, semanticModel.AnalyzeControlFlow(node));
+                //    dfl.Add(node, semanticModel.AnalyzeDataFlow(node));
+                //}
+                //if (node is ExpressionSyntax)
+                //{
+                //    dfl.Add(node, semanticModel.AnalyzeDataFlow(node));
+                //}
 
 
-                            //var symbol = semanticModel.GetDeclaredSymbol(node);
-                            //if (symbol != null)
-                            //{
-                            //    xx.Add(SymbolFinder.FindImplementationsAsync(symbol, workspace).Result.ToList());
-                            //    xxx.Add(SymbolFinder.FindCallersAsync(symbol, workspace).Result.ToList());
-                            //    var t = SymbolFinder.
-                            //}
+                //var symbol = semanticModel.GetDeclaredSymbol(node);
+                //if (symbol != null)
+                //{
+                //    xx.Add(SymbolFinder.FindImplementationsAsync(symbol, workspace).Result.ToList());
+                //    xxx.Add(SymbolFinder.FindCallersAsync(symbol, workspace).Result.ToList());
+                //    var t = SymbolFinder.
+                //}
 
             }
 
